@@ -90,8 +90,8 @@ void altio_connect(byte which, byte type) {
     
   if( type == 5 || type == 6 || type == 7 ) {
           // output mode
-    detachInterrupt(which);
-    pinMode(2+which,OUTPUT);
+    detachInterrupt(0);
+    pinMode(2,OUTPUT);
       // set correct flag, as needed
     if( type == 5 ) {
       external_trigger |= B10000000 >> which;
@@ -107,8 +107,8 @@ void altio_connect(byte which, byte type) {
   }
 
   if( type == 0 ) {
-      detachInterrupt(which);
-      digitalWriteFast(2+which, LOW);
+      detachInterrupt(0);
+      digitalWriteFast(2, LOW);
         // disable external interval for this line (just in case it
         // was ever set)
       external_interval &= (B11111111 ^ (B10100000 >> which));
@@ -127,16 +127,12 @@ void altio_connect(byte which, byte type) {
   }
   
     // set pin as input
-  pinMode(2+which, INPUT);
+  pinMode(2, INPUT);
     // enable pull-up resistor
-  digitalWriteFast(2+which, HIGH);
+  digitalWriteFast(2, HIGH);
   
-  if( which ) {
-    attachInterrupt(1, altio_isr_two, altio_dir);
-  }
-  else {
-    attachInterrupt(0, altio_isr_one, altio_dir);
-  }
+  attachInterrupt(0, altio_isr_one, altio_dir);
+  
   
 }    
   
@@ -164,14 +160,11 @@ void alt_ext_trigger_engage(boolean predel) {
   if( predel == true ) {
     if( external_trigger & B10000000 ) 
       digitalWriteFast(2, HIGH);
-    if( external_trigger & B01000000 )
-      digitalWriteFast(3, HIGH);
   }
   else {
     if( external_trigger & B00100000 ) 
       digitalWriteFast(2, HIGH);
-    if( external_trigger & B00010000 )
-      digitalWriteFast(3, HIGH);
+
   }        
   
   MsTimer2::set(dly, alt_ext_trigger_disengage);
@@ -183,9 +176,6 @@ void alt_ext_trigger_disengage() {
   if( external_trigger & B10100000 )
     digitalWriteFast(2, LOW);
     
-  if( external_trigger & B01010000 )
-    digitalWriteFast(3, LOW);
-
   MsTimer2::stop();
   
     // clear flag...

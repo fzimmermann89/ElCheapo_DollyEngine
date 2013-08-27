@@ -49,14 +49,14 @@
 
   // motor PWM
 #define MOTOR0_P 3
-#define MOTOR1_P 11
-#define MOTOR0_DIR 2
-#define MOTOR1_DIR 12
+#define MOTOR1_P 14
+#define MOTOR0_DIR 4
+#define MOTOR1_DIR 14
 
  // camera pins //TODO
-#define CAMERA_PIN 13
+#define CAMERA_PIN 12
 #define FOCUS_PIN 13
-#define IR_PIN 13
+#define IR_PIN 12
 
 #define FREQ 38400
 #define oscd 16 //TODO
