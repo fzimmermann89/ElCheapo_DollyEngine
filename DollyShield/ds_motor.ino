@@ -131,7 +131,7 @@ void motor_set_speed( byte motor, unsigned int m_speed ) {
   }
   else if( ! (ui_ctrl_flags & B00000100) && m_sms_tm[motor] > 0 ) {
       // just in case
-    digitalWrite(motor_pin, LOW);
+    digitalWriteFast(motor_pin, LOW);
       // return if we're in an SMS condition
       // and not in manual mode
     return;
@@ -148,7 +148,7 @@ void motor_set_speed( byte motor, unsigned int m_speed ) {
   else {
     // just in case... switching down from 
     // pwm to pulsed...
-    digitalWrite(motor_pin,LOW);
+    digitalWriteFast(motor_pin,LOW);
   }
   
 }
@@ -208,7 +208,7 @@ void motor_dir( byte motor, byte dir ) {
   }
 
   
-  digitalWrite(m_dirp, m_dirc);  
+  digitalWriteFast(m_dirp, m_dirc);  
   m_wasdir[motor] = dir;
   motor_set_speed( motor, ths_speed );
 }
@@ -377,8 +377,8 @@ void motor_stop_all() {
     timer_engaged = false;
   }
 
-  digitalWrite(MOTOR0_P, LOW);
-  digitalWrite(MOTOR1_P, LOW);
+  digitalWriteFast(MOTOR0_P, LOW);
+  digitalWriteFast(MOTOR1_P, LOW);
   
   motor_control(0, false);
   motor_control(1, false);
@@ -443,14 +443,14 @@ void motor_run_pulsing() {
     // we use timer1, which disables pwm on
     // lcd bkl pin
     if( cur_bkl > 0 ) {
-      digitalWrite(LCD_BKL, HIGH);
+      digitalWriteFast(LCD_BKL, HIGH);
     }
     else {
-      digitalWrite(LCD_BKL, LOW);
+      digitalWriteFast(LCD_BKL, LOW);
     }
       
-    digitalWrite(MOTOR0_P, LOW);
-    digitalWrite(MOTOR1_P, LOW);
+    digitalWriteFast(MOTOR0_P, LOW);
+    digitalWriteFast(MOTOR1_P, LOW);
     
     Timer1.initialize(MP_PERIOD);
     Timer1.attachInterrupt(motor_pulse);

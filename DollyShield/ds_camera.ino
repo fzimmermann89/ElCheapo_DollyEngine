@@ -39,15 +39,18 @@ OpenMoco
 */
 
 void fire_camera(unsigned long exp_tm) {
-
+//TODO IR  
    
     // determine if focus pin should be brought high
     // w. the shutter pin (for some nikons, etc.)
-    
+ if (!ir_remote){   
   if( focus_shutter )
-    digitalWrite(FOCUS_PIN, HIGH);
+    digitalWriteFast(FOCUS_PIN, HIGH);
     
-  digitalWrite(CAMERA_PIN, HIGH);
+  digitalWriteFast(CAMERA_PIN, HIGH);
+ }else{
+   send_ir();
+ }
     // start timer to stop camera exposure
   MsTimer2::set(exp_tm, stop_camera);
   MsTimer2::start();
@@ -62,7 +65,7 @@ void fire_camera(unsigned long exp_tm) {
 
 void stop_camera() {
   
-  digitalWrite(CAMERA_PIN, LOW);
+  digitalWriteFast(CAMERA_PIN, LOW);
  
     // we do this every time, because
     // it's possible that the flag
@@ -73,13 +76,13 @@ void stop_camera() {
     // the focus pin high for a long
     // time.
     
-  digitalWrite(FOCUS_PIN, LOW);
+  digitalWriteFast(FOCUS_PIN, LOW);
  
     // turn off timer - we do this
-    // after the digitalWrite() to minimize
+    // after the digitalWriteFast() to minimize
     // over-shooting in case this takes some
     // unusually-long amount of time
-    
+ if (ir_remote) send_ir();   
   MsTimer2::stop();
 
     // are we supposed to delay before allowing
@@ -122,7 +125,7 @@ void camera_clear() {
 void stop_cam_focus() {
   
   MsTimer2::stop();
-  digitalWrite(FOCUS_PIN, LOW);
+  digitalWriteFast(FOCUS_PIN, LOW);
   pre_focus_clear = 2;
   
 }
@@ -150,4 +153,17 @@ float calc_total_cam_tm() {
   total = total / 1000.00;
 
   return(total);
+}
+
+void send_ir(){
+  for(unsigned int i=1;i<=seq[0];i++){
+    int ir_status=0;
+    int n=seq[i];
+    while(n>0){
+      n--;
+      delayMicroseconds(oscd);
+      ir_status  =  !ir_status; 
+      digitalWriteFast(IR_PIN, ir_status&&(i%2));   
+    }
+  }
 }

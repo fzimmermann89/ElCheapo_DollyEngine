@@ -59,13 +59,13 @@ void init_user_interface() {
  lcd.setCursor(0,0); 
  lcd.print("MX2 Dolly Engine");
  lcd.setCursor(3,1);
- lcd.print("Version 0.92");
+ lcd.print("Ver 0.92-thc");
  
    // setup button input
 
  pinMode(BUT_PIN, INPUT);   
    // enable internal pull-up
- digitalWrite(BUT_PIN, HIGH);
+ digitalWriteFast(BUT_PIN, HIGH);
  
  
    // set the update screen flag (draw main
@@ -88,7 +88,7 @@ void check_user_interface() {
     if( blank_lcd ) 
       lcd.noDisplay();
       
-    digitalWrite(LCD_BKL, LOW);
+    digitalWriteFast(LCD_BKL, LOW);
   }
   else if( ! (ui_ctrl_flags & B00000010) && input_last_tm > millis() - (lcd_dim_tm * 1000) ) {
     ui_ctrl_flags |= B00000010;

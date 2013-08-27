@@ -40,6 +40,7 @@ void get_value( byte menu, byte pos, boolean read_save ) {
     //set as non-floating point/bool by default
   ui_type_flags = 0;
   
+
   switch(menu) {
     case 1:
       get_manual_select(pos);
@@ -48,12 +49,9 @@ void get_value( byte menu, byte pos, boolean read_save ) {
       get_m_axis_set(pos, read_save, 0);
       break;
     case 3:    
-      get_m_axis_set(pos, read_save, 1);
-      break;
-   case 4:
       get_m_cam_set(pos, read_save);
       break;
-   case 5:
+   case 4:
        get_global_set(pos, read_save);
        break;
    case 6:
@@ -317,6 +315,16 @@ void get_m_cam_set( byte pos, boolean read_save ) {
       cur_inp_long = focus_tap_tm;
       break;
     case 5:
+      //ir remote
+        ui_type_flags |= B01000000;
+      if( read_save == true ) {
+        ir_remote= cur_inp_bool;
+        eeprom_write(267, ir_remote); //TODO
+      }
+      cur_inp_bool = ir_remote;
+      break;
+ 
+    case 6:
         // focus w/ shutter
       ui_type_flags |= B01000000;
       if( read_save == true ) {
@@ -325,7 +333,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
       }
       cur_inp_bool = focus_shutter;
       break;
-   case 6:
+   case 7:
        // camera repeat value
       if( read_save == true ) {
         cur_inp_long = cur_inp_long > 255 ? 255 : cur_inp_long;
@@ -334,7 +342,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
       }
       cur_inp_long = cam_repeat;
       break;
-  case 7:
+  case 8:
       // camera repeat delay
       if( read_save == true) {
         cam_rpt_dly = cur_inp_long;

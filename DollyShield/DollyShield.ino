@@ -1,3 +1,5 @@
+
+
 /* 
 
    MX2 Dolly Engine version
@@ -37,6 +39,7 @@
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
+#include <digitalWriteFast.h>
 #include "MsTimer2.h"
 #include "TimerOne.h"
 #include "merlin_mount.h"
@@ -45,16 +48,20 @@
 #define FIRMWARE_VERSION  92
 
   // motor PWM
-#define MOTOR0_P 5
-#define MOTOR1_P 6
-#define MOTOR0_DIR 15
-#define MOTOR1_DIR 16
+#define MOTOR0_P 3
+#define MOTOR1_P 11
+#define MOTOR0_DIR 2
+#define MOTOR1_DIR 12
 
- // camera pins
+ // camera pins //TODO
 #define CAMERA_PIN 13
-#define FOCUS_PIN 12
+#define FOCUS_PIN 13
+#define IR_PIN 13
 
-#define MAX_MOTORS 2
+#define FREQ 38400
+#define oscd 16 //TODO
+
+#define MAX_MOTORS 1
 
 //#define MP_PERIOD 30
 #define MP_PERIOD 30
@@ -63,18 +70,18 @@
 /* User Interface Values */
 
   // lcd pins
-#define LCD_RS  17
-#define LCD_EN  18
-#define LCD_D4  11
-#define LCD_D5  8
-#define LCD_D6  7
-#define LCD_D7  4
+#define LCD_RS  8
+#define LCD_EN  9
+#define LCD_D4  4
+#define LCD_D5  5
+#define LCD_D6  6
+#define LCD_D7  7
 
  // which input is our button
-#define BUT_PIN 14
+#define BUT_PIN A0
 
   // lcd backlight pin
-#define LCD_BKL 9
+#define LCD_BKL 10
 
   // max # of LCD characters (including newline)
 #define MAX_LCD_STR 17
@@ -93,22 +100,22 @@
 #define BUT4  5
 
   // which buttons?
-#define BUT_UP BUT4
-#define BUT_DN BUT3
-#define BUT_CT BUT0
-#define BUT_LT BUT2
-#define BUT_RT BUT1
+#define BUT_UP BUT1
+#define BUT_DN BUT2
+#define BUT_CT BUT4
+#define BUT_LT BUT3
+#define BUT_RT BUT0
 
   // analog button read values
-#define BUT0_VAL  70
-#define BUT1_VAL  250
-#define BUT2_VAL  450
-#define BUT3_VAL  655
+#define BUT0_VAL  0
+#define BUT1_VAL  100
+#define BUT2_VAL  255
+#define BUT3_VAL  405
 //#define BUT3_VAL 540
-#define BUT4_VAL  830
+#define BUT4_VAL  640
 
   // button variance range
-#define BUT_THRESH  60
+#define BUT_THRESH  40
 
 
  // how many ms does a button have
@@ -125,18 +132,18 @@
  
 #define ALT_TRIG_THRESH 250
 
+//IR Sequence
+unsigned int seq[] = {
+  16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
 
   // menu strings
-prog_char menu_1[] PROGMEM = "Manual Move";
-prog_char menu_2[] PROGMEM = "Axis 1";
-prog_char menu_3[] PROGMEM = "Axis 2";
-prog_char menu_4[] PROGMEM = "Camera";
-prog_char menu_5[] PROGMEM = "Settings";
-prog_char menu_6[] PROGMEM = "Scope";
+prog_char menu_1[] PROGMEM = "Movements";
+prog_char menu_2[] PROGMEM = "Motor Setup";
+prog_char menu_4[] PROGMEM = "Camera Setup";
+prog_char menu_5[] PROGMEM = "General Setup";
 
-prog_char manual_menu_1[] PROGMEM = "Axis 1";
-prog_char manual_menu_2[] PROGMEM = "Axis 2";
-prog_char manual_menu_3[] PROGMEM = "Scope";
+prog_char manual_menu_1[] PROGMEM = "Manual Move";
+prog_char manual_menu_3[] PROGMEM = "Fast Simulat.";
 
 prog_char axis_menu_1[] PROGMEM = "Ramp Shots";
 prog_char axis_menu_2[] PROGMEM = "RPM";
@@ -155,20 +162,19 @@ prog_char camera_menu_2[] PROGMEM = "Max Shots";
 prog_char camera_menu_3[] PROGMEM = "Exp. Time ms";
 prog_char camera_menu_4[] PROGMEM = "Exp. Delay ms";
 prog_char camera_menu_5[] PROGMEM = "Focus Tap ms";
-prog_char camera_menu_6[] PROGMEM = "Shutter+Focus";
-prog_char camera_menu_7[] PROGMEM = "Repeat";
-prog_char camera_menu_8[] PROGMEM = "Repeat Delay";
+prog_char camera_menu_6[] PROGMEM = "Nikon IR";
+prog_char camera_menu_7[] PROGMEM = "Shutter+Focus";
+prog_char camera_menu_8[] PROGMEM = "Repeat";
+prog_char camera_menu_9[] PROGMEM = "Repeat Delay";
 
 prog_char set_menu_1[] PROGMEM = "Motor Disp";
 prog_char set_menu_2[] PROGMEM = "Motor Sl.Mod";
 prog_char set_menu_3[] PROGMEM = "Backlight";
 prog_char set_menu_4[] PROGMEM = "AutoDim (sec)";
 prog_char set_menu_5[] PROGMEM = "Blank LCD";
-prog_char set_menu_6[] PROGMEM = "I/O 1";
-prog_char set_menu_7[] PROGMEM = "I/O 2";
+prog_char set_menu_6[] PROGMEM = "I/O Pin";
 prog_char set_menu_8[] PROGMEM = "Metric Disp.";
 prog_char set_menu_9[] PROGMEM = "Reset Mem";
-prog_char set_menu_10[] PROGMEM = "Scope";
 prog_char set_menu_11[] PROGMEM = "Cal. Spd Low";
 prog_char set_menu_12[] PROGMEM = "Cal. Spd Hi";
 prog_char set_menu_13[] PROGMEM = "AltOut Pre ms";
@@ -177,25 +183,21 @@ prog_char set_menu_15[] PROGMEM = "USB Trigger";
 prog_char set_menu_16[] PROGMEM = "Invert Dir";
 prog_char set_menu_17[] PROGMEM = "Invert I/O";
 
-
-prog_char scope_menu_1[] PROGMEM = "Pan Man. Spd.";
-prog_char scope_menu_2[] PROGMEM = "Tilt Man. Spd.";
-
  // menu organization
 
-PROGMEM const char *menu_str[]  = { menu_1, menu_2, menu_3, menu_4, menu_5, menu_6 };
+PROGMEM const char *menu_str[]  = { menu_1, menu_2, menu_4, menu_5};
 
-PROGMEM const char *man_str[]   = { manual_menu_1, manual_menu_2, manual_menu_3 };
+PROGMEM const char *man_str[]   = { manual_menu_1,  manual_menu_3 };
 
 PROGMEM const char *axis0_str[] = { axis_menu_1, axis_menu_10, axis_menu_11, axis_menu_2, axis_menu_4, axis_menu_5, axis_menu_12, axis_menu_6, axis_menu_7, axis_menu_8 };
 PROGMEM const char *axis1_str[] = { axis_menu_1, axis_menu_10, axis_menu_11, axis_menu_2, axis_menu_4, axis_menu_5, axis_menu_12, axis_menu_6, axis_menu_7, axis_menu_8 };
-PROGMEM const char *cam_str[]   = { camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8 };
-PROGMEM const char *set_str[]   = { set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6, set_menu_7, set_menu_8, set_menu_9, set_menu_10, set_menu_11, set_menu_12, set_menu_13, set_menu_14, set_menu_15, set_menu_16, set_menu_17 };
-PROGMEM const char *scope_str[] = { scope_menu_1, scope_menu_2 };
+PROGMEM const char *cam_str[]   = { camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
+PROGMEM const char *set_str[]   = { set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6, set_menu_8, set_menu_9, set_menu_11, set_menu_12, set_menu_13, set_menu_14, set_menu_15, set_menu_16, set_menu_17 };
+
 
  // max number of inputs for each menu (in order listed above, starting w/ 0)
 
- byte max_menu[7]  = {5,2,9,9,7,16,1};
+ byte max_menu[7]  = {3,1,9,8,14};
 
  // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {0,0,0,0,0};
@@ -208,7 +210,7 @@ byte cur_menu      = 0;
 byte cur_pos       = 0;
 byte cur_pos_sel   = 0;
 
-  // which input value position are we in?
+  // which mo value position are we in?
 byte cur_inp_pos   = 0;
 
   // input buffers
@@ -357,6 +359,8 @@ unsigned int focus_tap_tm = 0;
 unsigned int post_delay_tm      = 100;
  // brign focus pin high w/ shutter
 boolean focus_shutter   = true;
+//use ir remote
+boolean ir_remote   = true;
  // intervalometer time (seconds)
 float cam_interval = 1.0;
  // max shots
@@ -498,17 +502,18 @@ LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 void setup() { 
 
- pinMode(CAMERA_PIN, OUTPUT);
- pinMode(FOCUS_PIN, OUTPUT);
- pinMode(MOTOR0_P, OUTPUT);
- pinMode(MOTOR1_P, OUTPUT);
- pinMode(MOTOR1_DIR, OUTPUT);
- pinMode(MOTOR0_DIR, OUTPUT);
+ pinModeFast(CAMERA_PIN, OUTPUT);
+ pinModeFast(FOCUS_PIN, OUTPUT);
+ pinModeFast(IR_PIN, OUTPUT);
+ pinModeFast(MOTOR0_P, OUTPUT);
+ pinModeFast(MOTOR1_P, OUTPUT);
+ pinModeFast(MOTOR1_DIR, OUTPUT);
+ pinModeFast(MOTOR0_DIR, OUTPUT);
 
- Serial.begin(9600); 
+ Serial.begin(115200);
 
  init_user_interface();
- delay(1000);
+ delay(500);
 
     // check firmware version stored in eeprom
     // will cause eeprom_saved() to return false
@@ -841,7 +846,7 @@ void main_loop_handler() {
       }
       else if( focus_tap_tm > 0 && pre_focus_clear == 0 && !(run_status & B00001000) ) {
           // pre-focus tap is set, bring focus line high
-        digitalWrite(FOCUS_PIN, HIGH);
+        digitalWriteFast(FOCUS_PIN, HIGH);
         MsTimer2::set(focus_tap_tm, stop_cam_focus);
         MsTimer2::start();
         pre_focus_clear = 1;

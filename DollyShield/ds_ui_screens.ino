@@ -154,20 +154,6 @@ if( ui_motor_display ) {
   lcd.setCursor(8,1);
   
   
-  if( m_wasdir[1] == 1 ) {
-    lcd.print(lt);
-  }
-  else {
-    lcd.print(rt);
-  }
-
-if( ui_motor_display ) {
-  // display pct 
-   display_spd_ipm(m_speeds[1], 1);
- }
- else {
-  display_spd_pct(m_speeds[1]);
- }
 
     // we call this here mainly to reset the
     // cursor position when in an input
@@ -177,8 +163,11 @@ if( ui_motor_display ) {
 
 
 void main_screen_select(boolean dir) {
+   // merlin screen has five inputs, normal home
+    // has four
   
-  if( main_scr_input == 0 && dir == true ) {
+  byte max_inputs = (merlin_flags & B00010000) ? 5 : 4;
+  if( main_scr_input == 0) {
     lcd.blink();
   }
   
@@ -186,19 +175,14 @@ void main_screen_select(boolean dir) {
     main_scr_input++;
   }
   else {
-    main_scr_input--;
+    main_scr_input+=max_inputs;
   }
 
-    
-    // merlin screen has five inputs, normal home
-    // has six
-    
-  byte max_inputs = (merlin_flags & B00010000) ? 5 : 6;
+  main_scr_input=main_scr_input%(max_inputs+1);
 
     // exit main scr setup
   
-  if( (dir == true && main_scr_input > max_inputs) ||
-      (dir == false && main_scr_input == 0 ) ) {
+  if(main_scr_input == 0 ) {
     lcd.noBlink();
     main_scr_input = 0;
     return;
@@ -218,7 +202,7 @@ void show_manual() {
  lcd.setCursor(0, 0);
 
  if( cur_motor == 0 ) {
-  lcd.print("Axis 1");
+  lcd.print("[Sel] to exit");
  }
  else {
   lcd.print("Axis 2");
