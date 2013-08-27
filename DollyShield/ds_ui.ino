@@ -829,11 +829,6 @@ void draw_menu(byte dir, boolean value_only) {
       draw_values(set_str, draw_all, value_only);
       break;
 
-    case 6:
-    
-      draw_values(scope_str, draw_all, value_only);
-      break;
-      
     default: 
       return;  
   }
