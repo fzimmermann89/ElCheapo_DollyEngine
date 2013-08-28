@@ -554,6 +554,8 @@ void setup() {
     write_all_eeprom_memory();
   }
 
+  input_last_tm=millis();
+
   show_home();
 
   /*

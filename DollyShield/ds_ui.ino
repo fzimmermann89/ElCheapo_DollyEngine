@@ -1,5 +1,3 @@
-
-
 /* 
  
  "DollyShield" MX2
@@ -83,20 +81,19 @@ void check_user_interface() {
 
 
   // turn off/on lcd backlight if needed
-  if( ui_ctrl_flags & B00000010 && input_last_tm < millis() - (lcd_dim_tm * 1000) ) {
+  if( (ui_ctrl_flags & B00000010) && (input_last_tm < (millis() - (lcd_dim_tm * 1000))) ) {
 
     ui_ctrl_flags &= B11111101;
 
     if( blank_lcd ) 
       lcd.noDisplay();
 
-    digitalWriteFast(LCD_BKL, LOW);
+    digitalWrite(LCD_BKL, 0);
   }
-  else if( ! (ui_ctrl_flags & B00000010) && input_last_tm > millis() - (lcd_dim_tm * 1000) ) {
+  else if( (! (ui_ctrl_flags & B00000010)) && (input_last_tm > millis() - (lcd_dim_tm * 1000)) ) {
     ui_ctrl_flags |= B00000010;
 
     lcd.display();
-
     analogWrite(LCD_BKL, cur_bkl);
   }
 
@@ -500,7 +497,6 @@ void ui_button_up( boolean held ) {
 
   // on calibration screen
   if( ui_ctrl_flags & B00000001 ) {
-
     if( ui_cal_scrn_flags & B10000000 ) {
       // in calibrating settings
       move_val(true);
@@ -509,8 +505,7 @@ void ui_button_up( boolean held ) {
     }
 
     m_cur_cal = m_cur_cal > 1 ? 2 : m_cur_cal + 1;
-    show_calibrate();
-
+    show_calibrate();    
     return;
   }
 
@@ -520,11 +515,13 @@ void ui_button_up( boolean held ) {
     show_manual();
     return;
   }
-
-
+  
+  // if not currently in setup menus, or
+  // modifying a main screen value
+  if( ! (ui_ctrl_flags & B01000000) & main_scr_input == 0 )
+    return;
 
   if( main_scr_input > 0 ) {
-
     move_val(true);
     // save present value
     get_mainscr_set(main_scr_input, true);
