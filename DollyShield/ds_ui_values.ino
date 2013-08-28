@@ -40,7 +40,6 @@ void get_value( byte menu, byte pos, boolean read_save ) {
     //set as non-floating point/bool by default
   ui_type_flags = 0;
   
-
   switch(menu) {
     case 1:
       get_manual_select(pos);
@@ -468,20 +467,7 @@ void get_global_set(byte pos, boolean read_save) {
       cur_inp_long = input_type[0];
       break;
 
-   case 6: 
-       // input 2
-       
-      ui_type_flags2 |= B10000000;
-      
-      if( read_save == true ) {
-        altio_connect(1, cur_inp_long);
-        eeprom_write(218,input_type[1]);
-      }
-      
-      cur_inp_long = input_type[1];
-      break;
-      
-   case 7:
+   case 6:
       // metric display
      ui_type_flags |= B01000000;
      
@@ -527,7 +513,7 @@ void get_global_set(byte pos, boolean read_save) {
      cur_inp_bool = ui_is_metric;
      break;
      
-   case 8:
+   case 7:
      // reset memory
 
      ui_type_flags |= B01000000;
@@ -539,20 +525,8 @@ void get_global_set(byte pos, boolean read_save) {
      
      cur_inp_bool = false;
      break;
-     
-   case 9:
-     // merlin enable
-      ui_type_flags |= B01000000;
-      
-      if( read_save == true ) {
-        merlin_enabled = cur_inp_bool;
-        eeprom_write(220, merlin_enabled);
-      }
-      
-      cur_inp_bool = merlin_enabled;
-      break;
-
-   case 10:
+    
+   case 8:
      // low calibration spd
       ui_type_flags2 |= B01000000;
       
@@ -564,7 +538,7 @@ void get_global_set(byte pos, boolean read_save) {
       cur_inp_long = motor_spd_cal[0];
       break;
 
-   case 11:
+   case 9:
      // high calibration spd
       ui_type_flags2 |= B01000000;
       
@@ -576,7 +550,7 @@ void get_global_set(byte pos, boolean read_save) {
       cur_inp_long = motor_spd_cal[1];
       break;
   
-  case 12: 
+  case 10: 
     // alt output pre time
     
     if( read_save == true ) {
@@ -587,7 +561,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = ext_trig_pre_delay;
     break;
     
-  case 13:
+  case 11:
     // alt output post time
     
     if( read_save == true ) {
@@ -598,7 +572,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = ext_trig_pst_delay;
     break;
      
-   case 14:
+   case 12:
      // GB enable
       ui_type_flags |= B01000000;
       
@@ -610,7 +584,7 @@ void get_global_set(byte pos, boolean read_save) {
       cur_inp_bool = gb_enabled;
       break;
 
-   case 15:
+   case 13:
      // invert dir display
       ui_type_flags |= B01000000;
       
@@ -622,7 +596,7 @@ void get_global_set(byte pos, boolean read_save) {
       cur_inp_bool = ui_invdir;
       break;
       
-   case 16:
+   case 14:
      // flip I/O trigger type
      
      ui_type_flags |= B01000000;
@@ -878,16 +852,8 @@ void get_manual_select(byte pos) {
 
     // merlin manual screen
     
-  if( pos == 2 ) {
-    merlin_flags |= B00100000;
-      // set merlin into high speed mode
-      // AC/20120113: removed 
-      // ratio is now set in merlin_move_manual()
-      
-   // merlin.setRatio(1, 3);
-   // merlin.setRatio(2, 3);
-      // show merlin screen
-    show_merlin();
+  if( pos == 1 ) {
+//TODO
     return;
   }
 

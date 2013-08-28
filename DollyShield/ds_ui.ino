@@ -1,3 +1,5 @@
+
+
 /* 
 
    "DollyShield" MX2
@@ -47,19 +49,19 @@ void init_user_interface() {
  
    // banner
    
- lcd.print("(c) 2012 Dynamic");
+ lcd.print("(c) 2012 DP");
  
  lcd.setCursor(5,1);
- lcd.print("Perception");
+ lcd.print("mod. by FZ");
 
  delay(750);
 
  lcd.clear(); 
 
  lcd.setCursor(0,0); 
- lcd.print("MX2 Dolly Engine");
+ lcd.print("MX2 El Cheapo");
  lcd.setCursor(3,1);
- lcd.print("Ver 0.92-thc");
+ lcd.print("Ver 0.92.01");
  
    // setup button input
 
@@ -388,12 +390,11 @@ void ui_button_center( boolean held ) {
         // the next menu to go to
         
           // calibration, don't do anything else
-          // EJD:20130329: Corregido && cur_pos == 6 que no dejaba acceder a calibrar la constante 
-      if( (cur_menu == 2 || cur_menu == 3) && cur_pos == 5 ) {
+        if (cur_menu == 2 && cur_pos == 5 ) {
         get_value(cur_menu, cur_pos, false);
         return;
       }
-
+    
 
       byte new_menu = get_menu(cur_menu, cur_pos);
 
@@ -659,41 +660,7 @@ void ui_button_rt( boolean held ) {
       // adjust
       main_screen_select(true);
       return;
-    }
-    
-    if( ui_ctrl_flags & B00100000 ) {
-        // we're in a value entry mode.  Exit
-        // entry without saving the value
-
-        // clear in value setting flag
-        // and the flag indicating that
-        // we've already displayed this value
-      ui_ctrl_flags &= B11001111;        
-              // reset the float tenths (vs 100ths) parameter
-      ui_float_tenths = false;
-
-      draw_menu(0,false);
-      return;
-    }
-    
-      // draw previous menu
-      
-    if( cur_menu == 0 ) { 
-        // we're at the highest menu, back to main screen 
-      cur_pos = 0;  
-        // clear setup flag
-        // indicate display needs updating
-      ui_ctrl_flags &= B10111111;
-      ui_ctrl_flags |= B10000000;
-        // clear out list of menus
-      flush_menu();
-    }
-    else {
-        // a parent menu can be drawn
-      cur_menu = pop_menu();
-      draw_menu(0,false);
-    }
-  
+    } 
 
 }
 
@@ -743,10 +710,43 @@ void ui_button_lt(boolean held) {
     }
 
     // left button
-    if( ! (ui_ctrl_flags & B01000000) || ui_ctrl_flags & B00100000 )
+    if( ! (ui_ctrl_flags & B01000000 || ui_ctrl_flags & B00100000 ))
       return;
-}
 
+    if( ui_ctrl_flags & B00100000 ) {
+        // we're in a value entry mode.  Exit
+        // entry without saving the value
+
+        // clear in value setting flag
+        // and the flag indicating that
+        // we've already displayed this value
+      ui_ctrl_flags &= B11001111;        
+              // reset the float tenths (vs 100ths) parameter
+      ui_float_tenths = false;
+
+      draw_menu(0,false);
+      return;
+    }
+    
+      // draw previous menu
+      
+    if( cur_menu == 0 ) { 
+        // we're at the highest menu, back to main screen 
+      cur_pos = 0;  
+        // clear setup flag
+        // indicate display needs updating
+      ui_ctrl_flags &= B10111111;
+      ui_ctrl_flags |= B10000000;
+        // clear out list of menus
+      flush_menu();
+    }
+    else {
+        // a parent menu can be drawn
+      cur_menu = pop_menu();
+      draw_menu(0,false);
+    }
+
+}
 
 
 /* 
@@ -816,15 +816,10 @@ void draw_menu(byte dir, boolean value_only) {
       
     case 3:
     
-      draw_values(axis1_str, draw_all, value_only);
-      break;
-
-    case 4:
-
       draw_values(cam_str, draw_all, value_only);
       break;
   
-    case 5:
+    case 4:
     
       draw_values(set_str, draw_all, value_only);
       break;
@@ -1032,10 +1027,10 @@ void ui_set_backlight(byte value) {
   }
   else {
     if( cur_bkl > 0 ) {
-      digitalWrite(LCD_BKL, HIGH);
+      digitalWriteFast(LCD_BKL, HIGH);
     }
     else {
-      digitalWrite(LCD_BKL, LOW);
+      digitalWriteFast(LCD_BKL, LOW);
     }
   }
 }

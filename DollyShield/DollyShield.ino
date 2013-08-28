@@ -53,7 +53,7 @@
 #define MOTOR0_DIR 4
 #define MOTOR1_DIR 14
 
- // camera pins //TODO
+ // camera pins
 #define CAMERA_PIN 12
 #define FOCUS_PIN 13
 #define IR_PIN 12
@@ -111,7 +111,6 @@
 #define BUT1_VAL  100
 #define BUT2_VAL  255
 #define BUT3_VAL  405
-//#define BUT3_VAL 540
 #define BUT4_VAL  640
 
   // button variance range
@@ -210,7 +209,7 @@ byte cur_menu      = 0;
 byte cur_pos       = 0;
 byte cur_pos_sel   = 0;
 
-  // which mo value position are we in?
+  // which input value position are we in?
 byte cur_inp_pos   = 0;
 
   // input buffers
