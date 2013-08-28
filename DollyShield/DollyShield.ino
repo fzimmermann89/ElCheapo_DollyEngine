@@ -169,7 +169,8 @@ prog_char set_menu_2[] PROGMEM = "Motor Sl.Mod";
 prog_char set_menu_3[] PROGMEM = "Backlight";
 prog_char set_menu_4[] PROGMEM = "AutoDim (sec)";
 prog_char set_menu_5[] PROGMEM = "Blank LCD";
-prog_char set_menu_6[] PROGMEM = "I/O Pin";
+prog_char set_menu_6[] PROGMEM = "I/O 1";
+prog_char set_menu_7[] PROGMEM = "I/O 2";
 prog_char set_menu_8[] PROGMEM = "Metric Disp.";
 prog_char set_menu_9[] PROGMEM = "Reset Mem";
 prog_char set_menu_11[] PROGMEM = "Cal. Spd Low";
@@ -195,13 +196,13 @@ PROGMEM const char *axis1_str[] = {
 PROGMEM const char *cam_str[]   = { 
   camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
 PROGMEM const char *set_str[]   = { 
-  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6, set_menu_8, set_menu_9, set_menu_11, set_menu_12, set_menu_13, set_menu_14, set_menu_15, set_menu_16, set_menu_17 };
+  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_11, set_menu_12, set_menu_13, set_menu_14, set_menu_15, set_menu_16, set_menu_17 };
 
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 
 byte max_menu[7]  = {
-  3,1,9,8,14};
+  3,1,9,8,15};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -641,28 +642,7 @@ void main_loop_handler() {
   // camera
 
   if( motor_engaged ) {      
-    // motor currently moving
-    // do not fire camera until motors are
-    // done - we get caught up in here until the
-    // motors have stopped moving
-
-    /*  if( motor_ran == 1 ) {
-     // check to see if motor #2 needs to be run...
-     if( in_sms_cycle == false && m_sms_tm[0] > 0 && m_sms_tm[1] > 0 ) {
-     in_sms_cycle = true;
-     // motor #2 remains to be run
-     MsTimer2::set(m_sms_tm[1], stop_motor_sms);
-     run_motor_sms(1);
-     MsTimer2::start();
-     } 
-     else if(in_sms_cycle == false) {         
-     // no motors remain
-     motor_engaged = false;
-     ok_stop       = true;
-     }
-     }
-     else*/
-    if ( motor_ran > 0 ) {
+       if ( motor_ran > 0 ) {
       // all of our motors have run one
       // cycle, let the camera fire
       motor_engaged = false;

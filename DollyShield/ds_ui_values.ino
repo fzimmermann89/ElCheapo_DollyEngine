@@ -269,7 +269,6 @@ void get_m_cam_set( byte pos, boolean read_save ) {
   switch(pos) {
   case 0:
     // interval timer
-
     ui_type_flags |= B10000000;
     ui_float_tenths = true;
 
@@ -279,6 +278,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_float = cam_interval;
     break;
+
   case 1:
     // max shots
     if( read_save == true ) {
@@ -287,6 +287,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_long = cam_max;
     break;
+
   case 2:
     // exposure time
     if( read_save == true ) { 
@@ -295,6 +296,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_long = exp_tm;
     break;    
+
   case 3:
     // post exp delay
     if( read_save == true ) { 
@@ -303,6 +305,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_long = post_delay_tm;
     break;
+
   case 4:
     // focus tap tm
     if( read_save == true ) {
@@ -311,6 +314,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_long = focus_tap_tm;
     break;
+
   case 5:
     //ir remote
     ui_type_flags |= B01000000;
@@ -330,6 +334,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_bool = focus_shutter;
     break;
+
   case 7:
     // camera repeat value
     if( read_save == true ) {
@@ -339,6 +344,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     }
     cur_inp_long = cam_repeat;
     break;
+
   case 8:
     // camera repeat delay
     if( read_save == true) {
@@ -396,7 +402,6 @@ void get_global_set(byte pos, boolean read_save) {
     break;
 
   case 3:
-
     // lcd dim time
     if( read_save == true ) {
       lcd_dim_tm = cur_inp_long;
@@ -420,7 +425,6 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 5: 
     // input 1
-
     ui_type_flags2 |= B10000000;
 
     if( read_save == true ) {
@@ -431,16 +435,26 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = input_type[0];
     break;
 
-  case 6:
+  case 6: 
+    // input 2 
+    ui_type_flags2 |= B10000000;
+
+    if( read_save == true ) {
+      altio_connect(1, cur_inp_long);
+      eeprom_write(218,input_type[1]);
+    }
+
+    cur_inp_long = input_type[1];
+    break;
+
+  case 7:
     // metric display
     ui_type_flags |= B01000000;
 
     if( read_save == true ) {
       if ( cur_inp_bool != ui_is_metric ) {
-
         // only convert values when the 
         // UI metric type changes
-
 
         if( ui_is_metric ) {
           // going to imperial
@@ -448,7 +462,6 @@ void get_global_set(byte pos, boolean read_save) {
           min_ipm[0]  = min_ipm[0] / 2.54;
           m_diarev[1] = m_diarev[1] / 2.54;
           min_ipm[1]  = min_ipm[1] / 2.54;
-
         }
         else {
           // going to metric
@@ -457,29 +470,23 @@ void get_global_set(byte pos, boolean read_save) {
           m_diarev[1] *= 2.54;
           min_ipm[1]  *= 2.54;
         }
-
         ui_is_metric = cur_inp_bool;
+
         // write values to memory
         eeprom_write(219, ui_is_metric);
-
         eeprom_write(16, m_diarev[0]);
         eeprom_write(20, m_diarev[1]);  
         eeprom_write(40, min_ipm[0]);
         eeprom_write(44, min_ipm[1]);
 
         motor_update_dist(m_rpm[0], m_diarev[0]);
-
-
       }
-
     }
-
     cur_inp_bool = ui_is_metric;
     break;
 
-  case 7:
+  case 8:
     // reset memory
-
     ui_type_flags |= B01000000;
 
     if( read_save == true ) {
@@ -490,7 +497,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_bool = false;
     break;
 
-  case 8:
+  case 9:
     // low calibration spd
     ui_type_flags2 |= B01000000;
 
@@ -502,7 +509,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = motor_spd_cal[0];
     break;
 
-  case 9:
+  case 10:
     // high calibration spd
     ui_type_flags2 |= B01000000;
 
@@ -514,7 +521,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = motor_spd_cal[1];
     break;
 
-  case 10: 
+  case 11: 
     // alt output pre time
 
     if( read_save == true ) {
@@ -525,7 +532,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = ext_trig_pre_delay;
     break;
 
-  case 11:
+  case 12:
     // alt output post time
 
     if( read_save == true ) {
@@ -536,7 +543,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_long = ext_trig_pst_delay;
     break;
 
-  case 12:
+  case 13:
     // GB enable
     ui_type_flags |= B01000000;
 
@@ -548,7 +555,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_bool = gb_enabled;
     break;
 
-  case 13:
+  case 14:
     // invert dir display
     ui_type_flags |= B01000000;
 
@@ -560,7 +567,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_bool = ui_invdir;
     break;
 
-  case 14:
+  case 15:
     // flip I/O trigger type
 
     ui_type_flags |= B01000000;
@@ -574,8 +581,6 @@ void get_global_set(byte pos, boolean read_save) {
     break;
 
   }
-
-
 
 }
 
@@ -592,22 +597,17 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
   switch(pos) {
   case 1:
-
     // on/off
-
     lcd.setCursor(0,0);
 
     if( read_save ) {
       if( cur_inp_bool > 0 ) {   
         // if set to positive value
-
         start_executing();
-
       }
       else {
         stop_executing();
       }
-
     }
 
     ui_type_flags |= B01000000;
@@ -616,7 +616,6 @@ void get_mainscr_set(byte pos, boolean read_save) {
     break;
 
   case 2:
-
     // set interval time
     lcd.setCursor(4, 0);
 
@@ -632,7 +631,6 @@ void get_mainscr_set(byte pos, boolean read_save) {
     break;
 
   case 3:
-
     // dir for m1
     lcd.setCursor(0,1);
 
@@ -645,16 +643,13 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
   case 4:
     // spd for m1
-
     lcd.setCursor(1,1);
 
     if( ! motor_sl_mod ) {
       // shoot-move-shoot?
-
       cur_inp_long = cur_inp_long > m_maxsms[0] ? m_maxsms[0] : cur_inp_long;
     } 
     else {       
-
       cur_inp_long = cur_inp_long > 255 ? 255 : cur_inp_long;
     }
 
@@ -663,7 +658,6 @@ void get_mainscr_set(byte pos, boolean read_save) {
       // calculate speed change per shot for ramping
       // if needed - use function to update values
       motor_set_ramp(m_ramp_set[0]);
-
     }
 
     cur_inp_long = m_speeds[0];
@@ -680,17 +674,12 @@ void get_manual_select(byte pos) {
   // set in manual mode
   ui_ctrl_flags |= B00000100;
 
-   if( pos == 1 ) {
+  if( pos == 1 ) {
     //TODO
     return;
   }
-
-
-
   // show manual motor screen
   show_manual();
-
-
 }
 
 
@@ -711,8 +700,6 @@ void display_spd_ipm(unsigned int spd) {
   else {
     lcd.print('i');
   }
-
-
 }
 
 void display_spd_pct(byte spd) {
@@ -727,9 +714,4 @@ void display_spd_pct(byte spd) {
   }
   lcd.print('%');
 }
-
-
-
-
-
 

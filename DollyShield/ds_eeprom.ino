@@ -239,7 +239,7 @@ void write_all_eeprom_memory() {
   eeprom_write(71, *p, 72);
 
   eeprom_write(217, input_type[0]);
-  eeprom_write(218, input_type[1]); //?? TODO
+  eeprom_write(218, input_type[1]);
   eeprom_write(219, ui_is_metric);
   eeprom_write(229, m_lead_in[0]);
 

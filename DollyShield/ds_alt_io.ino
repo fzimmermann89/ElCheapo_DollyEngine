@@ -90,8 +90,14 @@ void altio_connect(byte which, byte type) {
 
   if( type == 5 || type == 6 || type == 7 ) {
     // output mode
-    detachInterrupt(0);
-    pinMode(2,OUTPUT);
+
+    detachInterrupt(which);
+    if (which==0){
+      pinModeFast(2,OUTPUT);
+    }
+    else{
+      pinModeFast(3,OUTPUT);
+    }
     // set correct flag, as needed
     if( type == 5 ) {
       external_trigger |= B10000000 >> which;
@@ -107,8 +113,15 @@ void altio_connect(byte which, byte type) {
   }
 
   if( type == 0 ) {
-    detachInterrupt(0);
-    digitalWriteFast(2, LOW);
+    detachInterrupt(which);
+
+    if (which==0){
+      digitalWriteFast(2, LOW);
+    }
+    else{
+      digitalWriteFast(3, LOW);
+    }
+
     // disable external interval for this line (just in case it
     // was ever set)
     external_interval &= (B11111111 ^ (B10100000 >> which));
@@ -126,12 +139,21 @@ void altio_connect(byte which, byte type) {
     external_interval &= (B11111111 ^ (B10100000 >> which));
   }
 
-  // set pin as input
-  pinMode(2, INPUT);
-  // enable pull-up resistor
-  digitalWriteFast(2, HIGH);
 
-  attachInterrupt(0, altio_isr_one, altio_dir);
+  if (which==0){
+
+    // set pin as input
+    pinModeFast(2, INPUT);
+    // enable pull-up resistor
+    digitalWriteFast(2, HIGH);
+    attachInterrupt(0, altio_isr_one, altio_dir);
+  }
+  else{
+    pinModeFast(3, INPUT);
+    // enable pull-up resistor
+    digitalWriteFast(3, HIGH);
+    attachInterrupt(1, altio_isr_two, altio_dir);
+  }
 
 
 }    
@@ -160,11 +182,14 @@ void alt_ext_trigger_engage(boolean predel) {
   if( predel == true ) {
     if( external_trigger & B10000000 ) 
       digitalWriteFast(2, HIGH);
+    if( external_trigger & B01000000 )
+      digitalWriteFast(3, HIGH);
   }
   else {
     if( external_trigger & B00100000 ) 
       digitalWriteFast(2, HIGH);
-
+    if( external_trigger & B00010000 )
+      digitalWriteFast(3, HIGH);
   }        
 
   MsTimer2::set(dly, alt_ext_trigger_disengage);
@@ -175,11 +200,16 @@ void alt_ext_trigger_disengage() {
 
   if( external_trigger & B10100000 )
     digitalWriteFast(2, LOW);
+  if( external_trigger & B01010000 )
+    digitalWriteFast(3, LOW);
 
   MsTimer2::stop();
 
   // clear flag...
   run_status &= B11110111;
 }
+
+
+
 
 
