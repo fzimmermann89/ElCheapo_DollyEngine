@@ -218,6 +218,11 @@ void get_m_axis_set( byte pos, boolean read_save) {
 
       min_ipm[0] = cur_inp_float;
       min_spd[0] = 255 * ( min_ipm[0] / max_ipm[0] );
+      
+      
+       Serial.print("mins:");
+  Serial.println(min_spd[0]);
+      
       eeprom_write(40, min_ipm[0]);
       eeprom_write(48 , min_spd[0]);
     } 

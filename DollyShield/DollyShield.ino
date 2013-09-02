@@ -47,13 +47,11 @@
 
 // motor PWM
 #define MOTOR0_P 3
-#define MOTOR1_P 14
-#define MOTOR0_DIR 4
-#define MOTOR1_DIR 14
+#define MOTOR0_DIR 13
 
 // camera pins
 #define CAMERA_PIN 12
-#define FOCUS_PIN 13
+#define FOCUS_PIN 15
 #define IR_PIN 12
 
 #define FREQ 38400
@@ -407,10 +405,10 @@ byte min_spd[1] = {
   (min_ipm[0] / max_ipm[0]) * 255};
 // minimum pulse cycles per motor
 byte m_min_pulse[1] = { 
-  125};
+  20};
 // calibration points
 byte motor_spd_cal[2] = {
-  1,40};
+  2,10};
 
 
 // maximum sms distance
@@ -526,14 +524,17 @@ void setup() {
   pinModeFast(CAMERA_PIN, OUTPUT);
   pinModeFast(FOCUS_PIN, OUTPUT);
   pinModeFast(IR_PIN, OUTPUT);
-  pinModeFast(MOTOR0_P, OUTPUT);
+  pinMode(MOTOR0_P, OUTPUT);
   pinModeFast(MOTOR0_DIR, OUTPUT);
 
   Serial.begin(115200);
-
   init_user_interface();
-  delay(500);
 
+ for(int s = 0; s < 255; s+=8)
+    {
+        analogWrite(MOTOR0_P,s);
+        delay(500);
+    }
   // check firmware version stored in eeprom
   // will cause eeprom_saved() to return false
   // if version stored in eeprom does not match

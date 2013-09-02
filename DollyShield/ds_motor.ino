@@ -41,6 +41,7 @@ void motor_speed_adjust(int val, boolean spd_floor ) {
     c_speed = (int) m_speeds[0] + val >= 0 ? m_speeds[0] + val : 0;
     // do we need to floor the value at the min speed setting? (man control)
     if( spd_floor ) 
+    Serial.println("fl");
       c_speed = c_speed < min_spd[0] ? min_spd[0] : c_speed;
   }
 
@@ -76,8 +77,11 @@ void motor_control(boolean state) {
 
 
 void motor_set_speed( unsigned int m_speed ) {
+analogWrite(MOTOR0_P,32);
+delay(500);
 
-
+  Serial.print("s:");
+Serial.println(m_speed);
 
   m_speeds[0] = m_speed;
   m_sms_tm[0] = 0;
@@ -85,7 +89,6 @@ void motor_set_speed( unsigned int m_speed ) {
 
 
   if( ! motor_sl_mod && ! (ui_ctrl_flags & B00000100) ) {
-
     // handle when in interleaved mode and not on
     // manual control screen
 
@@ -101,6 +104,8 @@ void motor_set_speed( unsigned int m_speed ) {
 
     // normalize to max pwm speed
     m_speed = m_speed > 255 ? 255 : m_speed;
+Serial.print("s_norm:");
+Serial.println(m_speed);
 
     m_speeds[0] = m_speed;
   }
@@ -109,7 +114,7 @@ void motor_set_speed( unsigned int m_speed ) {
   // do we need to go into pulsing mode?
 
   if( m_speed > 0 && m_speed < min_spd[0]  ) {
-
+Serial.println("smaller");
     motor_calc_pulse_len(m_speed, false);
 
   } //      
@@ -128,7 +133,8 @@ void motor_set_speed( unsigned int m_speed ) {
   }
   else if( ! (ui_ctrl_flags & B00000100) && m_sms_tm[0] > 0 ) {
     // just in case
-    digitalWriteFast(MOTOR0_P, LOW);
+    digitalWrite(MOTOR0_P, LOW);
+    Serial.println("sms-man");
     // return if we're in an SMS condition
     // and not in manual mode
     return;
@@ -138,14 +144,21 @@ void motor_set_speed( unsigned int m_speed ) {
   // to given analog speed
 
   // only set analog speed if it exceeds min speed
-
+Serial.print("ms:");
+Serial.println(min_spd[0]);
+   Serial.print("s:");
+    Serial.println(m_speed);
+    
   if( m_speed >= min_spd[0] ) {
     analogWrite(MOTOR0_P, m_speed);
+ Serial.print("written");
+ Serial.println(m_speed);
   }
   else {
+    Serial.println("off");
     // just in case... switching down from 
     // pwm to pulsed...
-    digitalWriteFast(MOTOR0_P,LOW);
+    digitalWrite(MOTOR0_P,LOW);
   }
 
 }
@@ -153,7 +166,7 @@ void motor_set_speed( unsigned int m_speed ) {
 void motor_calc_pulse_len(unsigned int m_speed, boolean ignore_cal) {
   // for how many periods should the motor be on and
   // off? (pulsing mode)     
-
+Serial.println("calc");
   float m_pct   = ( (float) m_speed / 255.0 );
   float periods = 1333.0; // 25 times a second 
 
@@ -228,6 +241,8 @@ void motor_update_dist(float rpm, float diarev ) {
 
   max_ipm[0] = rpm * diarev;
   min_spd[0] = 255 * ( min_ipm[0] / max_ipm[0] );
+  Serial.print("mins:");
+  Serial.println(min_spd[0]);
   m_maxsms[0] = max_ipm[0] * 100;
 
   eeprom_write(24, max_ipm[0]);
@@ -265,7 +280,8 @@ void motor_pulse() { //TODO
         }
         else {            
           // set port value high for given motor
-          PORTD |= (B00100000 << i);  
+        //  PORTD |= (B00100000 << i); 
+         digitalWriteFast(MOTOR0_P,HIGH); 
           //analogWrite(5, 165);
           mstate[i] = 1;
           pulses[i] = 1;
@@ -280,7 +296,8 @@ void motor_pulse() { //TODO
 
           // set port value low for given motor
           //analogWrite(5, 0);
-          PORTD &= ( B11111111 ^ ( B00100000 << i ) ); 
+       //   PORTD &= ( B11111111 ^ ( B00100000 << i ) ); 
+         digitalWriteFast(MOTOR0_P,LOW); 
           mstate[i] = 0;
           pulses[i] = 1;
         }
@@ -353,7 +370,7 @@ void motor_stop_all() {
     timer_engaged = false;
   }
 
-  digitalWriteFast(MOTOR0_P, LOW);
+  digitalWrite(MOTOR0_P, LOW);
 
   motor_control(false);
 
@@ -421,7 +438,7 @@ void motor_run_pulsing() {
       digitalWriteFast(LCD_BKL, LOW);
     }
 
-    digitalWriteFast(MOTOR0_P, LOW);
+    digitalWrite(MOTOR0_P, LOW);
 
 
     Timer1.initialize(MP_PERIOD);
@@ -472,14 +489,21 @@ void motor_execute_ramp_changes() {
 
 
 void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
-
+Serial.print("w:");
+Serial.println(which);
+    Serial.print("msp:");
+Serial.println(mspd);
 
   byte cur_dir = m_wasdir[0];
   motor_dir(dir);
 
   if( which == 1 ) {
+    Serial.print("maxs:");
+Serial.println(m_maxsms[0]);
     float m_pct = ( (float) mspd / (float) m_maxsms[0] );  
     unsigned int run_tm = 60000.0 * m_pct;
+    Serial.print("pct:");
+Serial.println(m_pct);
 
     motor_ran = 0;
 
@@ -493,14 +517,14 @@ void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
     return;
   }
   else {
-
+Serial.println("pulsing");
     byte was_on_pct = on_pct[0];
     byte was_off_pct = off_pct[0];     
 
     motor_calc_pulse_len(mspd, true);
 
     unsigned long run_tm = millis();
-
+Serial.println("start");
     motor_run_pulsing();
 
     // main loop is ~ 10% slower than calibration loop
@@ -508,7 +532,7 @@ void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
       // introduce timing block delay similar to main loop
       int foo = analogRead(BUT_PIN);
     }
-
+Serial.println("stop");
     motor_stop_all();
 
     on_pct[0]  = was_on_pct;

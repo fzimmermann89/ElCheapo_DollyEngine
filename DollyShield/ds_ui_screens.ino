@@ -217,9 +217,8 @@ void execute_calibrate() {
     float traveled = 0.01 * (max_ipm[0]);
     unsigned int runspd = 0.01 * m_maxsms[0];
     cur_inp_float = traveled;
-
     completed++;
-
+Serial.println("s");
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Running ");  
@@ -247,13 +246,18 @@ void execute_calibrate() {
   // pulse calibration  
   for( byte c = 1; c <= 2; c++ ) {
     byte ths_spd = c == 1 ? motor_spd_cal[0] : motor_spd_cal[1];
-
+Serial.print("c:");
+Serial.println(c);
     for( byte i = 0; i <= 1; i++ ) {
+      Serial.print("i:");
+Serial.println(i);
+
       float des_ipm = motor_calc_ipm(ths_spd, true);
       cur_inp_float = des_ipm;
 
       completed++;
-
+Serial.print("comp:");
+Serial.println(completed);
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Running ");  
