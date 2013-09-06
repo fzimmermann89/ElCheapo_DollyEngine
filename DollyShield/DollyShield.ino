@@ -1,21 +1,9 @@
 /* 
  
- MX2 Dolly Engine version
- 
+ MX2 El Cheapo
+ modified Version of Dynamic Perception LLC's DollyShield
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
- 
- Sketch to run the "DollyShield" design, provides control of
- the arduino shield.  A dual 1Amp motor control 
- shield with integrated LCD, 5 buttons, two generic I/O ports,
- and dual opto-coupled input for camera control.  
- 
- This sketch creates a user interface and implements core features
- of the shield, allowing for integrated control of one camera and 
- up to two axes of motion.  Features allow for all of the following
- motion types: shoot-move-shoot, continuous, and slow "pulsing" of 
- the full speed motor to allow for very slow speeds without more
- expensive steppers or even encoders.  
- 
+ (c) FFZ
  For more info go to http://openmoco.org
  
  This program is free software: you can redistribute it and/or modify
@@ -40,6 +28,40 @@
 #include <digitalWriteFast.h>
 #include "MsTimer2.h"
 #include "TimerOne.h"
+
+
+
+ typedef struct
+{
+  unsigned char bit0:1;
+  unsigned char bit1:1;
+  unsigned char bit2:1;
+  unsigned char bit3:1;
+  unsigned char bit4:1;
+  unsigned char bit5:1;
+  unsigned char bit6:1;
+  unsigned char bit7:1;
+}io_reg;
+
+#define BIT_1   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
+#define BIT_2   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
+#define BIT_3   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
+#define BIT_4   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
+#define BIT_5   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define BIT_6   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
+#define BIT_7   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
+#define BIT_8	((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -133,74 +155,79 @@ unsigned int seq[] = {
 
 // menu strings
 prog_char menu_1[] PROGMEM = "Movements";
-prog_char menu_2[] PROGMEM = "Motor Setup";
-prog_char menu_4[] PROGMEM = "Camera Setup";
-prog_char menu_5[] PROGMEM = "General Setup";
+prog_char menu_2[] PROGMEM = "Motor  Setup";
+prog_char menu_3[] PROGMEM = "Camera Setup";
+prog_char menu_4[] PROGMEM = "General Setup";
 
 prog_char manual_menu_1[] PROGMEM = "Manual Move";
-prog_char manual_menu_3[] PROGMEM = "Fast Simulat.";
+prog_char manual_menu_2[] PROGMEM = "Fast Simulat.";
 
-prog_char axis_menu_1[] PROGMEM = "Ramp Shots";
-prog_char axis_menu_2[] PROGMEM = "RPM";
-prog_char axis_menu_4[] PROGMEM = "Angle";
-prog_char axis_menu_5[] PROGMEM = "Calibrate";
-prog_char axis_menu_6[] PROGMEM = "Slow Mode IPM";
-prog_char axis_menu_7[] PROGMEM = "Dist. per Rev";
-prog_char axis_menu_8[] PROGMEM = "Min Pulse";
-prog_char axis_menu_10[] PROGMEM = "Lead In";
-prog_char axis_menu_11[] PROGMEM = "Lead Out";
-prog_char axis_menu_12[] PROGMEM = "Cal. Constant";
+prog_char axis_menu_1[] PROGMEM = "Ramp In Shots";
+prog_char axis_menu_2[] PROGMEM = "Ramp Out Shots";
+prog_char axis_menu_4[] PROGMEM = "Angel";
+prog_char axis_menu_5[] PROGMEM = "Lead In";
+prog_char axis_menu_6[] PROGMEM = "Lead Out";
+prog_char axis_menu_7[] PROGMEM = "Advanced";
 
+prog_char axis_adv_menu_1[] PROGMEM = "Calibrate";
+prog_char axis_adv_menu_2[] PROGMEM = "max RPM";
+prog_char axis_adv_menu_3[] PROGMEM = "Dist per Rev";
+prog_char axis_adv_menu_4[] PROGMEM = "Min Cont. Speed";
+prog_char axis_adv_menu_5[] PROGMEM = "Pulse Length";
+prog_char axis_adv_menu_6[] PROGMEM = "Pulse Power";
+prog_char axis_adv_menu_7[] PROGMEM = "Cal. Spd Low";
+prog_char axis_adv_menu_8[] PROGMEM = "Cal. Spd Hi";
 
 prog_char camera_menu_1[] PROGMEM = "Interval sec";
 prog_char camera_menu_2[] PROGMEM = "Max Shots";
 prog_char camera_menu_3[] PROGMEM = "Exp. Time ms";
-prog_char camera_menu_4[] PROGMEM = "Exp. Delay ms";
-prog_char camera_menu_5[] PROGMEM = "Focus Tap ms";
-prog_char camera_menu_6[] PROGMEM = "Nikon IR";
-prog_char camera_menu_7[] PROGMEM = "Shutter+Focus";
-prog_char camera_menu_8[] PROGMEM = "Repeat";
-prog_char camera_menu_9[] PROGMEM = "Repeat Delay";
+prog_char camera_menu_4[] PROGMEM = "Shutter Type;
+prog_char camera_menu_5[] PROGMEM = "Bulb Mode";
+prog_char camera_menu_6[] PROGMEM = "Repeat";
+prog_char camera_menu_7[] PROGMEM = "Repeat Delay ms";
+prog_char camera_menu_8[] PROGMEM = "PreExp Delay ms";
+prog_char camera_menu_9[] PROGMEM = "PstExp Delay ms";
+prog_char camera_menu_10[] PROGMEM = "Focus Delay ms";
 
-prog_char set_menu_1[] PROGMEM = "Motor Disp";
-prog_char set_menu_2[] PROGMEM = "Motor Sl.Mod";
-prog_char set_menu_3[] PROGMEM = "Backlight";
-prog_char set_menu_4[] PROGMEM = "AutoDim (sec)";
-prog_char set_menu_5[] PROGMEM = "Blank LCD";
-prog_char set_menu_6[] PROGMEM = "I/O 1";
-prog_char set_menu_7[] PROGMEM = "I/O 2";
-prog_char set_menu_8[] PROGMEM = "Metric Disp.";
-prog_char set_menu_9[] PROGMEM = "Reset Mem";
-prog_char set_menu_11[] PROGMEM = "Cal. Spd Low";
-prog_char set_menu_12[] PROGMEM = "Cal. Spd Hi";
-prog_char set_menu_13[] PROGMEM = "AltOut Pre ms";
-prog_char set_menu_14[] PROGMEM = "AltOut Post ms";
-prog_char set_menu_15[] PROGMEM = "USB Trigger";
-prog_char set_menu_16[] PROGMEM = "Invert Dir";
-prog_char set_menu_17[] PROGMEM = "Invert I/O";
+
+prog_char set_menu_1[] PROGMEM = "Backlight";
+prog_char set_menu_2[] PROGMEM = "AutoDim (sec)";
+prog_char set_menu_3[] PROGMEM = "Blank LCD";
+prog_char set_menu_4[] PROGMEM = "I/O 1";
+prog_char set_menu_5[] PROGMEM = "I/O 2";
+prog_char set_menu_6[] PROGMEM = "In Delay ms";
+prog_char set_menu_7[] PROGMEM = "Out Delay ms";
+prog_char set_menu_8[] PROGMEM = "USB Trigger";
+prog_char set_menu_9[] PROGMEM = "Invert Dir";
+prog_char set_menu_10[] PROGMEM = "Invert I/O";
+prog_char set_menu_11[] PROGMEM = "Reset Mem";
 
 // menu organization
 
 PROGMEM const char *menu_str[]  = { 
-  menu_1, menu_2, menu_4, menu_5};
+  menu_1, menu_2, menu_3, menu_4};
 
 PROGMEM const char *man_str[]   = { 
-  manual_menu_1,  manual_menu_3 };
+  manual_menu_1,  manual_menu_2 };
+  
+
 
 PROGMEM const char *axis0_str[] = { 
-  axis_menu_1, axis_menu_10, axis_menu_11, axis_menu_2, axis_menu_4, axis_menu_5, axis_menu_12, axis_menu_6, axis_menu_7, axis_menu_8 };
-PROGMEM const char *axis1_str[] = { 
-  axis_menu_1, axis_menu_10, axis_menu_11, axis_menu_2, axis_menu_4, axis_menu_5, axis_menu_12, axis_menu_6, axis_menu_7, axis_menu_8 };
+  axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6, axis_menu_7};
+    
 PROGMEM const char *cam_str[]   = { 
-  camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
+  camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9,camera_menu_10 };
+  
 PROGMEM const char *set_str[]   = { 
-  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_11, set_menu_12, set_menu_13, set_menu_14, set_menu_15, set_menu_16, set_menu_17 };
+  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_11};
 
+  PROGMEM const char *axis_adv_str[]   = { 
+  axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7,axis_adv_menu_8 };
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 
 byte max_menu[7]  = {
-  3,1,9,8,15};
+  3,1,6,9,10,8};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -254,7 +281,8 @@ unsigned int lcd_dim_tm     = 5;
 unsigned long input_last_tm = 0;
 
 // show cm instead of inch?
-boolean ui_is_metric = false;
+//boolean ui_is_metric = false;
+
 // invert L/R displays?
 boolean ui_invdir = false;
 
@@ -285,7 +313,7 @@ byte ui_ctrl_flags = B00000000;
 
 byte ui_cal_scrn_flags = 0;
 
-// whether to show ipm (true) or pct (false)
+// whether to show cpm (true) or % (false)
 
 boolean ui_motor_display = true;
 
@@ -293,10 +321,10 @@ boolean ui_motor_display = true;
  
  B0 = input value is a float
  B1 = input is a bool (on/off) value
- B2 = input is a bool (up/dn) value
+ B2 = input is list (NikonIR/CanonIR/Shutter Cab/Shut+Foc Cab) value
  B3 = input is a bool (lt/rt) value
- B4 = input is a bool (ipm/pct) value
- B5 = input is a bool (pulse/sms) value
+ B4 = input is a bool (cm/%) value
+ B5 = input is a list (cont/sms) value
  B6 = input is a bool (rotary/linear) value
  B7 = input is list (0,45,90) value
  
@@ -322,7 +350,10 @@ byte ui_type_flags2 = 0;
  B2 = camera cycle complete
  B3 = motors currently running
  B4 = external trigger engaged
- 
+ b5
+ b6
+ b7
+
  */
 
 volatile byte run_status = 0;
@@ -352,19 +383,14 @@ byte external_trigger  = 0;
 unsigned long ext_trig_pre_delay = 0;
 unsigned long ext_trig_pst_delay = 0;
 
-// motor slow mode is pulse (true) or sms (false)
-boolean motor_sl_mod = true;
-
 // camera exposure time
 unsigned long exp_tm      = 100;
 // tap focus before exposing
 unsigned int focus_tap_tm = 0;
 // delay after exposing (mS)
 unsigned int post_delay_tm      = 100;
-// brign focus pin high w/ shutter
-boolean focus_shutter   = true;
-//use ir remote
-boolean ir_remote   = true;
+// shutter mode (0:NikonIR/1:CanonIR/2:Shutter Cab/3:Shut+Foc Cab)
+byte shutter_mode   = 0;
 // intervalometer time (seconds)
 float cam_interval = 1.0;
 // max shots
@@ -379,56 +405,51 @@ unsigned long cam_last_tm = 0;
 
 // currently selected motor
 //byte cur_motor = 0;
+
 // set speed for the current motor
-unsigned int m_speeds[1] = {
-  0};
+unsigned int m_speed = 0;
 // currently set speed (for altering motor speed)
-unsigned int mcur_spds[1] = {
-  0};
+unsigned int mcur_spds=0;
+
 // prev direction for motor
-byte m_wasdir[1] = {
-  0};
+byte m_wasdir = 0;
+
 // distance (i) per revolution
-float m_diarev[1] = {
-  3.53};
+float m_diarev =  3.53;
 // motor RPMs
-float m_rpm[1]    = { 
-  8.75};
-// calculated max ipm
-float max_ipm[1] = {
-  m_diarev[0] * m_rpm[0]};
-// user-configurable min ipm
-float min_ipm[1] = {
-  20.0};
-// minimumspeed (min ipm->255 scale value)
-byte min_spd[1] = { 
-  (min_ipm[0] / max_ipm[0]) * 255};
+float m_rpm    = 9;
+// calculated max cpm
+float max_cpm =  m_diarev * m_rpm};
+// user-configurable min cpm
+float min_cpm = 20.0;
+// minimumspeed (min cpm->255 scale value) //TODO WHY?
+byte min_spd =  (min_cpm / max_cpm) * 255};
 // minimum pulse cycles per motor
-byte m_min_pulse[1] = { 
-  20};
+byte m_min_pulse=   20;
 // calibration points
+
 byte motor_spd_cal[2] = {
   2,10};
 
 
-// maximum sms distance
-unsigned int m_maxsms[1] = { 
-  max_ipm[0] * 100};
+// maximum sms distance //TODO
+unsigned int m_maxsms =  max_cpm * 100;
 
-
+/*
 // for timer1 pulsing mode control
 boolean timer_used = false;
 volatile  bool timer_engaged      = false;
 volatile bool motor_engaged      = false;
 volatile byte motor_ran = 0;
+*/
+
 
 // motor calibration
 
-float m_cal_constant[1] = {
-  0.69};
+float m_cal_constant = 0.69;
 
-float m_cal_array[1][3][3][2] = { 
-  { 
+float m_cal_array[3][3][2] = { //TODO sinnvolle Werte voreintragen. 
+   
     {
       {
         0.61914329,0.61914329                  }
@@ -456,35 +477,26 @@ float m_cal_array[1][3][3][2] = {
         2.01133251,2.11453032                  }
     } 
   }
-};
-
-byte m_cur_cal = 0;
-byte m_angle[2] = {
-  0,0};
+;
+//aktueller Winkel-wert in m_cal_array für den kalibriert wird //warum global?
+byte m_cur_cal = 0;     
+byte m_angle = 0;
 
 boolean m_cal_done = false;
 
 // ramping data
-byte m_ramp_set[1]     = {
-  0};
-float m_ramp_shift[1]  = {
-  0.0};
-byte m_ramp_mod[1]     = {
-  0};
+byte m_ramp_set     = 0;
+float m_ramp_shift  = 0.0;
+byte m_ramp_mod	    = 0;
 
 // lead-ins for axis movement
-unsigned int m_lead_in[1] = {
-  0};
-unsigned int m_lead_out[1] = {
-  0};
+unsigned int m_lead_in  = 0;
+unsigned int m_lead_out = 0;
 
 // for controlling pulsing and sms movement
-unsigned long on_pct[1]                = {
-  0};
-unsigned long off_pct[1]               = {
-  0};
-unsigned int m_sms_tm[1]              = {
-  0};
+unsigned long on_pct  = 0;
+unsigned long off_pct = 0;
+unsigned int m_sms_tm = 0;
 
 // shots fired
 unsigned long shots = 0;
@@ -499,14 +511,7 @@ unsigned long shots = 0;
 
 byte input_type[2]            = {0,0};
 unsigned long input_trig_last = 0;
-/*
- 
- 0 = axis 0 currently running free (continuous)
- 1 = axis 1 currently running free
- 2 = in merlin manual control
- 3 = displaying merlin config screen
- 
- */
+
 // usb trigger flag
 boolean gb_enabled = false;
 
@@ -524,17 +529,12 @@ void setup() {
   pinModeFast(CAMERA_PIN, OUTPUT);
   pinModeFast(FOCUS_PIN, OUTPUT);
   pinModeFast(IR_PIN, OUTPUT);
-  pinMode(MOTOR0_P, OUTPUT);
+  pinModeFast(MOTOR0_P, OUTPUT);
   pinModeFast(MOTOR0_DIR, OUTPUT);
 
   Serial.begin(115200);
   init_user_interface();
 
- for(int s = 0; s < 255; s+=8)
-    {
-        analogWrite(MOTOR0_P,s);
-        delay(500);
-    }
   // check firmware version stored in eeprom
   // will cause eeprom_saved() to return false
   // if version stored in eeprom does not match
@@ -559,17 +559,16 @@ void setup() {
 
   show_home();
 
-  /*
+  //Output Calibration Data
  for( byte i = 0; i <= 2; i++) {
    Serial.print(i, DEC);
    Serial.print(":");
    for ( byte x = 0; x < 2; x++ ) {
-   Serial.print(m_cal_array[0][0][i][x], 8);
+   Serial.print(m_cal_array[0][i][x], 8);
    Serial.print(":");
    }
    Serial.println("");
    } 
-   */
 
 }
 
@@ -627,10 +626,10 @@ void main_loop_handler() {
     pre_focus_clear = 3;
   }
   else  if( motor_sl_mod &&
-    (( m_speeds[0] > 0 && m_speeds[0] < min_spd[0] ) ) ) {
+    (( m_speeds > 0  < min_spd ) ) ) {
 
-    // if pulse mode is on and at least
-    // one motor needs to be pulsed...
+    // if pulse mode is on and
+    //motor needs to be pulsed...
 
     motor_run_pulsing();
 
@@ -717,21 +716,20 @@ void main_loop_handler() {
 
   }
 
-  else if( motors_clear == true && ! motor_sl_mod &&
-    ( m_sms_tm[0] > 0 ) ) {
+  else if( motors_clear == true && !motor_sl_mod && ( m_sms_tm > 0 ) ) {
 
-    // if we're set to go to s-m-s and at least one motor is set to move
-    // start DC motor(s) moving
+    // if we're set to go to s-m-s and motor is set to move
+    // start motor moving
 
     motor_ran = 0;
 
-    // set motors to move, and then
+    // set motor to move, and then
     // set timer to turn them off  
 
-    if( m_sms_tm[0] > 0 ) {
-      // start first motor
+    if( m_sms_tm > 0 ) {
+      // start motor
       run_motor_sms(); 
-      MsTimer2::set(m_sms_tm[0], stop_motor_sms);
+      MsTimer2::set(m_sms_tm, stop_motor_sms);
     }
 
 

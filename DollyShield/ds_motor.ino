@@ -282,7 +282,6 @@ void motor_pulse() { //TODO
           // set port value high for given motor
         //  PORTD |= (B00100000 << i); 
          digitalWriteFast(MOTOR0_P,HIGH); 
-          //analogWrite(5, 165);
           mstate[i] = 1;
           pulses[i] = 1;
         }
@@ -295,7 +294,6 @@ void motor_pulse() { //TODO
         else {
 
           // set port value low for given motor
-          //analogWrite(5, 0);
        //   PORTD &= ( B11111111 ^ ( B00100000 << i ) ); 
          digitalWriteFast(MOTOR0_P,LOW); 
           mstate[i] = 0;

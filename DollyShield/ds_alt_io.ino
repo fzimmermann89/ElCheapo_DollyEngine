@@ -29,7 +29,7 @@
  */
 
 
-//TODO: Remove which
+
 void altio_isr_handler(byte which) {
 
   // from internals
