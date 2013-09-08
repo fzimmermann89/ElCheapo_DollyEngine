@@ -1,8 +1,10 @@
 /* 
  
- "DollyShield" MX2
- 
- (c) 2010 C.A. Church / Dynamic Perception LLC
+ MX2 El Cheapo
+ modified Version of Dynamic Perception LLC's DollyShield
+ (c) 2010-2011 C.A. Church / Dynamic Perception LLC
+ (c) FFZ
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,7 +19,6 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
- 
  */
 
 /*
@@ -27,7 +28,6 @@
  ========================================
  
  */
-
 
 
 void altio_isr_handler(byte which) {

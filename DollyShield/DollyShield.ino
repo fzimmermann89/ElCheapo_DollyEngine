@@ -4,7 +4,7 @@
  modified Version of Dynamic Perception LLC's DollyShield
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
- For more info go to http://openmoco.org
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,11 @@
  
  */
 
+/*
+NOTES:
+-use timer2 for lcd and motor "soft pwm" to use any pin. in slow pulse mode use counter in isr. less overhead than timer1
+-user timer1 in ctc mode with couter for general purpose ms-timer, instead of mstimer2 OR 
+*/
 
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
@@ -28,40 +33,6 @@
 #include <digitalWriteFast.h>
 #include "MsTimer2.h"
 #include "TimerOne.h"
-
-
-
- typedef struct
-{
-  unsigned char bit0:1;
-  unsigned char bit1:1;
-  unsigned char bit2:1;
-  unsigned char bit3:1;
-  unsigned char bit4:1;
-  unsigned char bit5:1;
-  unsigned char bit6:1;
-  unsigned char bit7:1;
-}io_reg;
-
-#define BIT_1   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
-#define BIT_2   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
-#define BIT_3   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
-#define BIT_4   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
-#define BIT_5   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
-#define BIT_6   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
-#define BIT_7   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
-#define BIT_8	((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -209,8 +180,6 @@ PROGMEM const char *menu_str[]  = {
 
 PROGMEM const char *man_str[]   = { 
   manual_menu_1,  manual_menu_2 };
-  
-
 
 PROGMEM const char *axis0_str[] = { 
   axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6, axis_menu_7};
@@ -225,7 +194,6 @@ PROGMEM const char *set_str[]   = {
   axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7,axis_adv_menu_8 };
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
-
 byte max_menu[7]  = {
   3,1,6,9,10,8};
 
@@ -317,34 +285,44 @@ byte ui_cal_scrn_flags = 0;
 
 boolean ui_motor_display = true;
 
-/* input type flags
- 
- B0 = input value is a float
- B1 = input is a bool (on/off) value
- B2 = input is list (NikonIR/CanonIR/Shutter Cab/Shut+Foc Cab) value
- B3 = input is a bool (lt/rt) value
- B4 = input is a bool (cm/%) value
- B5 = input is a list (cont/sms) value
- B6 = input is a bool (rotary/linear) value
- B7 = input is list (0,45,90) value
- 
- */
-
+//input type flags
+#define INPUT_FLOAT 1
+#define INPUT_ONOFF 2
+#define INPUT_SHUTTER 3
+#define INPUT_LTRT 4
+#define INPUT_CMPCT 5
+#define INPUT_CONTSMS 6
+#define INPUT_ROTLIN 7		//TODO //WHY?
+#define INPUT_ANGEL 8
+#define INPUT_IO 9		//TODO //disable start stop
+#define INPUT_FORCEDMETRIC 10	//TODO 
 byte ui_type_flags = 0;
 
-/* input type flags vector #2
- 
- B0 = input value is list (Disable/Start/Stop)
- B1 = input value is forced metric
- 
- */
-
-byte ui_type_flags2 = 0;
 
 
+// run status flags
+ typedef struct
+{
+  unsigned char bit0:1;
+  unsigned char bit1:1;
+  unsigned char bit2:1;
+  unsigned char bit3:1;
+  unsigned char bit4:1;
+  unsigned char bit5:1;
+  unsigned char bit6:1;
+  unsigned char bit7:1;
+}io_reg;
 
-/* run status flags
- 
+#define S_RUNNING  		 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
+#define S_CAM_ENGAGED   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
+#define S_CAM_CYCLE_COMPLETE   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
+#define S_MOT_RUNNING   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
+#define S_EXT_TRIG_ENGAGED   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define BIT_6   		 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
+#define BIT_7  			 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
+#define BIT_8			 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
+
+/* 
  B0 = running
  B1 = camera currently engaged
  B2 = camera cycle complete
@@ -353,30 +331,20 @@ byte ui_type_flags2 = 0;
  b5
  b6
  b7
+*/
 
- */
-
-volatile byte run_status = 0;
-
-/* external intervalometer
+// external intervalometer
  
- B0 = I/O 1 is external intervalometer
- B1 = I/O 2 is external intervalometer
- B2 = interval OK to fire
- 
- */
-
+#define EXT_INTV_1 (1 << 0) //B0 = I/O 1 is external intervalometer
+#define EXT_INTV_2 (1 << 1) //B1 = I/O 2 is external intervalometer
+#define EXT_INT_OK (1 << 2) //B2 = interval OK to fire
 byte external_interval = 0;
 
-/* external trigger via alt i/o pins
- 
- B0 = I/O 1 external enabled (before)
- B1 = I/O 2 external enabled (before)
- B2 = I/O 1 external enabled (after)
- B3 = I/O 2 external enabled (after)
- 
- */
-
+//external trigger via alt i/o pins
+#define EXT_TRIG_1_BEFORE (1 << 0) //B0 = I/O 1 external enabled (before)
+#define EXT_TRIG_2_BEFORE (1 << 1) //B1 = I/O 2 external enabled (before)
+#define EXT_TRIG_1_AFTER  (1 << 2) //B2 = I/O 1 external enabled (after)
+#define EXT_TRIG_2_AFTER  (1 << 2) //B3 = I/O 2 external enabled (after)
 byte external_trigger  = 0;
 
 // trigger delays
@@ -442,7 +410,7 @@ volatile  bool timer_engaged      = false;
 volatile bool motor_engaged      = false;
 volatile byte motor_ran = 0;
 */
-
+//TODO
 
 // motor calibration
 
@@ -478,7 +446,7 @@ float m_cal_array[3][3][2] = { //TODO sinnvolle Werte voreintragen.
     } 
   }
 ;
-//aktueller Winkel-wert in m_cal_array für den kalibriert wird //warum global?
+//aktueller Winkel-wert in m_cal_array für den kalibriert wird //warum global? //TODO
 byte m_cur_cal = 0;     
 byte m_angle = 0;
 
@@ -614,7 +582,7 @@ void main_loop_handler() {
   if( cam_max > 0 && shots >= cam_max && ( ok_stop || (m_speeds[0] <= 0.0 ) || motor_sl_mod ) ) {
 
     // stop program if max shots exceeded, and complete cycle completed
-    // if in interleave, ignore ocmplete cycle if in pulse
+    // if in interleave, ignore complete cycle if in pulse
     ok_stop = false;
     stop_executing();
     // interrupt further processing      

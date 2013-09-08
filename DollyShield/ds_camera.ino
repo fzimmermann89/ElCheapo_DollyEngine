@@ -83,7 +83,8 @@ void stop_camera() {
   // after the digitalWriteFast() to minimize
   // over-shooting in case this takes some
   // unusually-long amount of time
-  if (ir_remote) send_ir();   
+ 
+  // if (ir_remote) send_ir();  
   MsTimer2::stop();
 
   // are we supposed to delay before allowing
