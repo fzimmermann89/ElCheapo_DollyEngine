@@ -123,7 +123,9 @@ void show_home() {
 void main_screen_select(boolean dir) {
 
   byte max_inputs = 4;
+ 
   if( main_scr_input == 0) {
+   //enter main scr setup
     lcd.blink();
   }
 
@@ -134,13 +136,11 @@ void main_screen_select(boolean dir) {
     main_scr_input+=max_inputs;
   }
 
-  main_scr_input=main_scr_input%(max_inputs+1);
-
-  // exit main scr setup
+  if (wert>max_inputs) wert-=max_inputs;
 
   if(main_scr_input == 0 ) {
+    // exit main scr setup
     lcd.noBlink();
-    main_scr_input = 0;
     return;
   }
 
