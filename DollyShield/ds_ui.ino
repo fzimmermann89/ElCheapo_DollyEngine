@@ -254,29 +254,15 @@ byte is_button_press(byte button) {
 byte get_menu( byte mnu, byte pos ) {
 
   // where is our target menu when 
-  // mnu.pos is pressed?
+  // mnu.pos is pressed?  
+  //MainMenu is menu 0, its submenus are menus 1-4. AdvancedMotorMenu is menu 5. 
+  //Special return codes for calibration, manual move and input.
 
-
-  switch(mnu) {
-  case 0:
-
-    if( pos <= 5 )
-      return( pos + 1 );
-
-    break;
-
-  case 1:
-    // manual control is special return code
-    return(254);
-
-  default:
-    break;        
-  }
-
-
-
-  // default is 'no target', an input value
-  return(255);
+if (mnu == 0) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
+else if (mnu == 2 && pos == 5) return 5; //Advanced Motor Menu
+else if (mnu == 5 && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
+else if (mnu == 1) return MENU_MANUAL; 
+else return(MENU_INPUT); //No Submenu, Input Menu.
 
 }
 
@@ -379,24 +365,17 @@ void ui_button_center( boolean held ) {
     // in a setup menu, find
     // the next menu to go to
 
-    // calibration, don't do anything else
-    if (cur_menu == 2 && cur_pos == 5 ) {
-      get_value(cur_menu, cur_pos, false);
-      return;
-    }
-
-
     byte new_menu = get_menu(cur_menu, cur_pos);
 
-    // if drawing motor manual screen...
-
-    if( new_menu == 254 ) {
+  
+    if( new_menu == MENU_CALIBRATION || new_menu==MENU_MANUAL ) {
+		  // if drawing motor manual screen or in calibration screen...
       get_value(cur_menu, cur_pos, false);
       return;
     }
 
 
-    if( new_menu == 255 && ! (ui_ctrl_flags & B00100000) )  {
+    if( new_menu == MENU_INPUT && ! (ui_ctrl_flags & B00100000) )  {
       // this is not a menu, but an input of some
       // sort
 
@@ -681,7 +660,7 @@ void draw_menu(byte dir, boolean value_only) {
   cur_pos = cur_pos > max_menu[cur_menu] ? max_menu[cur_menu] : cur_pos;
 
   switch( cur_menu ) {
-
+     //draw the menu
   case 0:
 
     draw_values(menu_str, draw_all, value_only);
@@ -706,6 +685,9 @@ void draw_menu(byte dir, boolean value_only) {
 
     draw_values(set_str, draw_all, value_only);
     break;
+  
+  case 5:
+    draw_values(axis_adv_str, draw_all, value_only);
 
   default: 
     return;  
@@ -775,7 +757,7 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
    
 
       switch(ui_type) {
-	     case INPUT_IO:
+	   case INPUT_IO:
         // for alt i/o inputs
 
         if( cur_inp_long == 0 ) {
@@ -806,7 +788,6 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
           lcd.print("Change Dir");
         }
         break;
-      
       case INPUT_SPEED: 
         // cal speed inputs in gobal set menu
         display_spd_ipm(cur_inp_long);
@@ -857,6 +838,21 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
           lcd.print(90,DEC);
         }
         break;
+      case INPUT_SHUTTER:
+        // for shutter type
+        if( cur_inp_long == SHUTTER_MODE_CABLE_FOCUS ) {
+          lcd.print("Cable+Focus");
+        }
+        else if( cur_inp_long == SHUTTER_MODE_CABLE_NO_FOCUS ) {
+          lcd.print("Cable");
+        }
+        else if( cur_inp_long == SHUTTER_MODE_IR_CANON ) {
+          lcd.print("IR Canon");
+        }
+        else ( cur_inp_long == SHUTTER_MODE_IR_NIKON ) {
+          lcd.print("IR NIKON");
+        }
+        break;  
       default:
         lcd.print((unsigned long)cur_inp_long);
         return;

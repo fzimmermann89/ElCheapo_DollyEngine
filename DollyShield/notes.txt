@@ -28,7 +28,7 @@
   #define 16 EEPROM_POS_m_diarev
   #define 24 EEPROM_POS_max_ipm
   #define 32 EEPROM_POS_m_rpm
-  #define 40 EEPROM_POS_min_ipm
+  #define 40 EEPROM_POS_min_cpm
   #define 48 EEPROM_POS_min_spd
   #define 50 EEPROM_POS_m_min_pulse
   #define 52 EEPROM_POS_altio_dir

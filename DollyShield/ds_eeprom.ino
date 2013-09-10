@@ -52,7 +52,7 @@
 				 = 28-31
  m_rpm        	 = 32-35
 				 = 36-39
- min_ipm	     = 40-43
+ min_cpm	     = 40-43
 				 = 44-47
  min_spd      	 = 48
 				 = 49
@@ -219,7 +219,7 @@ void write_all_eeprom_memory() {
   eeprom_write(16, m_diarev);
   eeprom_write(24, max_ipm);
   eeprom_write(32, m_rpm);
-  eeprom_write(40, min_ipm);
+  eeprom_write(40, min_cpm);
   eeprom_write(48, min_spd);
   eeprom_write(50, m_min_pulse);
   eeprom_write(52, altio_dir);
@@ -273,7 +273,7 @@ void restore_eeprom_memory() {
   eeprom_read(16, m_diarev[0]);
   eeprom_read(24, max_ipm[0]);
   eeprom_read(32, m_rpm[0]);
-  eeprom_read(40, min_ipm[0]);
+  eeprom_read(40, min_cpm[0]);
   eeprom_read(48, min_spd[0]);
   eeprom_read(50, m_min_pulse[0]);
   eeprom_read(52, altio_dir);

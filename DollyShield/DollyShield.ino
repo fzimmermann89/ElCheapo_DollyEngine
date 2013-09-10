@@ -34,11 +34,16 @@ NOTES:
  1				0,0625us			4ms				16000
  8				0,5us				32ms			2000
  64				4us					262ms			250
- 256				16us				1s				62.5	~63 	wert=wert<<6-wert
+ 256			16us				1s				62.5	~63 	wert=wert<<6-wert
  1024			64us				4s				15.625  ~16		wert=wert<<4
  
  
  */
+
+#define EEPROM_TODO 123
+
+
+
 
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
@@ -138,82 +143,87 @@ unsigned int seq[] = {
   16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
 
 // menu strings
-prog_char menu_1[] PROGMEM = "Movements";
-prog_char menu_2[] PROGMEM = "Motor  Setup";
-prog_char menu_3[] PROGMEM = "Camera Setup";
-prog_char menu_4[] PROGMEM = "General Setup";
+prog_char menu_0[] PROGMEM = "Movements";
+prog_char menu_1[] PROGMEM = "Motor  Setup";
+prog_char menu_2[] PROGMEM = "Camera Setup";
+prog_char menu_3[] PROGMEM = "General Setup";
 
-prog_char manual_menu_1[] PROGMEM = "Manual Move";
-prog_char manual_menu_2[] PROGMEM = "Fast Simulat.";
+prog_char manual_menu_0[] PROGMEM = "Manual Move";
+prog_char manual_menu_1[] PROGMEM = "Fast Simulat.";
 
-prog_char axis_menu_1[] PROGMEM = "Ramp In Shots";
-prog_char axis_menu_2[] PROGMEM = "Ramp Out Shots";
-prog_char axis_menu_3[] PROGMEM = "Angel";
-prog_char axis_menu_4[] PROGMEM = "Lead In";
-prog_char axis_menu_5[] PROGMEM = "Lead Out";
-prog_char axis_menu_6[] PROGMEM = "Advanced";
+prog_char axis_menu_0[] PROGMEM = "Ramp In Shots";
+prog_char axis_menu_1[] PROGMEM = "Ramp Out Shots";
+prog_char axis_menu_2[] PROGMEM = "Angel";
+prog_char axis_menu_3[] PROGMEM = "Lead In";
+prog_char axis_menu_4[] PROGMEM = "Lead Out";
+prog_char axis_menu_5[] PROGMEM = "Advanced";
 
-prog_char axis_adv_menu_1[] PROGMEM = "Calibrate";
-prog_char axis_adv_menu_2[] PROGMEM = "max RPM";
-prog_char axis_adv_menu_3[] PROGMEM = "Dist per Rev";
-prog_char axis_adv_menu_4[] PROGMEM = "Min Cont. Speed";
-prog_char axis_adv_menu_5[] PROGMEM = "Pulse Length";
-prog_char axis_adv_menu_6[] PROGMEM = "Pulse Power";
-prog_char axis_adv_menu_7[] PROGMEM = "Cal. Spd Low";
-prog_char axis_adv_menu_8[] PROGMEM = "Cal. Spd Hi";
+prog_char axis_adv_menu_0[] PROGMEM = "Calibrate";
+prog_char axis_adv_menu_1[] PROGMEM = "max RPM";
+prog_char axis_adv_menu_2[] PROGMEM = "Dist per Rev";
+prog_char axis_adv_menu_3[] PROGMEM = "Min Cont. Speed";
+prog_char axis_adv_menu_4[] PROGMEM = "Pulse Length";
+prog_char axis_adv_menu_5[] PROGMEM = "Pulse Power";
+prog_char axis_adv_menu_6[] PROGMEM = "Cal. Spd Low";
+prog_char axis_adv_menu_7[] PROGMEM = "Cal. Spd Hi";
 
-prog_char camera_menu_1[] PROGMEM = "Interval sec";
-prog_char camera_menu_2[] PROGMEM = "Max Shots";
-prog_char camera_menu_3[] PROGMEM = "Exp. Time ms";
-prog_char camera_menu_4[] PROGMEM = "Shutter Type";
-prog_char camera_menu_5[] PROGMEM = "Bulb Mode";
-prog_char camera_menu_6[] PROGMEM = "Repeat";
-prog_char camera_menu_7[] PROGMEM = "Repeat Delay ms";
-prog_char camera_menu_8[] PROGMEM = "PreExp Delay ms";
-prog_char camera_menu_9[] PROGMEM = "PstExp Delay ms";
-prog_char camera_menu_10[] PROGMEM = "Focus Delay ms";
+prog_char camera_menu_0[] PROGMEM = "Interval sec";
+prog_char camera_menu_1[] PROGMEM = "Max Shots";
+prog_char camera_menu_2[] PROGMEM = "Exp. Time ms";
+prog_char camera_menu_3[] PROGMEM = "Shutter Type";
+prog_char camera_menu_4[] PROGMEM = "Bulb Mode";
+prog_char camera_menu_5[] PROGMEM = "Repeat";
+prog_char camera_menu_6[] PROGMEM = "Repeat Delay ms";
+prog_char camera_menu_7[] PROGMEM = "PreExp Delay ms";
+prog_char camera_menu_8[] PROGMEM = "PstExp Delay ms";
+prog_char camera_menu_9[] PROGMEM = "Focus Delay ms";
 
 
-prog_char set_menu_1[] PROGMEM = "Backlight";
-prog_char set_menu_2[] PROGMEM = "AutoDim (sec)";
-prog_char set_menu_3[] PROGMEM = "Blank LCD";
-prog_char set_menu_4[] PROGMEM = "I/O 1";
-prog_char set_menu_5[] PROGMEM = "I/O 2";
-prog_char set_menu_6[] PROGMEM = "In Delay ms";
-prog_char set_menu_7[] PROGMEM = "Out Delay ms";
-prog_char set_menu_8[] PROGMEM = "Out Pre/Pst Exp";
-prog_char set_menu_9[] PROGMEM = "USB Trigger";
-prog_char set_menu_10[] PROGMEM = "Invert Dir";
-prog_char set_menu_11[] PROGMEM = "Invert I/O";
-prog_char set_menu_12[] PROGMEM = "Reset Mem";
+prog_char set_menu_0[] PROGMEM = "Backlight";
+prog_char set_menu_1[] PROGMEM = "AutoDim (sec)";
+prog_char set_menu_2[] PROGMEM = "Blank LCD";
+prog_char set_menu_3[] PROGMEM = "I/O 1";
+prog_char set_menu_4[] PROGMEM = "I/O 2";
+prog_char set_menu_5[] PROGMEM = "In Delay ms";
+prog_char set_menu_6[] PROGMEM = "Out Delay ms";
+prog_char set_menu_7[] PROGMEM = "USB Trigger";
+prog_char set_menu_8[] PROGMEM = "Invert Dir";
+prog_char set_menu_9[] PROGMEM = "Invert I/O";
+prog_char set_menu_10[] PROGMEM = "Reset Mem";
 
 // menu organization
 
 PROGMEM const char *menu_str[]  = { 
-  menu_1, menu_2, menu_3, menu_4};
+  menu_0,menu_1, menu_2, menu_3};
 
 PROGMEM const char *man_str[]   = { 
-  manual_menu_1,  manual_menu_2 };
+  manual_menu_0,  manual_menu_1 };
 
 PROGMEM const char *axis0_str[] = { 
-  axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6};
+  axis_menu_0,axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5};
 
 PROGMEM const char *cam_str[]   = { 
-  camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9,camera_menu_10 };
+  camera_menu_0, camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
 
 PROGMEM const char *set_str[]   = { 
-  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_11,set_menu_12};
+  set_menu_0, set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_10};
 
 PROGMEM const char *axis_adv_str[]   = { 
-  axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7,axis_adv_menu_8 };
+  axis_adv_menu_0, axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7};
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 byte max_menu[7]  = {
-  3,1,6,9,11,8};
+  3,1,5,9,10,7};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
   0,0,0,0,0};
+
+
+//Special Return Codes used / Magic Values
+#define MENU_MANUAL 254
+#define MENU_CALIBRATION 253
+#define MENU_INPUT 255
 
 char lcd_buf[MAX_LCD_STR];
 
@@ -297,7 +307,7 @@ boolean ui_motor_display = true;
 //input type flags
 
  enum  __attribute__((packed)) INPUTS {
-     INPUT_FLOAT, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
+     INPUT_FLOAT, INPUT_LONG, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
  };
 
 
@@ -371,10 +381,10 @@ unsigned int focus_tap_tm = 0;
 // delay after exposing (mS)
 unsigned int post_delay_tm      = 100;
 
-#define SHUTTER_MODE_IR_NIKON        0
-#define SHUTTER_MODE_IR_CANON        1
-#define SHUTTER_MODE_CABLE_NO_FOCUS  2
-#define SHUTTER_MODE_CABLE_FOCUS     3
+
+ enum  __attribute__((packed)) SHUTTER_MODE {
+     SHUTTER_MODE_IR_NIKON=0, SHUTTER_MODE_IR_CANON=1, SHUTTER_MODE_CABLE_NO_FOCUS=2, SHUTTER_MODE_CABLE_FOCUS=3};
+
 // shutter mode (0:NikonIR/1:CanonIR/2:Shutter Cab/3:Shut+Foc Cab)
 byte shutter_mode   = 0;
 

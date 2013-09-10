@@ -240,7 +240,7 @@ void motor_update_dist(float rpm, float diarev ) {
   // set distance settings when rpm or diarev change
 
   max_ipm[0] = rpm * diarev;
-  min_spd[0] = 255 * ( min_ipm[0] / max_ipm[0] );
+  min_spd[0] = 255 * ( min_cpm[0] / max_ipm[0] );
   Serial.print("mins:");
   Serial.println(min_spd[0]);
   m_maxsms[0] = max_ipm[0] * 100;

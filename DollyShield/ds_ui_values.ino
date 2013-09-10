@@ -53,6 +53,9 @@ void get_value( byte menu, byte pos, boolean read_save ) {
   case 4:
     get_global_set(pos, read_save);
     break;
+  case 5:
+    get_m_adv_set(pos,read_save);
+    break;
 
   }
 
@@ -64,7 +67,7 @@ void get_value( byte menu, byte pos, boolean read_save ) {
 void move_val(boolean dir) {
 
   // increase or decrease input value
-
+//INPUT_FLOAT, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
   if( ui_type==INPUT_FLOAT) {
     // float type
 
@@ -90,13 +93,12 @@ void move_val(boolean dir) {
     }
 
   }
-  else if( ui_type_flags & B01111110 ) {
+  else if( ui_type==INPUT_ONOF ||ui_type==INPUT_LTRT ||ui_type==INPUT_CMPCT || ui_type==INPUT_CONTSMS ) {
     // any boolean type
 
     cur_inp_bool = ! cur_inp_bool;
   }
   else {
-
     // unsigned long type
     unsigned long mod = (1 * inp_val_mult);
     // long input
@@ -111,14 +113,16 @@ void move_val(boolean dir) {
         cur_inp_long -= mod;
       }
     } // end if dir not true
-
-    if( INPUT_ANGEL ) {
-      // ceiling on certain values
+   
+    // ceiling on certain values
+    if (ui_type==INPUT_ANGEL ) {
       cur_inp_long = cur_inp_long > 2 ? 2 : cur_inp_long;
     }
-    else if( INPUT_IO ) {
-      // ceiling for alt i/o types
+    else if (ui_type==INPUT_IO ) {
       cur_inp_long = cur_inp_long > 8 ? 8 : cur_inp_long;
+    }
+    else if (ui_type==INPUT_SHUTTER ) {
+      cur_inp_long = cur_inp_long > 3 ? 3 : cur_inp_long;
     }
 
   } // end else long type...
@@ -130,119 +134,118 @@ void move_val(boolean dir) {
 
 void get_m_axis_set( byte pos, boolean read_save) {
 
-  ui_type_flags = 0;
-  ui_type_flags2 = 0;
+  ui_type = INPUT_LONG;
 
   // set axis configurable values
 
   switch(pos) { 
   case 0:
-    // set ramp value
+    // set ramp in value
     if( read_save == true ) {
       motor_set_ramp(cur_inp_long);         
-      eeprom_write(61, m_ramp_set[0]);
+      eeprom_write(EEPROM_TODO, m_ramp_in);
     }
 
-    cur_inp_long = m_ramp_set[0];
+    cur_inp_long = m_ramp_in;
     break;
-
+  
   case 1:
-    // set lead-in value
+    // set ramp out value
     if( read_save == true ) {
-      m_lead_in[0] = cur_inp_long;
-      eeprom_write(229 , m_lead_in[0]);
+      motor_set_ramp(cur_inp_long);         
+      eeprom_write(EEPROM_TODO, m_ramp_out);
     }
 
-    cur_inp_long = m_lead_in[0];
+    cur_inp_long = m_ramp_out;
     break;
-
-  case 2:
-    // set lead-out value
-    if( read_save == true ) {
-      m_lead_out[0] = cur_inp_long;
-      eeprom_write(233, m_lead_out[0]);
-    }
-
-    cur_inp_long = m_lead_out[0];
-    break;
-
-  case 3:
-    ui_type_flags |= B10000000;
-    // set rpm
-    if( read_save == true ) {
-      m_rpm[0] = cur_inp_float;
-      motor_update_dist(m_rpm[0], m_diarev[0]);
-      eeprom_write(32, m_rpm[0]);
-    }
-
-    cur_inp_float = m_rpm[0];
-    break;
-
-
-  case 4: 
-
+  
+  case 2: 
     // doly angle (for calibration)
     ui_type_flags |= B00000001;
 
     if( read_save == true ) {
       m_angle[0] = cur_inp_long;
-      eeprom_write(215, m_angle[0]);
+      eeprom_write(EEPROM_TODO, m_angle[0]);
     }
 
     cur_inp_long = m_angle[0];
     break;
+   
+  case 3:
+    // set lead-in value
+    if( read_save == true ) {
+      m_lead_in = cur_inp_long;
+      eeprom_write(EEPROM_TODO , m_lead_in);
+    }
+
+    cur_inp_long = m_lead_in;
+    break;
+
+  case 4:
+    // set lead-out value
+    if( read_save == true ) {
+      m_lead_out = cur_inp_long;
+      eeprom_write(EEPROM_TODO, m_lead_out);
+    }
+
+    cur_inp_long = m_lead_out;
+    break;
 
 
-  case 5:
+
+  }
+
+}
+
+void get_m_adv_set( byte pos, boolean read_save){
+
+
+
+
+  case 0:
     // calibrate motor
     get_calibrate_select(0);
     break;
 
-  case 6:
-    // calibration constant
-
-    ui_type_flags |= B10000000;
-
+  case 1:
+    ui_type =INPUT_FLOAT;
+    // set rpm
     if( read_save == true ) {
-      m_cal_constant[0] = cur_inp_float;
-      eeprom_write(239, m_cal_constant[0]);
+      m_rpm = cur_inp_float;
+      motor_update_dist(m_rpm, m_diarev);
+      eeprom_write(EEPROM_TODO, m_rpm);
     }
 
-    cur_inp_float = m_cal_constant[0];
+    cur_inp_float = m_rpm;
     break;
-
-  case 7:
-    // min ipm setting
-    ui_type_flags |= B10000000;
-    if( read_save == true ) {
-
-      min_ipm[0] = cur_inp_float;
-      min_spd[0] = 255 * ( min_ipm[0] / max_ipm[0] );
-      
-      
-       Serial.print("mins:");
-  Serial.println(min_spd[0]);
-      
-      eeprom_write(40, min_ipm[0]);
-      eeprom_write(48 , min_spd[0]);
-    } 
-    cur_inp_float = min_ipm[0];
-
-    break;
-
-  case 8:
+    
+  case 2:
     // distance per revolution
-    ui_type_flags |= B10000000;
+    ui_type=INPUT_FLOAT;
 
     if( read_save == true ) {
-      m_diarev[0] = cur_inp_float;
-      motor_update_dist(m_rpm[0], m_diarev[0]);
-      eeprom_write(16, m_diarev[0]);
+      m_diarev = cur_inp_float;
+      motor_update_dist(m_rpm, m_diarev);
+      eeprom_write(EEPROM_TODO, m_diarev);
     }
-
-    cur_inp_float = m_diarev[0];
-
+    cur_inp_float = m_diarev;
     break;
+
+  case 3:
+    // min cont setting
+    ui_type=INPUT_FLOAT;
+    if( read_save == true ) {
+
+      min_cpm = cur_inp_float;
+      min_spd = 255 * ( min_cpm / max_ipm );
+   
+      eeprom_write(EEPROM_TODO, min_cpm);
+      eeprom_write(EEPROM_TODO , min_spd);
+    } 
+    cur_inp_float = min_cpm;
+    break;
+
+//TODO 4-7
 
   case 9:
     // motor min pulse
@@ -257,12 +260,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_long = m_min_pulse[0];
     break;
 
-
-  }
-
 }
-
-
 
 
 void get_m_cam_set( byte pos, boolean read_save ) {
@@ -274,36 +272,40 @@ void get_m_cam_set( byte pos, boolean read_save ) {
   switch(pos) {
   case 0:
     // interval timer
-    ui_type_flags |= B10000000;
+    ui_type=INPUT_FLOAT;
     ui_float_tenths = true;
 
     if( read_save == true ) { 
       cam_interval = cur_inp_float;
-      eeprom_write(67, cam_interval);
+      eeprom_write(EEPROM_TODO, cam_interval);
     }
     cur_inp_float = cam_interval;
     break;
 
   case 1:
     // max shots
+    ui_type=INPUT_LONG;
     if( read_save == true ) {
       cam_max = cur_inp_long;
-      eeprom_write(10, cam_max);
+      eeprom_write(EEPROM_TODO, cam_max);
     }
     cur_inp_long = cam_max;
     break;
 
   case 2:
+  
     // exposure time
+     ui_type=INPUT_LONG;
     if( read_save == true ) { 
       exp_tm = cur_inp_long;
-      eeprom_write(260, exp_tm);
+      eeprom_write(EEPROM_TODO, exp_tm);
     }
     cur_inp_long = exp_tm;
     break;    
 
   case 3:
     // post exp delay
+     ui_type=INPUT_LONG;
     if( read_save == true ) { 
       post_delay_tm = cur_inp_long;
       eeprom_write(5, post_delay_tm);
@@ -311,8 +313,9 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_long = post_delay_tm;
     break;
 
-  case 4:
-    // focus tap tm
+  case 9:
+    // focus delay / tap time
+     ui_type=INPUT_LONG;
     if( read_save == true ) {
       focus_tap_tm = cur_inp_long;
       eeprom_write(3, focus_tap_tm);
@@ -320,25 +323,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_long = focus_tap_tm;
     break;
 
-  case 5:
-    //ir remote
-    ui_type_flags |= B01000000;
-    if( read_save == true ) {
-      ir_remote= cur_inp_bool;
-      eeprom_write(267, ir_remote); //TODO
-    }
-    cur_inp_bool = ir_remote;
-    break;
-
-  case 6:
-    // focus w/ shutter
-    ui_type_flags |= B01000000;
-    if( read_save == true ) {
-      focus_shutter = cur_inp_bool;
-      eeprom_write(7, focus_shutter);
-    }
-    cur_inp_bool = focus_shutter;
-    break;
+ 
 
   case 7:
     // camera repeat value
@@ -464,16 +449,16 @@ void get_global_set(byte pos, boolean read_save) {
         if( ui_is_metric ) {
           // going to imperial
           m_diarev[0] = m_diarev[0] / 2.54;
-          min_ipm[0]  = min_ipm[0] / 2.54;
+          min_cpm[0]  = min_cpm[0] / 2.54;
           m_diarev[1] = m_diarev[1] / 2.54;
-          min_ipm[1]  = min_ipm[1] / 2.54;
+          min_cpm[1]  = min_cpm[1] / 2.54;
         }
         else {
           // going to metric
           m_diarev[0] *= 2.54;
-          min_ipm[0]  *= 2.54;
+          min_cpm[0]  *= 2.54;
           m_diarev[1] *= 2.54;
-          min_ipm[1]  *= 2.54;
+          min_cpm[1]  *= 2.54;
         }
         ui_is_metric = cur_inp_bool;
 
@@ -481,8 +466,8 @@ void get_global_set(byte pos, boolean read_save) {
         eeprom_write(219, ui_is_metric);
         eeprom_write(16, m_diarev[0]);
         eeprom_write(20, m_diarev[1]);  
-        eeprom_write(40, min_ipm[0]);
-        eeprom_write(44, min_ipm[1]);
+        eeprom_write(40, min_cpm[0]);
+        eeprom_write(44, min_cpm[1]);
 
         motor_update_dist(m_rpm[0], m_diarev[0]);
       }
