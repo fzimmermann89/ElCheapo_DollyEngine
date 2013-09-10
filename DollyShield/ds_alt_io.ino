@@ -161,7 +161,7 @@ void altio_connect(byte which, byte type) {
 void altio_flip_runstat() {
   // if currently running, stop; if not, start
 
-    if( run_status & B10000000 ) {
+    if(S_RUNNING) { // run_status & B10000000
     // running
     stop_executing();
   }
@@ -175,7 +175,7 @@ void alt_ext_trigger_engage(boolean predel) {
 
   unsigned long dly = predel == true ? ext_trig_pre_delay : ext_trig_pst_delay;
   // set flag
-  run_status |= B00001000;
+  S_EXT_TRIG_ENGAGED=true; //run_status |= B00001000;
 
   // we use the interrupt pins, 2&3
 
@@ -206,7 +206,7 @@ void alt_ext_trigger_disengage() {
   MsTimer2::stop();
 
   // clear flag...
-  run_status &= B11110111;
+  S_EXT_TRIG_ENGAGED=false;//run_status &= B11110111;
 }
 
 

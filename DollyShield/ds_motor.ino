@@ -34,15 +34,15 @@ void motor_speed_adjust(int val, boolean spd_floor ) {
   byte c_speed = 0;
   // val is expected to be between -255 and 255;
 
-  if( (int) m_speeds[0] + val >= 255 ) {
+  if( (int) m_speed+ val >= 255 ) {
     c_speed = 255;
   }
   else {
-    c_speed = (int) m_speeds[0] + val >= 0 ? m_speeds[0] + val : 0;
+    c_speed = (int) m_speed + val >= 0 ? m_speed + val : 0;
     // do we need to floor the value at the min speed setting? (man control)
     if( spd_floor ) 
     Serial.println("fl");
-      c_speed = c_speed < min_spd[0] ? min_spd[0] : c_speed;
+      c_speed = c_speed < min_spd ? min_spd : c_speed;
   }
 
   motor_set_speed(c_speed );   
@@ -56,21 +56,21 @@ void motor_control(boolean state) {
   if( ! state ) {
     // set motors as not running
 
-    unsigned int ths_spd = m_speeds[0];
+    unsigned int ths_spd = m_speed;
 
     motor_set_speed( 0 );
 
-    m_speeds[0] = ths_spd;
-    mcur_spds[0] = ths_spd;
+    m_speed = ths_spd;
+    mcur_spds = ths_spd;
 
-    run_status &= B11101111;
+   S_MOT_RUNNING=false;// run_status &= B11101111;
 
   }
   else {
     // set motors as running...
-    run_status |= B00010000;
-    if( mcur_spds[0] > 0 )
-      motor_set_speed(mcur_spds[0]);
+   S_MOT_RUNNING=true;// run_status |= B00010000;
+    if( mcur_spds > 0 )
+      motor_set_speed(mcur_spds);
   }
 }
 
@@ -83,7 +83,7 @@ delay(500);
   Serial.print("s:");
 Serial.println(m_speed);
 
-  m_speeds[0] = m_speed;
+  m_speed = m_speed;
   m_sms_tm[0] = 0;
 
 
@@ -107,7 +107,7 @@ Serial.println(m_speed);
 Serial.print("s_norm:");
 Serial.println(m_speed);
 
-    m_speeds[0] = m_speed;
+    m_speed = m_speed;
   }
 
 
@@ -125,7 +125,7 @@ Serial.println("smaller");
 
 
 
-  if( ! (run_status & B00010000)  ) {
+  if( ! (S_MOT_RUNNING)  ) { //run_status & B00010000
     // if disabled, do not move motor, but
     // instead adjust stored speed
     mcur_spds[0] = m_speed;
@@ -199,7 +199,7 @@ void motor_dir(byte dir ) {
     return;
 
   // get current speed for the motor
-  byte ths_speed = m_speeds[0];
+  byte ths_speed = m_speed;
 
 
 
@@ -334,14 +334,14 @@ void motor_set_ramp( byte ramp) {
 
   // calculate speed change per shot  
   if( ramp > 0 ) {
-    m_ramp_shift[0] = (float) m_speeds[0] / ramp;
+    m_ramp_shift[0] = (float) m_speed / ramp;
 
     // if there's less than one step per jump,
     // we need to skip shots between increases
     // so determine how many shots to skip
 
       if( m_ramp_shift[0] < 1 ) {
-      m_ramp_mod[0] = ramp / m_speeds[0];
+      m_ramp_mod[0] = ramp / m_speed;
       m_ramp_mod[0] = m_ramp_mod[0] < 2 ? 2 : m_ramp_mod[0];
       m_ramp_shift[0] = 1.0;
     }
@@ -465,7 +465,7 @@ void motor_execute_ramp_changes() {
   if( m_ramp_set[0] >= ( shots - m_lead_in[0]) ) {
     // if ramping less than once per shot 
     if( m_ramp_mod[0] > 0 && ( shots - m_lead_in[0] ) % m_ramp_mod[0] == 0 ) {
-      motor_set_speed(m_speeds[0] + 1);
+      motor_set_speed(m_speed + 1);
     }
     else if( m_ramp_mod[0] == 0 ) {  
       motor_set_speed((m_ramp_shift[0] * (shots - m_lead_in[0]) ) );
@@ -474,7 +474,7 @@ void motor_execute_ramp_changes() {
   else if( (cam_max - shots - m_lead_out[0]) <= m_ramp_set[0] ) {
     // ramping down, it seems
     if( m_ramp_mod[0] > 0 && (cam_max - shots - m_lead_out[0]) % m_ramp_mod[0] == 0 ) {
-      byte m_spd = m_speeds[0] > 0 ? m_speeds[0] - 1 : 0;
+      byte m_spd = m_speed > 0 ? m_speed - 1 : 0;
       motor_set_speed(m_spd);
     }
     else if( m_ramp_mod[0] == 0 ) {  

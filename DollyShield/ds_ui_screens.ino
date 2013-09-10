@@ -34,7 +34,7 @@ void prep_home_screen() {
   lcd.clear();
   lcd.setCursor(0,0);
 
-  if( run_status & B10000000 ) {
+  if(S_RUNNING) {//run_status & B10000000
     // in 'external intervalometer' mode, show 'ext' inseatd of 'on'
     if( external_interval & B11000000 || gb_enabled == true ) {
       lcd.print("Ext");
@@ -102,10 +102,10 @@ void show_home() {
 
   if( ui_motor_display ) {
     // display pct 
-    display_spd_ipm(m_speeds[0]);
+    display_spd_ipm(m_speed);
   }
   else {
-    display_spd_pct(m_speeds[0]);
+    display_spd_pct(m_speed);
   }
 
 
@@ -166,10 +166,10 @@ void show_manual() {
 
   if( ui_motor_display ) {
     // display ipm 
-    display_spd_ipm(m_speeds[0]);
+    display_spd_ipm(m_speed);
   }
   else {
-    display_spd_pct(m_speeds[0]);
+    display_spd_pct(m_speed);
   }
 
 
@@ -204,7 +204,7 @@ void execute_calibrate() {
   // in calibration  
   ui_cal_scrn_flags |= B10000000;
   // floating point input
-  ui_type_flags |= B10000000;
+  ui_type = INPUT_FLOAT;
 
   ui_float_tenths = false;
 

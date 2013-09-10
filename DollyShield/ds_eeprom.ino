@@ -36,7 +36,7 @@
  *******************************
  
  (position count starts at zero)
- 
+ //TODO
  flash enabled   = 0
  (was exp_tm)    = 1-2*
  focus_tap_tm    = 3-4
@@ -44,25 +44,25 @@
  focus_shutter   = 7
  = 8-9
  cam_max         = 10-11
- m_speeds[0]     = 12-13
- m_speeds[1]     = 14-15
- m_diarev[0]     = 16-19
- m_diarev[1]     = 20-23
- max_ipm[0]      = 24-27
- max_ipm[1]      = 28-31
- m_rpm[0]        = 32-35
- m_rpm[1]        = 36-39
- min_ipm[0]      = 40-43
- min_ipm[1]      = 44-47
- min_spd[0]      = 48
- min_spd[1]      = 49
+ m_speeds	     = 12-13
+				 = 14-15
+ m_diarev	     = 16-19
+				 = 20-23
+ max_ipm	     = 24-27
+				 = 28-31
+ m_rpm        	 = 32-35
+				 = 36-39
+ min_ipm	     = 40-43
+				 = 44-47
+ min_spd      	 = 48
+				 = 49
  m_min_pulse[0]  = 50
  m_min_pulse[0]  = 51
  altio_dir       = 52
- = 53
- = 54
- = 55 
- ui_motor_display = 56
+				 = 53
+				 = 54
+				 = 55 
+ ui_motor_display= 56
  motor_sl_mod    = 57
  lcd_dim_tm      = 58-59
  blank_lcd       = 60
@@ -209,26 +209,26 @@ void eeprom_read( int pos, float& val ) {
 }
 
 void write_all_eeprom_memory() {
-
+/*
   // write default values into eeprom
   eeprom_write(3, focus_tap_tm);
   eeprom_write(5, post_delay_tm);
   eeprom_write(7, focus_shutter);
 
   eeprom_write(10, cam_max);
-  eeprom_write(16, m_diarev[0]);
-  eeprom_write(24, max_ipm[0]);
-  eeprom_write(32, m_rpm[0]);
-  eeprom_write(40, min_ipm[0]);
-  eeprom_write(48, min_spd[0]);
-  eeprom_write(50, m_min_pulse[0]);
+  eeprom_write(16, m_diarev);
+  eeprom_write(24, max_ipm);
+  eeprom_write(32, m_rpm);
+  eeprom_write(40, min_ipm);
+  eeprom_write(48, min_spd);
+  eeprom_write(50, m_min_pulse);
   eeprom_write(52, altio_dir);
   eeprom_write(56, ui_motor_display);
   eeprom_write(57, motor_sl_mod);
   eeprom_write(58, lcd_dim_tm);
   eeprom_write(60, blank_lcd);
-  eeprom_write(61, m_ramp_set[0]);
-  eeprom_write(63, m_maxsms[0]);
+  eeprom_write(61, m_ramp_set);
+  eeprom_write(63, m_maxsms);
   eeprom_write(67, cam_interval);
 
   // handle m_cal_array in a sane manner
@@ -236,20 +236,15 @@ void write_all_eeprom_memory() {
   // 1 * 3 * 3 * 2 * 4 = 72
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(71, *p, 72);
+  eeprom_write(71, *p, (1*3*3*2*4));
 
   eeprom_write(217, input_type[0]);
   eeprom_write(218, input_type[1]);
   eeprom_write(219, ui_is_metric);
-  eeprom_write(229, m_lead_in[0]);
-
-  eeprom_write(233, m_lead_out[0]);
-
-  eeprom_write(237, motor_spd_cal[0]);
-
-  eeprom_write(239, m_cal_constant[0]);
-
-
+  eeprom_write(229, m_lead_in);
+  eeprom_write(233, m_lead_out);
+  eeprom_write(237, motor_spd_cal);
+  eeprom_write(239, m_cal_constant);
   eeprom_write(249, cam_repeat);
   eeprom_write(250, cam_rpt_dly);
 
@@ -260,13 +255,14 @@ void write_all_eeprom_memory() {
   eeprom_write(265, ui_invdir);
   eeprom_write(266, cur_bkl);
   eeprom_write(267, ir_remote);
+  */
 }
 
 
 // restore memory
 
 void restore_eeprom_memory() {
-
+/*
   // read eeprom stored values back into RAM
 
   eeprom_read(3, focus_tap_tm);
@@ -331,7 +327,7 @@ void restore_eeprom_memory() {
 
   // set lcd backlight to saved value
   ui_set_backlight(cur_bkl);
-
+*/
 }
 
 

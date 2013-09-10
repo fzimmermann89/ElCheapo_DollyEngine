@@ -1,0 +1,66 @@
+ enum  __attribute__((packed)) INPUTS {
+     INPUT_FLOAT, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
+ };
+
+
+
+ /* input type flags
+ 
+   B0 = input value is a float
+   B1 = input is a bool (on/off) value
+   B2 = input is a bool (up/dn) value
+   B3 = input is a bool (lt/rt) value
+   B4 = input is a bool (ipm/pct) value
+   B5 = input is a bool (pulse/sms) value
+   B6 = input is a bool (rotary/linear) value
+   B7 = input is list (0,45,90) value
+   
+ */
+ 
+
+
+
+  #define 3 EEPROM_POS_focus_tap_tm 3   //uint16
+  #define 5 EEPROM_POS_post_delay_tm 5  //
+  #define 7 EEPROM_POS_shutter_mode 7
+
+  #define 10 EEPROM_POS_cam_max
+  #define 16 EEPROM_POS_m_diarev
+  #define 24 EEPROM_POS_max_ipm
+  #define 32 EEPROM_POS_m_rpm
+  #define 40 EEPROM_POS_min_ipm
+  #define 48 EEPROM_POS_min_spd
+  #define 50 EEPROM_POS_m_min_pulse
+  #define 52 EEPROM_POS_altio_dir
+  #define 56 EEPROM_POS_ui_motor_display
+  #define 57 EEPROM_POS_motor_sl_mod
+  #define 58 EEPROM_POS_lcd_dim_tm
+  #define 60 EEPROM_POS_blank_lcd
+  #define 61 EEPROM_POS_m_ramp_set
+  #define 63 EEPROM_POS_m_maxsms
+  #define 67 EEPROM_POS_cam_interval
+
+  // handle m_cal_array in a sane manner
+  // float m_cal_array[1][3][3][2] 
+  // 1 * 3 * 3 * 2 * 4 = 72
+
+  byte* p = (byte*)(void*)&m_cal_array;
+  #define 71 EEPROM_POS_*p EEPROM_POS_(1*3*3*2*4)
+
+  #define 217 EEPROM_POS_input_type[0]
+  #define 218 EEPROM_POS_input_type[1]
+  #define 219 EEPROM_POS_ui_is_metric
+  #define 229 EEPROM_POS_m_lead_in
+  #define 233 EEPROM_POS_m_lead_out
+  #define 237 EEPROM_POS_motor_spd_cal
+  #define 239 EEPROM_POS_m_cal_constant
+  #define 249 EEPROM_POS_cam_repeat
+  #define 250 EEPROM_POS_cam_rpt_dly
+
+  #define 252 EEPROM_POS_ext_trig_pre_delay
+  #define 256 EEPROM_POS_ext_trig_pst_delay
+  #define 260 EEPROM_POS_exp_tm
+  #define 264 EEPROM_POS_gb_enabled
+  #define 265 EEPROM_POS_ui_invdir
+  #define 266 EEPROM_POS_cur_bkl
+  #define 267 EEPROM_POS_ir_remote

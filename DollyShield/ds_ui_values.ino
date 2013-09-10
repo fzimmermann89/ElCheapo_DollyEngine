@@ -38,7 +38,7 @@ void get_value( byte menu, byte pos, boolean read_save ) {
     return;
 
   //set as non-floating point/bool by default
-  ui_type_flags = 0;
+  ui_type = INPUT_ONOF;
 
   switch(menu) {
   case 1:
@@ -65,7 +65,7 @@ void move_val(boolean dir) {
 
   // increase or decrease input value
 
-  if( ui_type_flags & B10000000 ) {
+  if( ui_type==INPUT_FLOAT) {
     // float type
 
 
@@ -112,11 +112,11 @@ void move_val(boolean dir) {
       }
     } // end if dir not true
 
-    if( ui_type_flags & B00000001 ) {
+    if( INPUT_ANGEL ) {
       // ceiling on certain values
       cur_inp_long = cur_inp_long > 2 ? 2 : cur_inp_long;
     }
-    else if( ui_type_flags2 & B10000000 ) {
+    else if( INPUT_IO ) {
       // ceiling for alt i/o types
       cur_inp_long = cur_inp_long > 8 ? 8 : cur_inp_long;
     }
@@ -617,7 +617,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
     ui_type_flags |= B01000000;
 
-    cur_inp_bool = run_status >> 7;
+    cur_inp_bool =S_RUNNING ; //run_status >> 7
     break;
 
   case 2:
@@ -665,7 +665,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
       motor_set_ramp(m_ramp_set[0]);
     }
 
-    cur_inp_long = m_speeds[0];
+    cur_inp_long = m_speed;
 
     break; 
   }

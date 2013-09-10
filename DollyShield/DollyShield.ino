@@ -23,22 +23,22 @@
 
 /*
 NOTES:
--use timer2 for lcd and motor "soft pwm" to use any pin. in slow pulse mode use counter in isr. less overhead than timer1
--user timer1 in ctc mode with couter for general purpose ms-timer, instead of mstimer2 OR as compare..
--check bulb mode/stop camera using ir
-
-timer1 thoughts:
-16bit timer, dh bis 65535.
-bei 16mhz:
-prescaler		zeit pro tick		max zeit		ticks pro ms
-1				0,0625us			4ms				16000
-8				0,5us				32ms			2000
-64				4us					262ms			250
-256				16us				1s				62.5	~63 	wert=wert<<6-wert
-1024			64us				4s				15.625  ~16		wert=wert<<4
-
-
-*/
+ -use timer2 for lcd and motor "soft pwm" to use any pin. in slow pulse mode use counter in isr. less overhead than timer1
+ -user timer1 in ctc mode with couter for general purpose ms-timer, instead of mstimer2 OR as compare..
+ -check bulb mode/stop camera using ir
+ 
+ timer1 thoughts:
+ 16bit timer, dh bis 65535.
+ bei 16mhz:
+ prescaler		zeit pro tick		max zeit		ticks pro ms
+ 1				0,0625us			4ms				16000
+ 8				0,5us				32ms			2000
+ 64				4us					262ms			250
+ 256				16us				1s				62.5	~63 	wert=wert<<6-wert
+ 1024			64us				4s				15.625  ~16		wert=wert<<4
+ 
+ 
+ */
 
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
@@ -148,10 +148,10 @@ prog_char manual_menu_2[] PROGMEM = "Fast Simulat.";
 
 prog_char axis_menu_1[] PROGMEM = "Ramp In Shots";
 prog_char axis_menu_2[] PROGMEM = "Ramp Out Shots";
-prog_char axis_menu_4[] PROGMEM = "Angel";
-prog_char axis_menu_5[] PROGMEM = "Lead In";
-prog_char axis_menu_6[] PROGMEM = "Lead Out";
-prog_char axis_menu_7[] PROGMEM = "Advanced";
+prog_char axis_menu_3[] PROGMEM = "Angel";
+prog_char axis_menu_4[] PROGMEM = "Lead In";
+prog_char axis_menu_5[] PROGMEM = "Lead Out";
+prog_char axis_menu_6[] PROGMEM = "Advanced";
 
 prog_char axis_adv_menu_1[] PROGMEM = "Calibrate";
 prog_char axis_adv_menu_2[] PROGMEM = "max RPM";
@@ -165,7 +165,7 @@ prog_char axis_adv_menu_8[] PROGMEM = "Cal. Spd Hi";
 prog_char camera_menu_1[] PROGMEM = "Interval sec";
 prog_char camera_menu_2[] PROGMEM = "Max Shots";
 prog_char camera_menu_3[] PROGMEM = "Exp. Time ms";
-prog_char camera_menu_4[] PROGMEM = "Shutter Type;
+prog_char camera_menu_4[] PROGMEM = "Shutter Type";
 prog_char camera_menu_5[] PROGMEM = "Bulb Mode";
 prog_char camera_menu_6[] PROGMEM = "Repeat";
 prog_char camera_menu_7[] PROGMEM = "Repeat Delay ms";
@@ -181,10 +181,11 @@ prog_char set_menu_4[] PROGMEM = "I/O 1";
 prog_char set_menu_5[] PROGMEM = "I/O 2";
 prog_char set_menu_6[] PROGMEM = "In Delay ms";
 prog_char set_menu_7[] PROGMEM = "Out Delay ms";
-prog_char set_menu_8[] PROGMEM = "USB Trigger";
-prog_char set_menu_9[] PROGMEM = "Invert Dir";
-prog_char set_menu_10[] PROGMEM = "Invert I/O";
-prog_char set_menu_11[] PROGMEM = "Reset Mem";
+prog_char set_menu_8[] PROGMEM = "Out Pre/Pst Exp";
+prog_char set_menu_9[] PROGMEM = "USB Trigger";
+prog_char set_menu_10[] PROGMEM = "Invert Dir";
+prog_char set_menu_11[] PROGMEM = "Invert I/O";
+prog_char set_menu_12[] PROGMEM = "Reset Mem";
 
 // menu organization
 
@@ -195,20 +196,20 @@ PROGMEM const char *man_str[]   = {
   manual_menu_1,  manual_menu_2 };
 
 PROGMEM const char *axis0_str[] = { 
-  axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6, axis_menu_7};
-    
+  axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6};
+
 PROGMEM const char *cam_str[]   = { 
   camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9,camera_menu_10 };
-  
-PROGMEM const char *set_str[]   = { 
-  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_11};
 
-  PROGMEM const char *axis_adv_str[]   = { 
+PROGMEM const char *set_str[]   = { 
+  set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_11,set_menu_12};
+
+PROGMEM const char *axis_adv_str[]   = { 
   axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7,axis_adv_menu_8 };
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 byte max_menu[7]  = {
-  3,1,6,9,10,8};
+  3,1,6,9,11,8};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -232,7 +233,6 @@ boolean cur_inp_bool        = false;
 
 // which input are we on, if on
 // the main screen.
-
 byte main_scr_input         = 0;
 
 // last read button (analog) value
@@ -241,15 +241,14 @@ int last_but_rd = 1013;
 // flags for each button
 // use indivial bits to indicate
 // whether a given button was pressed.
-
 byte button_pressed = 0;
 
 // input value multiplier
-
 unsigned int inp_val_mult = 1;
 
 // how long has a button been held for?
 unsigned long hold_but_tm = 0;
+
 // when was ui last updated on home scr?
 unsigned long ui_update_tm = 0;
 
@@ -282,7 +281,6 @@ boolean ui_float_tenths = false;
  B7 = in calibrate mode
  
  */
-
 byte ui_ctrl_flags = B00000000;
 
 /* calibration screen flags
@@ -291,40 +289,41 @@ byte ui_ctrl_flags = B00000000;
  B1 = Done Calibrating
  
  */
-
 byte ui_cal_scrn_flags = 0;
 
 // whether to show cpm (true) or % (false)
-
 boolean ui_motor_display = true;
 
 //input type flags
-#define INPUT_FLOAT 1
-#define INPUT_ONOFF 2
-#define INPUT_SHUTTER 3
-#define INPUT_LTRT 4
-#define INPUT_CMPCT 5
-#define INPUT_CONTSMS 6
-#define INPUT_ROTLIN 7		//TODO //WHY?
-#define INPUT_ANGEL 8
-#define INPUT_IO 9		//TODO //disable start stop
-#define INPUT_FORCEDMETRIC 10	//TODO 
-byte ui_type_flags = 0;
+
+ enum  __attribute__((packed)) INPUTS {
+     INPUT_FLOAT, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
+ };
 
 
+byte ui_type = 0;
 
 // run status flags
- typedef struct
+typedef struct
 {
-  unsigned char bit0:1;
-  unsigned char bit1:1;
-  unsigned char bit2:1;
-  unsigned char bit3:1;
-  unsigned char bit4:1;
-  unsigned char bit5:1;
-  unsigned char bit6:1;
-  unsigned char bit7:1;
-}io_reg;
+unsigned char bit0:
+  1;
+unsigned char bit1:
+  1;
+unsigned char bit2:
+  1;
+unsigned char bit3:
+  1;
+unsigned char bit4:
+  1;
+unsigned char bit5:
+  1;
+unsigned char bit6:
+  1;
+unsigned char bit7:
+  1;
+}
+io_reg;
 
 #define S_RUNNING  		 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
 #define S_CAM_ENGAGED   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
@@ -344,10 +343,9 @@ byte ui_type_flags = 0;
  b5
  b6
  b7
-*/
+ */
 
 // external intervalometer
- 
 #define EXT_INTV_1 (1 << 0) //B0 = I/O 1 is external intervalometer
 #define EXT_INTV_2 (1 << 1) //B1 = I/O 2 is external intervalometer
 #define EXT_INT_OK (1 << 2) //B2 = interval OK to fire
@@ -366,18 +364,29 @@ unsigned long ext_trig_pst_delay = 0;
 
 // camera exposure time
 unsigned long exp_tm      = 100;
+
 // tap focus before exposing
 unsigned int focus_tap_tm = 0;
+
 // delay after exposing (mS)
 unsigned int post_delay_tm      = 100;
+
+#define SHUTTER_MODE_IR_NIKON        0
+#define SHUTTER_MODE_IR_CANON        1
+#define SHUTTER_MODE_CABLE_NO_FOCUS  2
+#define SHUTTER_MODE_CABLE_FOCUS     3
 // shutter mode (0:NikonIR/1:CanonIR/2:Shutter Cab/3:Shut+Foc Cab)
 byte shutter_mode   = 0;
+
 // intervalometer time (seconds)
 float cam_interval = 1.0;
+
 // max shots
 unsigned int cam_max  = 0;
+
 // camera repeat shots
 byte cam_repeat = 0;
+
 // delay between camera repeat cycles
 unsigned int cam_rpt_dly = 250;
 
@@ -389,6 +398,7 @@ unsigned long cam_last_tm = 0;
 
 // set speed for the current motor
 unsigned int m_speed = 0;
+
 // currently set speed (for altering motor speed)
 unsigned int mcur_spds=0;
 
@@ -397,70 +407,73 @@ byte m_wasdir = 0;
 
 // distance (i) per revolution
 float m_diarev =  3.53;
+
 // motor RPMs
 float m_rpm    = 9;
+
 // calculated max cpm
-float max_cpm =  m_diarev * m_rpm};
+float max_cpm =  m_diarev * m_rpm;
+
 // user-configurable min cpm
 float min_cpm = 20.0;
+
 // minimumspeed (min cpm->255 scale value) //TODO WHY?
-byte min_spd =  (min_cpm / max_cpm) * 255};
+byte min_spd =  (min_cpm / max_cpm) * 255;
+
 // minimum pulse cycles per motor
 byte m_min_pulse=   20;
-// calibration points
 
+// calibration points
 byte motor_spd_cal[2] = {
   2,10};
-
 
 // maximum sms distance //TODO
 unsigned int m_maxsms =  max_cpm * 100;
 
 /*
 // for timer1 pulsing mode control
-boolean timer_used = false;
-volatile  bool timer_engaged      = false;
-volatile bool motor_engaged      = false;
-volatile byte motor_ran = 0;
-*/
+ boolean timer_used = false;
+ volatile  bool timer_engaged      = false;
+ volatile bool motor_engaged      = false;
+ volatile byte motor_ran = 0;
+ */
 //TODO
 
 // motor calibration
-
 float m_cal_constant = 0.69;
-
 float m_cal_array[3][3][2] = { //TODO sinnvolle Werte voreintragen. 
-   
+
+  {
     {
-      {
-        0.61914329,0.61914329                  }
-      ,{
-        1.0,1.0                  }
-      ,{
-        2.01133251,2.11453032                  }
-    }
-    ,
-    {
-      {
-        0.61914329,0.61914329                  }
-      ,{
-        1.0,1.0                  }
-      ,{
-        2.01133251,2.11453032                  }
-    }
-    ,
-    {
-      {
-        0.61914329,0.61914329                  }
-      ,{
-        1.0,1.0                  }
-      ,{
-        2.01133251,2.11453032                  }
-    } 
+      0.61914329,0.61914329                      }
+    ,{
+      1.0,1.0                      }
+    ,{
+      2.01133251,2.11453032                      }
   }
+  ,
+  {
+    {
+      0.61914329,0.61914329                      }
+    ,{
+      1.0,1.0                      }
+    ,{
+      2.01133251,2.11453032                      }
+  }
+  ,
+  {
+    {
+      0.61914329,0.61914329                      }
+    ,{
+      1.0,1.0                      }
+    ,{
+      2.01133251,2.11453032                      }
+  } 
+}
 ;
 //aktueller Winkel-wert in m_cal_array für den kalibriert wird //warum global? //TODO
 byte m_cur_cal = 0;     
+
 byte m_angle = 0;
 
 boolean m_cal_done = false;
@@ -483,14 +496,13 @@ unsigned int m_sms_tm = 0;
 unsigned long shots = 0;
 
 // function types for alt inputs...
-
 /* 
  0 = disabled
  1 = start
  2 = stop
  */
-
-byte input_type[2]            = {0,0};
+byte input_type[2]            = {
+  0,0};
 unsigned long input_trig_last = 0;
 
 // usb trigger flag
@@ -501,9 +513,6 @@ byte altio_dir = FALLING;
 
 // initialize LCD object
 LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
-
-
-
 
 void setup() { 
 
@@ -541,19 +550,17 @@ void setup() {
   show_home();
 
   //Output Calibration Data
- for( byte i = 0; i <= 2; i++) {
-   Serial.print(i, DEC);
-   Serial.print(":");
-   for ( byte x = 0; x < 2; x++ ) {
-   Serial.print(m_cal_array[0][i][x], 8);
-   Serial.print(":");
-   }
-   Serial.println("");
-   } 
+  for( byte i = 0; i <= 2; i++) {
+    Serial.print(i, DEC);
+    Serial.print(":");
+    for ( byte x = 0; x < 2; x++ ) {
+      Serial.print(m_cal_array[0][i][x], 8);
+      Serial.print(":");
+    }
+    Serial.println("");
+  } 
 
 }
-
-
 
 void loop() {
 
@@ -564,7 +571,7 @@ void loop() {
     external_interval |= B00100000;
   }
 
-  if( run_status & B10000000 ) {
+  if( S_RUNNING ) { //run_status & B10000000
     // program is running
     main_loop_handler();
   } // end if running
@@ -576,9 +583,6 @@ void loop() {
   check_user_interface();    
 
 }
-
-
-
 
 void main_loop_handler() {
 
@@ -592,7 +596,7 @@ void main_loop_handler() {
   static byte    cam_repeated   = 0;
 
 
-  if( cam_max > 0 && shots >= cam_max && ( ok_stop || (m_speeds[0] <= 0.0 ) || motor_sl_mod ) ) {
+  if( cam_max > 0 && shots >= cam_max && ( ok_stop || (m_speed <= 0.0 ) || motor_sl_mod ) ) {
 
     // stop program if max shots exceeded, and complete cycle completed
     // if in interleave, ignore complete cycle if in pulse
@@ -606,8 +610,7 @@ void main_loop_handler() {
     MsTimer2::start();
     pre_focus_clear = 3;
   }
-  else  if( motor_sl_mod &&
-    (( m_speeds > 0  < min_spd ) ) ) {
+  else  if ( (m_speed > 0) && (m_speed < min_spd ) )  {
 
     // if pulse mode is on and
     //motor needs to be pulsed...
@@ -625,7 +628,7 @@ void main_loop_handler() {
   // camera
 
   if( motor_engaged ) {      
-       if ( motor_ran > 0 ) {
+    if ( motor_ran > 0 ) {
       // all of our motors have run one
       // cycle, let the camera fire
       motor_engaged = false;
@@ -634,17 +637,17 @@ void main_loop_handler() {
     }
 
   } // end if motor_engaged
-  else if( run_status & B01001000 || pre_focus_clear == 3 ) {
+  else if( S_CAM_ENGAGED || pre_focus_clear == 3 ) { //run_status & B01001000
     // currently firing the camera, focus, or triggering an external
     // control line
 
     // do nothing
     ;
   }
-  else if( run_status & B00100000 ) {
+  else if(S_CAM_CYCLE_COMPLETE) { //run_status & B00100000
     // camera cycle completed
     // clear exposure cycle complete flag
-    run_status &= B11011111;
+   S_CAM_CYCLE_COMPLETE=false;// run_status &= B11011111;
     if( camera_fired == true ) {
       // the shot just fired
       camera_fired = false;
@@ -661,7 +664,7 @@ void main_loop_handler() {
         // we block anything from happening while in the
         // post-exposure cycle by pretending to be an
         // exposure
-        run_status |= B01000000;
+      S_CAM_ENGAGED=true;  //run_status |= B01000000;
 
         MsTimer2::set(post_delay_tm, camera_clear);
         MsTimer2::start();
@@ -750,7 +753,7 @@ void main_loop_handler() {
 
       // make sure we handle pre-focus tap timing
 
-      if( ( pre_focus_clear == 4 || focus_tap_tm == 0 || (cam_repeat > 0 && cam_repeated > 0) ) && !(run_status & B00001000) ) {
+      if( ( pre_focus_clear == 4 || focus_tap_tm == 0 || (cam_repeat > 0 && cam_repeated > 0) ) && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
 
         // we always set the start mark at the time of the
         // first exposure in a repeat cycle (or the time of exp
@@ -780,7 +783,7 @@ void main_loop_handler() {
         pre_focus_clear = 0;
 
       }
-      else if( focus_tap_tm > 0 && pre_focus_clear == 0 && !(run_status & B00001000) ) {
+      else if( focus_tap_tm > 0 && pre_focus_clear == 0 && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
         // pre-focus tap is set, bring focus line high
         digitalWriteFast(FOCUS_PIN, HIGH);
         MsTimer2::set(focus_tap_tm, stop_cam_focus);
@@ -791,7 +794,6 @@ void main_loop_handler() {
   } // end if(do_fire...
 }
 
-
 void start_executing() {
   // starts program execution
 
@@ -800,9 +802,11 @@ void start_executing() {
 
   external_interval &= B11011111;
 
-  run_status |= B10010000;
-
-  // turn on motors
+ 
+S_RUNNING=true; //run_status |= B10010000;
+S_MOT_RUNNING=true; //run_status |= B10010000;
+ 
+ // turn on motors
   motor_control(true);
 
 
@@ -821,7 +825,6 @@ void stop_executing() {
   motor_stop_all();
 }
 
-
 boolean gbtl_trigger() {
 
   if( Serial.available() > 0 ) {
@@ -837,7 +840,4 @@ boolean gbtl_trigger() {
 
   return false;
 }
-
-
-
 

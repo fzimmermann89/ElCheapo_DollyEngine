@@ -121,7 +121,7 @@ void check_user_interface() {
 
   // make sure to turn off motor if in manual
   // control and no button is held
-  if( ui_ctrl_flags & B00000100 && held == false && run_status & B00010000 )
+  if( ui_ctrl_flags & B00000100 && held == false &&  S_MOT_RUNNING)//run_status & B00010000
     motor_control( false);
 
 
@@ -552,7 +552,7 @@ void ui_button_rt( boolean held ) {
     if( held == true ) {
       // change motor direction
       motor_dir(false);
-      if( ! (run_status & B00010000) )
+      if( ! (S_MOT_RUNNING) )//run_status & B00010000
         motor_control(true);
     }
     show_manual();
@@ -579,8 +579,7 @@ void ui_button_lt(boolean held) {
       // change motor direction
       motor_dir(true);
       // get motor moving (if not already)
-      if( ! (run_status & B00010000) )
-        motor_control(true);
+      if (!(S_MOT_RUNNING)) motor_control(true); //run_status & B00010000 
       show_manual();
     }
     return;
@@ -773,7 +772,10 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
       // display the correct current
       // temporary input value
 
-      if( ui_type_flags2 & B10000000 ) {
+   
+
+      switch(ui_type) {
+	     case INPUT_IO:
         // for alt i/o inputs
 
         if( cur_inp_long == 0 ) {
@@ -803,19 +805,16 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
         else {
           lcd.print("Change Dir");
         }
-        return;
-      }
-      else if( ui_type_flags2 & B01000000 ) {
+        break;
+      
+      case INPUT_SPEED: 
         // cal speed inputs in gobal set menu
         display_spd_ipm(cur_inp_long);
-        return;
-      }
-
-      switch(ui_type_flags) {
-      case B10000000:
+        break;
+      case INPUT_FLOAT:
         lcd.print(cur_inp_float, (byte) 2);
         break;
-      case B01000000:
+      case INPUT_ONOF:
         if (cur_inp_bool == true) {
           lcd.print("On");
         } 
@@ -823,15 +822,7 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
           lcd.print("Off");
         }
         break;
-      case B00100000:
-        if (cur_inp_bool == true) {
-          lcd.print("Up");
-        } 
-        else {
-          lcd.print("Dn");
-        }
-        break;
-      case B00010000:
+      case INPUT_LTRT:
         if (cur_inp_bool == true) {
           lcd.print("Rt");
         } 
@@ -839,31 +830,23 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
           lcd.print("Lt");
         }
         break;
-      case B00001000:
+      case INPUT_CMPCT:
         if (cur_inp_bool == true) {
-          lcd.print("IPM");
+          lcd.print("CPM");
         } 
         else {
           lcd.print("PCT");
         }
         break;
-      case B00000100:
+      case INPUT_CONTSMS:
         if (cur_inp_bool == true) {
-          lcd.print("Pulse");
+          lcd.print("Cont.");
         } 
         else {
-          lcd.print("Interleave");
+          lcd.print("S-M-S");
         }
         break;
-      case B00000010:
-        if (cur_inp_bool == true) {
-          lcd.print("Rotary");
-        } 
-        else {
-          lcd.print("Linear");
-        }
-        break;
-      case B00000001:
+      case INPUT_ANGEL:
         if( cur_inp_long == 0 ) {
           lcd.print(0,DEC);
         }

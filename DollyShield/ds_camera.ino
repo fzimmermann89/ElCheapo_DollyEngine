@@ -44,7 +44,7 @@ void fire_camera(unsigned long exp_tm) {
   // determine if focus pin should be brought high
   // w. the shutter pin (for some nikons, etc.)
   if (!ir_remote){   
-    if( focus_shutter )
+    if( focus_shutter ) //TODO
       digitalWriteFast(FOCUS_PIN, HIGH);
 
     digitalWriteFast(CAMERA_PIN, HIGH);
@@ -98,10 +98,10 @@ void stop_camera() {
   // than the max possible camera exposure timing
 
   // update camera currently engaged
-  run_status &= B10111111;
+ S_CAM_ENGAGED=false;// run_status &= B10111111;
 
   // update camera cycle complete
-  run_status |= B00100000;
+ S_CAM_CYCLE_COMPLETE=true; //run_status |= B00100000;
 
 }
 
@@ -115,10 +115,10 @@ void camera_clear() {
   MsTimer2::stop(); // turn off timer
 
   // update camera currently engaged
-  run_status &= B10111111;
+ S_CAM_ENGAGED=false; //run_status &= B10111111;
 
   // update camera cycle complete
-  run_status |= B00100000;
+S_CAM_CYCLE_COMPLETE=true;  //run_status |= B00100000;
 
 }  
 
