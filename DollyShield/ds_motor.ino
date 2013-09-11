@@ -1,8 +1,10 @@
 /* 
  
- "DollyShield" MX2
- 
- (c) 2010 C.A. Church / Dynamic Perception LLC
+ MX2 El Cheapo - Motor control functions
+ modified Version of Dynamic Perception LLC's DollyShield
+ (c) 2010-2011 C.A. Church / Dynamic Perception LLC ds_motor.ino
+ (c) FFZ
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,9 +19,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
- 
  */
-
 /*
 
  ========================================
@@ -245,9 +245,9 @@ void motor_update_dist(float rpm, float diarev ) {
   Serial.println(min_spd[0]);
   m_maxsms[0] = max_ipm[0] * 100;
 
-  eeprom_write(24, max_ipm[0]);
-  eeprom_write(48, min_spd[0]);
-  eeprom_write(63, m_maxsms[0]);
+  eeprom_write(EEPROM_TODO, max_ipm[0]);
+  eeprom_write(EEPROM_TODO, min_spd[0]);
+  eeprom_write(EEPROM_TODO, m_maxsms[0]);
 
 }
 

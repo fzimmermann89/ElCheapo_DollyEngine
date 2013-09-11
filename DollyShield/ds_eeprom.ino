@@ -1,8 +1,10 @@
 /* 
  
- "DollyShield" MX2
- 
- (c) 2010 C.A. Church / Dynamic Perception LLC
+ MX2 El Cheapo -  EEPROM Functions
+ modified Version of Dynamic Perception LLC's DollyShield
+ (c) 2010-2011 C.A. Church / Dynamic Perception LLC ds_eeprom.ino
+ (c) FFZ
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,9 +19,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
- 
  */
-
 /*
 
  ========================================
@@ -134,7 +134,7 @@ void eeprom_saved( boolean saved ) {
 // flash and stack abuse 
 
 
-void eeprom_write( int pos, byte& val, byte len ) {
+void eeprom_write(EEPROM_TODO, byte& val, byte len ) {
   byte* p = (byte*)(void*)&val;
   for( byte i = 0; i < len; i++ )
     EEPROM.write(pos++, *p++);    
@@ -144,22 +144,22 @@ void eeprom_write( int pos, byte& val, byte len ) {
 
 }
 
-void eeprom_write( int pos, unsigned int& val ) {
+void eeprom_write(EEPROM_TODO, unsigned int& val ) {
   byte* p = (byte*)(void*)&val;   
-  eeprom_write(pos, *p, sizeof(int));  
+  eeprom_write(EEPROM_TODO, *p, sizeof(int));  
 }
 
-void eeprom_write( int pos, unsigned long& val ) {
+void eeprom_write(EEPROM_TODO, unsigned long& val ) {
   byte* p = (byte*)(void*)&val;   
-  eeprom_write(pos, *p, sizeof(long));    
+  eeprom_write(EEPROM_TODO, *p, sizeof(long));    
 }
 
-void eeprom_write( int pos, float& val ) {
+void eeprom_write(EEPROM_TODO, float& val ) {
   byte* p = (byte*)(void*)&val;   
-  eeprom_write(pos, *p, sizeof(float));    
+  eeprom_write(EEPROM_TODO, *p, sizeof(float));    
 }
 
-void eeprom_write( int pos, byte& val ) {  
+void eeprom_write(EEPROM_TODO, byte& val ) {  
   EEPROM.write(pos, val);
   // indicate that memory has been saved
   eeprom_saved(true);
@@ -211,50 +211,50 @@ void eeprom_read( int pos, float& val ) {
 void write_all_eeprom_memory() {
 /*
   // write default values into eeprom
-  eeprom_write(3, focus_tap_tm);
-  eeprom_write(5, post_delay_tm);
-  eeprom_write(7, focus_shutter);
+  eeprom_write(EEPROM_TODO, focus_tap_tm);
+  eeprom_write(EEPROM_TODO, post_delay_tm);
+  eeprom_write(EEPROM_TODO, focus_shutter);
 
-  eeprom_write(10, cam_max);
-  eeprom_write(16, m_diarev);
-  eeprom_write(24, max_ipm);
-  eeprom_write(32, m_rpm);
-  eeprom_write(40, min_cpm);
-  eeprom_write(48, min_spd);
-  eeprom_write(50, m_min_pulse);
-  eeprom_write(52, altio_dir);
-  eeprom_write(56, ui_motor_display);
-  eeprom_write(57, motor_sl_mod);
-  eeprom_write(58, lcd_dim_tm);
-  eeprom_write(60, blank_lcd);
-  eeprom_write(61, m_ramp_set);
-  eeprom_write(63, m_maxsms);
-  eeprom_write(67, cam_interval);
+  eeprom_write(EEPROM_TODO, cam_max);
+  eeprom_write(EEPROM_TODO, m_diarev);
+  eeprom_write(EEPROM_TODO, max_ipm);
+  eeprom_write(EEPROM_TODO, m_rpm);
+  eeprom_write(EEPROM_TODO, min_cpm);
+  eeprom_write(EEPROM_TODO, min_spd);
+  eeprom_write(EEPROM_TODO, m_min_pulse);
+  eeprom_write(EEPROM_TODO, altio_dir);
+  eeprom_write(EEPROM_TODO, ui_motor_display);
+  eeprom_write(EEPROM_TODO, motor_sl_mod);
+  eeprom_write(EEPROM_TODO, lcd_dim_tm);
+  eeprom_write(EEPROM_TODO, blank_lcd);
+  eeprom_write(EEPROM_TODO, m_ramp_set);
+  eeprom_write(EEPROM_TODO, m_maxsms);
+  eeprom_write(EEPROM_TODO, cam_interval);
 
   // handle m_cal_array in a sane manner
   // float m_cal_array[1][3][3][2] 
   // 1 * 3 * 3 * 2 * 4 = 72
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(71, *p, (1*3*3*2*4));
+  eeprom_write(EEPROM_TODO, *p, (1*3*3*2*4));
 
-  eeprom_write(217, input_type[0]);
-  eeprom_write(218, input_type[1]);
-  eeprom_write(219, ui_is_metric);
-  eeprom_write(229, m_lead_in);
-  eeprom_write(233, m_lead_out);
-  eeprom_write(237, motor_spd_cal);
-  eeprom_write(239, m_cal_constant);
-  eeprom_write(249, cam_repeat);
-  eeprom_write(250, cam_rpt_dly);
+  eeprom_write(EEPROM_TODO, input_type[0]);
+  eeprom_write(EEPROM_TODO, input_type[1]);
+  eeprom_write(EEPROM_TODO, ui_is_metric);
+  eeprom_write(EEPROM_TODO, m_lead_in);
+  eeprom_write(EEPROM_TODO, m_lead_out);
+  eeprom_write(EEPROM_TODO, motor_spd_cal);
+  eeprom_write(EEPROM_TODO, m_cal_constant);
+  eeprom_write(EEPROM_TODO, cam_repeat);
+  eeprom_write(EEPROM_TODO, cam_rpt_dly);
 
-  eeprom_write(252, ext_trig_pre_delay);
-  eeprom_write(256, ext_trig_pst_delay);
-  eeprom_write(260, exp_tm);
-  eeprom_write(264, gb_enabled);
-  eeprom_write(265, ui_invdir);
-  eeprom_write(266, cur_bkl);
-  eeprom_write(267, ir_remote);
+  eeprom_write(EEPROM_TODO, ext_trig_pre_delay);
+  eeprom_write(EEPROM_TODO, ext_trig_pst_delay);
+  eeprom_write(EEPROM_TODO, exp_tm);
+  eeprom_write(EEPROM_TODO, gb_enabled);
+  eeprom_write(EEPROM_TODO, ui_invdir);
+  eeprom_write(EEPROM_TODO, cur_bkl);
+  eeprom_write(EEPROM_TODO, ir_remote);
   */
 }
 
@@ -343,9 +343,9 @@ void eeprom_versioning() {
   // wipe out any saved eeprom settings
   if( eeprom_ver != FIRMWARE_VERSION ) {
     eeprom_ver = FIRMWARE_VERSION;
-    eeprom_write(247, eeprom_ver);
+    eeprom_write(EEPROM_TODO, eeprom_ver);
     // order of operations is important, this must line
-    // must happen after the eeprom_write function call, as
+    // must happen after the eeprom_write(EEPROM_TODO, as
     // it automatically updates the eeprom saved status
     eeprom_saved(false);
   }  

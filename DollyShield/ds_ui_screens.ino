@@ -1,8 +1,10 @@
 /* 
  
- "DollyShield" MX2
- 
- (c) 2010 C.A. Church / Dynamic Perception LLC
+ MX2 El Cheapo - UI Screens
+ modified Version of Dynamic Perception LLC's DollyShield ds_ui_screens.ino
+ (c) 2010-2011 C.A. Church / Dynamic Perception LLC
+ (c) FFZ
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,9 +19,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
- 
  */
-
 
 /*
 
@@ -290,7 +290,7 @@ Serial.println(completed);
   // 2 * 3 * 3 * 2 * 4 = 144
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(71, *p, 144);
+  eeprom_write(EEPROM_TODO, *p, 144);
 
 }
 

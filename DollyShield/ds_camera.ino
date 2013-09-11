@@ -1,17 +1,10 @@
-/*
-
+/* 
  
- OpenMoco
- - Time-lapse Core Engine
- 
- - Modified for DollyShield (MX2) 6/2010 changes by cchurch/dynamicperception
- 
- 
- See www.openmoco.org for more information
- 
- 
- 
- (c) 2008-2010 C.A. Church
+ MX2 El Cheapo - Camera Control Functions
+ modified Version of Dynamic Perception LLC's DollyShield ds_camera.ino
+ (c) 2010-2011 C.A. Church / Dynamic Perception LLC
+ (c) FFZ
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,9 +19,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
- 
  */
-
 
 /*
 
@@ -58,7 +49,8 @@ void fire_camera(unsigned long exp_tm) {
 
   // update camera currently enaged
   // (turn on bit)
-  run_status |= B01000000;
+  S_CAM_ENGAGED=true;
+  //run_status |= B01000000;
 
   return;
 }
@@ -150,7 +142,7 @@ float calc_total_cam_tm() {
   float total = (float) ( exp_tm + pf_tm + post_delay_tm  );
 
   if( ! motor_sl_mod )
-    total += m_sms_tm[0] + m_sms_tm[1];
+    total += m_sms_tm[0];
 
   total = total / 1000.00;
 

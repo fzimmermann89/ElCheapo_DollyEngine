@@ -1,7 +1,7 @@
 /* 
  
- MX2 El Cheapo
- modified Version of Dynamic Perception LLC's DollyShield
+ MX2 El Cheapo - IO Functions and Interrupts
+ modified Version of Dynamic Perception LLC's DollyShield ds_alt_io.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
  For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse

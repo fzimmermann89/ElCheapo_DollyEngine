@@ -1,8 +1,10 @@
 /* 
  
- "DollyShield" MX2
- 
- (c) 2010 C.A. Church / Dynamic Perception LLC
+ MX2 El Cheapo - UI Values
+ modified Version of Dynamic Perception LLC's DollyShield ds_ui_values.ino
+ (c) 2010-2011 C.A. Church / Dynamic Perception LLC
+ (c) FFZ
+ For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,9 +19,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
- 
  */
-
 
 /*
 
@@ -160,21 +160,21 @@ void get_m_axis_set( byte pos, boolean read_save) {
   
   case 2: 
     // doly angle (for calibration)
-    ui_type_flags |= B00000001;
+    ui_type=INPUT_ANGEL;
 
     if( read_save == true ) {
-      m_angle[0] = cur_inp_long;
-      eeprom_write(EEPROM_TODO, m_angle[0]);
+      m_angle = cur_inp_long;
+      eeprom_write(EEPROM_TODO, m_angle);
     }
 
-    cur_inp_long = m_angle[0];
+    cur_inp_long = m_angle;
     break;
    
   case 3:
     // set lead-in value
     if( read_save == true ) {
       m_lead_in = cur_inp_long;
-      eeprom_write(EEPROM_TODO , m_lead_in);
+      eeprom_write(EEPROM_TODO, m_lead_in);
     }
 
     cur_inp_long = m_lead_in;
@@ -239,7 +239,7 @@ void get_m_adv_set( byte pos, boolean read_save){
       min_spd = 255 * ( min_cpm / max_ipm );
    
       eeprom_write(EEPROM_TODO, min_cpm);
-      eeprom_write(EEPROM_TODO , min_spd);
+      eeprom_write(EEPROM_TODO, min_spd);
     } 
     cur_inp_float = min_cpm;
     break;
@@ -337,7 +337,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     if( read_save == true ) {
       cur_inp_long = cur_inp_long > 255 ? 255 : cur_inp_long;
       cam_repeat = cur_inp_long;
-      eeprom_write(249, cam_repeat);
+      eeprom_write(EEPROM_TODO, cam_repeat);
     }
     cur_inp_long = cam_repeat;
     break;
@@ -347,7 +347,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
       ui_type=INPUT_LONG;
     if( read_save == true) {
       cam_rpt_dly = cur_inp_long;
-      eeprom_write(250, cam_rpt_dly);
+      eeprom_write(EEPROM_TODO, cam_rpt_dly);
     }
     cur_inp_long = cam_rpt_dly;
     break;
@@ -449,7 +449,7 @@ void get_global_set(byte pos, boolean read_save) {
     ui_type=INPUT_LONG;
     if( read_save == true ) {
       ext_in_delay = cur_inp_long;
-      eeprom_write(252, ext_in_delay);
+      eeprom_write(EEPROM_TODO, ext_in_delay);
     }
     cur_inp_long =  ext_in_delay;
     break;
@@ -517,11 +517,6 @@ void get_global_set(byte pos, boolean read_save) {
 
 
 void get_mainscr_set(byte pos, boolean read_save) {
-
-  // clear out previous on/off select
-
-  ui_type_flags   = 0;
-  ui_type_flags2  = 0;
   ui_float_tenths = false;
 
 
@@ -530,7 +525,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
   case 1:
     // on/off
     lcd.setCursor(0,0);
-
+    ui_type=INPUT_ONOF;
     if( read_save ) {
       if( cur_inp_bool > 0 ) {   
         // if set to positive value
@@ -540,9 +535,6 @@ void get_mainscr_set(byte pos, boolean read_save) {
         stop_executing();
       }
     }
-
-    ui_type=INPUT_ONOF;
-
     cur_inp_bool =S_RUNNING ; //run_status >> 7
     break;
 
@@ -555,7 +547,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
     if( read_save ) {
       cam_interval = cur_inp_float;
-      eeprom_write(67, cam_interval);
+      eeprom_write(EEPROM_TODO, cam_interval);
     }
 
     cur_inp_float = cam_interval;
@@ -564,11 +556,12 @@ void get_mainscr_set(byte pos, boolean read_save) {
   case 3:
     // dir for motor
     lcd.setCursor(0,1);
-
+    ui_type=INPUT_LTRT;
+    
     if( read_save )
       motor_dir(cur_inp_bool);
 
-    ui_type=INPUT_LTRT;
+
     cur_inp_bool = m_wasdir;
     break;
 
@@ -590,9 +583,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
       // if needed - use function to update values
       motor_set_ramp(m_ramp_set);  //TODO
     }
-
     cur_inp_long = m_speed;
-
     break; 
   }
 }
@@ -601,16 +592,16 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
 void get_manual_select(byte pos) {
 
-
-  // set in manual mode
-  ui_ctrl_flags |= B00000100;
-
-  if( pos == 1 ) {
-    //TODO
-    return;
-  }
-  // show manual motor screen
-  show_manual();
+switch pos{
+	case 0:  
+	// set in manual mode
+	  ui_ctrl_flags |= B00000100;
+	  show_manual();
+	  break;
+	
+	case 1:
+	//TODO
+	  break;
 }
 
 

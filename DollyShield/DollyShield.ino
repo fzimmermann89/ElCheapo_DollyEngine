@@ -279,18 +279,15 @@ boolean ui_invdir = false;
 // floats are input in tenths?
 boolean ui_float_tenths = false;
 
-/* user interface control flags
- 
- B0 = update display
- B1 = currently in setup menu
- B2 = in value entry
- B3 = have drawn initial value in value entry
- B4 = have used decimal in current value
- B5 = in manual mode
- B6 = lcd bkl on
- B7 = in calibrate mode
- 
- */
+// user interface control flags
+ #define UI_UPDATE_DISP (1<<0)        //B0 = update display
+ #define UI_SETUP_MENU (1<<1)         //B1 = currently in setup menu
+ #define UI_VALUE_ENTRY (1<<2)        //B2 = in value entry
+ #define UI_DRAWN_INITAL_VALUE (1<<3) //B3 = have drawn initial value in value entry
+ #define UI_USED_DECIMAL (1<<4)       //B4 = have used decimal in current value
+ #define UI_MANUAL_MODE (1<<5)        //B5 = in manual mode
+ #define UI_LCD_BKL_ON (1<<6)         //B6 = lcd bkl on
+ #define UI_CALIBRATE_MODE (1<<7)     //B7 = in calibrate mode
 byte ui_ctrl_flags = B00000000;
 
 /* calibration screen flags
@@ -303,6 +300,8 @@ byte ui_cal_scrn_flags = 0;
 
 // whether to show cpm (true) or % (false)
 boolean ui_motor_display = true;
+#define CPM true
+#define PCT false
 
 //input type flags
 
@@ -348,11 +347,11 @@ io_reg;
  B0 = running
  B1 = camera currently engaged
  B2 = camera cycle complete
- B3 = motors currently running
+ B3 = motor currently running
  B4 = external trigger engaged
- b5
- b6
- b7
+ b5 = slow mode
+ b6 = motor ran
+ b7 
  */
 
 // external intervalometer
@@ -442,11 +441,11 @@ unsigned int m_maxsms =  max_cpm * 100;
 
 /*
 // for timer1 pulsing mode control
- boolean timer_used = false;
- volatile  bool timer_engaged      = false;
+ boolean timer_used = false; */
+ //volatile  bool timer_engaged      = false;
  volatile bool motor_engaged      = false;
- volatile byte motor_ran = 0;
- */
+ volatile bool motor_ran = 0;
+
 //TODO
 
 // motor calibration
@@ -607,57 +606,48 @@ void main_loop_handler() {
 
 
   if( cam_max > 0 && shots >= cam_max && ( ok_stop || (m_speed <= 0.0 ) || motor_sl_mod ) ) {
-
     // stop program if max shots exceeded, and complete cycle completed
     // if in interleave, ignore complete cycle if in pulse
     ok_stop = false;
     stop_executing();
     // interrupt further processing      
   }
-  else if( pre_focus_clear == 2 ) {  
-    // allow 100ms for focus line to settle before allowing any further
-    MsTimer2::set(100, clear_cam_focus);
-    MsTimer2::start();
-    pre_focus_clear = 3;
-  }
-  else  if ( (m_speed > 0) && (m_speed < min_spd ) )  {
 
+  else  if ( (m_speed > 0) && (m_speed < min_spd ) )  {
     // if pulse mode is on and
     //motor needs to be pulsed...
-
     motor_run_pulsing();
 
   }
 
 
 
-  // we need to deterime if we can shoot the camera
+  // we need to determine if we can shoot the camera
   // by seeing if it is currently being fired, or 
   // is blocked in some way.  After making sure we're
   // not blocked, we check to see if its time to fire the
   // camera
 
-  if( motor_engaged ) {      
-    if ( motor_ran > 0 ) {
-      // all of our motors have run one
+  if( motor_engaged && motor_ran ) {      
+      // motor has run one
       // cycle, let the camera fire
       motor_engaged = false;
       ok_stop       = true;
       in_sms_cycle  = false;
     }
-
-  } // end if motor_engaged
-  else if( S_CAM_ENGAGED || pre_focus_clear == 3 ) { //run_status & B01001000
-    // currently firing the camera, focus, or triggering an external
-    // control line
-
+  } // end if motor_engaged && motor_ran
+  
+  
+  else if( S_CAM_ENGAGED) { //run_status & B01001000
+    // currently firing the camera
     // do nothing
     ;
   }
   else if(S_CAM_CYCLE_COMPLETE) { //run_status & B00100000
     // camera cycle completed
     // clear exposure cycle complete flag
-   S_CAM_CYCLE_COMPLETE=false;// run_status &= B11011111;
+   S_CAM_CYCLE_COMPLETE=false;
+   
     if( camera_fired == true ) {
       // the shot just fired
       camera_fired = false;
@@ -666,86 +656,85 @@ void main_loop_handler() {
 
       // for ramping motor speeds
       // we change speed in ramps after shots...
-
       motor_execute_ramp_changes();
+      
+      
       // check to see if a post-exposure delay is needed
-
       if( post_delay_tm > 0 ) {
         // we block anything from happening while in the
         // post-exposure cycle by pretending to be an
         // exposure
-      S_CAM_ENGAGED=true;  //run_status |= B01000000;
+      S_CAM_ENGAGED=true;  
 
-        MsTimer2::set(post_delay_tm, camera_clear);
-        MsTimer2::start();
+	   //TODO
+       // MsTimer2::set(post_delay_tm, camera_clear);
+       // MsTimer2::start();
 
         motors_clear = false;
         ok_stop = false;
       }
       else {
         // no post-exp delay, is the external trigger to fire?
-        if( external_trigger & B00110000 && ext_trig_pst_delay > 0 )
+        if( external_trigger & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) )  // && ext_trig_pst_delay > 0 
           alt_ext_trigger_engage(false);
 
 
         //no post-exposure delay, motors can run
         motors_clear = true;
       }
-
-    } 
+    }//end cam_fired==true 
     else {
       // this was a post-exposure delay cycle completing, not
       // an actual shot
-
+  /* //TODO //why? already done?
       // is the external trigger to fire?
       if( external_trigger & B00110000 && ext_trig_pst_delay > 0 )
         alt_ext_trigger_engage(false);
-
+*/
 
       // we can set the motors clear to move now
       motors_clear = true;        
     }
+  }//end S_CAM_CYCLE_COMPLETE
+
+  //else if( motors_clear == true && !motor_sl_mod && ( m_sms_tm > 0 ) ) {
+
+    //// if we're set to go to s-m-s and motor is set to move
+    //// start motor moving
+
+    //motor_ran = 0;
+
+    //// set motor to move, and then
+    //// set timer to turn them off  
+
+    //if( m_sms_tm > 0 ) {
+      //// start motor
+      //run_motor_sms(); 
+      //MsTimer2::set(m_sms_tm, stop_motor_sms);
+    //}
 
 
+    //// engage timer
+    //MsTimer2::start();
 
-  }
+    //motor_engaged = true;
+    //motors_clear = false;
+    //ok_stop      = false;
 
-  else if( motors_clear == true && !motor_sl_mod && ( m_sms_tm > 0 ) ) {
-
-    // if we're set to go to s-m-s and motor is set to move
-    // start motor moving
-
-    motor_ran = 0;
-
-    // set motor to move, and then
-    // set timer to turn them off  
-
-    if( m_sms_tm > 0 ) {
-      // start motor
-      run_motor_sms(); 
-      MsTimer2::set(m_sms_tm, stop_motor_sms);
-    }
-
-
-    // engage timer
-    MsTimer2::start();
-
-    motor_engaged = true;
-    motors_clear = false;
-    ok_stop      = false;
-
-  }   
-  else if( gb_enabled == true || external_interval & B11000000 ) {
+  //}   
+  
+  else if( gb_enabled == true || external_interval & (EXT_INTV_1|EXT_INTV_2) ) {
     // external intervalometer is engaged
 
-    if( external_interval & B00100000 ) {
+    if( external_interval & EXT_INT_OK ) {
       // external intervalometer has triggered
 
       // clear out ok to fire flag
-      external_interval &= B11011111;      
+      external_interval &= ~ẼXT_INTV_OK;      
       do_fire = true;
     }
   }
+  
   else if( cam_last_tm < millis() - (cam_interval * 1000) ) {
     // internal intervalometer triggers
     do_fire = true;
@@ -755,7 +744,7 @@ void main_loop_handler() {
     // we've had a fire camera event
 
     // is the external trigger to fire? (either as 'before' or 'through')
-    if( external_trigger & B11000000 && ext_trig_pre_delay > 0 && ext_trip == false && (cam_repeat == 0 || cam_repeated == 0) ) {
+    if( (external_trigger & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE))  && ext_trip == false && (cam_repeat == 0 || cam_repeated == 0) ) {
       alt_ext_trigger_engage(true);
       ext_trip = true;
     }
@@ -831,7 +820,10 @@ S_MOT_RUNNING=true; //run_status |= B10010000;
 }
 
 void stop_executing() {
-  run_status &= B01100111;
+  //run_status &= B01100111;
+  S_RUNNING=false;
+  S_MOT_RUNNING=false;
+  S_EXT_TRIG_ENGAGED=false;
   motor_stop_all();
 }
 

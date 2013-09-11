@@ -1,3 +1,23 @@
+ REMOVED FUNCTIONS:
+ - main handler:
+	pre_focus_clear
+	ext_trigger_pre_delay und post_delay. den gesammten trigger krams nochmal ansehen!!
+	motor_sl_mod angefangen rauszunehmen
+ 
+ 
+ 
+ 
+  // motor slow mode is pulse (true) or sms (false)
+boolean motor_sl_mod = true;
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  enum  __attribute__((packed)) INPUTS {
      INPUT_FLOAT, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
  };
