@@ -60,7 +60,7 @@ void altio_isr_handler(byte which) {
 
     case 8:
       // switch  motor direction
-      motor_dir(!m_wasdir[0]);
+      motor_dir(!m_wasdir);
 
       break;
 

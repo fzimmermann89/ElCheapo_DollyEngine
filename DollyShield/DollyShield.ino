@@ -357,7 +357,7 @@ io_reg;
 // external intervalometer
 #define EXT_INTV_1 (1 << 0) //B0 = I/O 1 is external intervalometer
 #define EXT_INTV_2 (1 << 1) //B1 = I/O 2 is external intervalometer
-#define EXT_INT_OK (1 << 2) //B2 = interval OK to fire
+#define EXT_INTV_OK (1 << 2) //B2 = interval OK to fire
 byte external_interval = 0;
 
 //external trigger via alt i/o pins
@@ -377,9 +377,9 @@ unsigned long exp_tm      = 100;
 // tap focus before exposing
 unsigned int focus_tap_tm = 0;
 
-// delay after exposing (mS)
+// other delays in ms
 unsigned int post_delay_tm      = 100;
-
+unsigned int pre_delay_tm;
 
  enum  __attribute__((packed)) SHUTTER_MODE {
      SHUTTER_MODE_IR_NIKON=0, SHUTTER_MODE_IR_CANON=1, SHUTTER_MODE_CABLE_NO_FOCUS=2, SHUTTER_MODE_CABLE_FOCUS=3};
@@ -487,7 +487,10 @@ byte m_angle = 0;
 
 boolean m_cal_done = false;
 
-// ramping data
+boolean bulb_mode=false;
+// ramping data //TODO
+byte m_ramp_in=0;
+byte m_ramp_out=0;
 byte m_ramp_set     = 0;
 float m_ramp_shift  = 0.0;
 byte m_ramp_mod	    = 0;
@@ -634,8 +637,7 @@ void main_loop_handler() {
       motor_engaged = false;
       ok_stop       = true;
       in_sms_cycle  = false;
-    }
-  } // end if motor_engaged && motor_ran
+    }// end if motor_engaged && motor_ran
   
   
   else if( S_CAM_ENGAGED) { //run_status & B01001000
@@ -726,11 +728,11 @@ void main_loop_handler() {
   else if( gb_enabled == true || external_interval & (EXT_INTV_1|EXT_INTV_2) ) {
     // external intervalometer is engaged
 
-    if( external_interval & EXT_INT_OK ) {
+    if( external_interval & EXT_INTV_OK ) {
       // external intervalometer has triggered
 
       // clear out ok to fire flag
-      external_interval &= ~ẼXT_INTV_OK;      
+      external_interval &= ~EXT_INTV_OK;      
       do_fire = true;
     }
   }
@@ -811,7 +813,7 @@ S_MOT_RUNNING=true; //run_status |= B10010000;
 
   // if ramping is enabled for a motor, start at a zero
   // speed
-  if( m_ramp_set[0] >= 1 )
+  if( m_ramp_set >= 1 )
     motor_set_speed(0); 
 
 

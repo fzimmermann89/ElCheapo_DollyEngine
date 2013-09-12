@@ -198,9 +198,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
 
 void get_m_adv_set( byte pos, boolean read_save){
 
-
-
-
+switch (pos){
   case 0:
     // calibrate motor
     get_calibrate_select(0);
@@ -236,7 +234,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     if( read_save == true ) {
 
       min_cpm = cur_inp_float;
-      min_spd = 255 * ( min_cpm / max_ipm );
+      min_spd = 255 * ( min_cpm / max_cpm );
    
       eeprom_write(EEPROM_TODO, min_cpm);
       eeprom_write(EEPROM_TODO, min_spd);
@@ -265,7 +263,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     }
     cur_inp_long = motor_spd_cal[1];
     break;
-
+}
 
 }
 
@@ -393,7 +391,7 @@ void get_global_set(byte pos, boolean read_save) {
 
    case 0:
     // backlight level    
-    ui_type=INPUT_LONG
+    ui_type=INPUT_LONG;
     if(read_save == true) {
       cur_bkl = cur_inp_long > 255 ? 255 : cur_inp_long;
       ui_set_backlight(cur_bkl);
@@ -404,7 +402,7 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 1:
     // lcd dim time
-    ui_type=INPUT_LONG
+    ui_type=INPUT_LONG;
     if( read_save == true ) {
       lcd_dim_tm = cur_inp_long;
       eeprom_write(EEPROM_TODO, lcd_dim_tm);
@@ -592,7 +590,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
 void get_manual_select(byte pos) {
 
-switch pos{
+switch (pos) {
 	case 0:  
 	// set in manual mode
 	  ui_ctrl_flags |= B00000100;
@@ -603,7 +601,7 @@ switch pos{
 	//TODO
 	  break;
 }
-
+}
 
 void get_calibrate_select(byte pos) {
   // display calibrate screen  

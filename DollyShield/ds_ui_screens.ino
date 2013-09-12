@@ -92,7 +92,7 @@ void show_home() {
   char lt = ui_invdir == true ? 'R' : 'L';
   char rt = ui_invdir == true ? 'L' : 'R';
 
-  if( m_wasdir[0] == 1 ) {
+  if( m_wasdir == 1 ) {
     lcd.print(lt);
   }
   else {
@@ -136,7 +136,7 @@ void main_screen_select(boolean dir) {
     main_scr_input+=max_inputs;
   }
 
-  if (wert>max_inputs) wert-=max_inputs;
+  if (main_scr_input>max_inputs) main_scr_input-=max_inputs;
 
   if(main_scr_input == 0 ) {
     // exit main scr setup
@@ -214,8 +214,8 @@ void execute_calibrate() {
 
   // sms calibration
   for( byte i = 0; i <= 1; i++ ) {
-    float traveled = 0.01 * (max_ipm[0]);
-    unsigned int runspd = 0.01 * m_maxsms[0];
+    float traveled = 0.01 * (max_cpm);
+    unsigned int runspd = 0.01 * m_maxsms;
     cur_inp_float = traveled;
     completed++;
 Serial.println("s");

@@ -30,7 +30,7 @@
 
 
 void motor_speed_adjust(int val, boolean spd_floor ) {
-
+/* 
   byte c_speed = 0;
   // val is expected to be between -255 and 255;
 
@@ -46,11 +46,11 @@ void motor_speed_adjust(int val, boolean spd_floor ) {
   }
 
   motor_set_speed(c_speed );   
-
+ */
 }
 
 void motor_control(boolean state) {
-
+/*
   // turn motors on or off
 
   if( ! state ) {
@@ -72,19 +72,14 @@ void motor_control(boolean state) {
     if( mcur_spds > 0 )
       motor_set_speed(mcur_spds);
   }
+*/
 }
 
 
 
 void motor_set_speed( unsigned int m_speed ) {
-analogWrite(MOTOR0_P,32);
-delay(500);
-
-  Serial.print("s:");
-Serial.println(m_speed);
-
-  m_speed = m_speed;
-  m_sms_tm[0] = 0;
+ /* m_speed = m_speed;
+  m_sms_tm = 0;
 
 
 
@@ -92,12 +87,12 @@ Serial.println(m_speed);
     // handle when in interleaved mode and not on
     // manual control screen
 
-    float m_pct = ( (float) m_speed / (float) m_maxsms[0] );  
+    float m_pct = ( (float) m_speed / (float) m_maxsms );  
 
-    m_sms_tm[0] = 60000.0 * m_pct;
+    m_sms_tm = 60000.0 * m_pct;
 
     // calibrate
-    m_sms_tm[0] *= motor_cal_adjust(0,0,m_wasdir[0]);
+    m_sms_tm *= motor_cal_adjust(0,0,m_wasdir);
 
   }
   else {
@@ -113,13 +108,13 @@ Serial.println(m_speed);
 
   // do we need to go into pulsing mode?
 
-  if( m_speed > 0 && m_speed < min_spd[0]  ) {
+  if( m_speed > 0 && m_speed < min_spd ) {
 Serial.println("smaller");
     motor_calc_pulse_len(m_speed, false);
 
   } //      
   else {
-    on_pct[0] = 0;
+    on_pct = 0;
   }
 
 
@@ -128,10 +123,10 @@ Serial.println("smaller");
   if( ! (S_MOT_RUNNING)  ) { //run_status & B00010000
     // if disabled, do not move motor, but
     // instead adjust stored speed
-    mcur_spds[0] = m_speed;
+    mcur_spds = m_speed;
     return;
   }
-  else if( ! (ui_ctrl_flags & B00000100) && m_sms_tm[0] > 0 ) {
+  else if( ! (ui_ctrl_flags & B00000100) && m_sms_tm > 0 ) {
     // just in case
     digitalWrite(MOTOR0_P, LOW);
     Serial.println("sms-man");
@@ -145,11 +140,11 @@ Serial.println("smaller");
 
   // only set analog speed if it exceeds min speed
 Serial.print("ms:");
-Serial.println(min_spd[0]);
+Serial.println(min_spd);
    Serial.print("s:");
     Serial.println(m_speed);
     
-  if( m_speed >= min_spd[0] ) {
+  if( m_speed >= min_spd ) {
     analogWrite(MOTOR0_P, m_speed);
  Serial.print("written");
  Serial.println(m_speed);
@@ -160,42 +155,42 @@ Serial.println(min_spd[0]);
     // pwm to pulsed...
     digitalWrite(MOTOR0_P,LOW);
   }
-
+*/
 }
 
 void motor_calc_pulse_len(unsigned int m_speed, boolean ignore_cal) {
-  // for how many periods should the motor be on and
+/*  // for how many periods should the motor be on and
   // off? (pulsing mode)     
 Serial.println("calc");
   float m_pct   = ( (float) m_speed / 255.0 );
   float periods = 1333.0; // 25 times a second 
 
-  on_pct[0] = periods * m_pct; 
-  off_pct[0] = (float) (periods - on_pct[0]);
+  on_pct = periods * m_pct; 
+  off_pct = (float) (periods - on_pct[0]);
 
-  float cal_amt = motor_cal_adjust(1,m_speed, m_wasdir[0]);
+  float cal_amt = motor_cal_adjust(1,m_speed, m_wasdir);
 
   // calibrate, if desired
   if( ! ignore_cal && cal_amt != 1.0 )
-    off_pct[0] = ( (double) off_pct[0] * ( cal_amt * m_cal_constant[0] )  ); 
+    off_pct = ( (double) off_pct * ( cal_amt * m_cal_constant )  ); 
 
-  if(on_pct[0] < 1)
-    on_pct[0] = 1;
+  if(on_pct < 1)
+    on_pct = 1;
 
   // make sure that we're on for a minimum amount of time
 
-  if ( on_pct[0] != 0 && on_pct[0] < m_min_pulse[0] ) {
+  if ( on_pct != 0 && on_pct < m_min_pulse ) {
     // adjust so that off time is increased relative to on time
-    float diff = (float) m_min_pulse[0] / (float) on_pct[0];       
-    off_pct[0] = ((float) off_pct[0] * diff);
-    on_pct[0] = m_min_pulse[0];
+    float diff = (float) m_min_pulse / (float) on_pct;       
+    off_pct = ((float) off_pct * diff);
+    on_pct = m_min_pulse;
   }
-
+*/
 }
 
 void motor_dir(byte dir ) {
-
-  if( m_wasdir[0] == dir )
+/*
+  if( m_wasdir == dir )
     return;
 
   // get current speed for the motor
@@ -213,82 +208,84 @@ void motor_dir(byte dir ) {
 
 
   digitalWriteFast(MOTOR0_DIR, dir);  
-  m_wasdir[0] = dir;
+  m_wasdir = dir;
   motor_set_speed( ths_speed );
+  */
 }
 
 
 float motor_calc_ipm(unsigned int spd, boolean ths_mode) {
-  // calculate ipm for a given speed and mode
+/* 
+ // calculate ipm for a given speed and mode
 
     // get max speed for either pulse or sms mode
   // on calibration screen, always ch
 
-  float maxspd = ( ! ths_mode ) ? (float) m_maxsms[0] : 255.0;
+  float maxspd = ( ! ths_mode ) ? (float) m_maxsms : 255.0;
 
   // in manual mode, we're always in 0-255 mode
   if( ui_ctrl_flags & B00000100 ) 
     maxspd = 255.0;
 
-  float cur_ipm = (float) max_ipm[0] * ( (float) spd / (float) maxspd );      
+  float cur_ipm = (float) max_cpm * ( (float) spd / (float) maxspd );      
 
   return(cur_ipm);
+  */
+return (0.0);
 }
 
 
 void motor_update_dist(float rpm, float diarev ) {
+/*
   // set distance settings when rpm or diarev change
 
-  max_ipm[0] = rpm * diarev;
-  min_spd[0] = 255 * ( min_cpm[0] / max_ipm[0] );
+  max_cpm = rpm * diarev;
+  min_spd = 255 * ( min_cpm / max_cpm );
   Serial.print("mins:");
-  Serial.println(min_spd[0]);
-  m_maxsms[0] = max_ipm[0] * 100;
+  Serial.println(min_spd);
+  m_maxsms= max_cpm * 100;
 
-  eeprom_write(EEPROM_TODO, max_ipm[0]);
-  eeprom_write(EEPROM_TODO, min_spd[0]);
-  eeprom_write(EEPROM_TODO, m_maxsms[0]);
-
+  eeprom_write(EEPROM_TODO, max_cpm);
+  eeprom_write(EEPROM_TODO, min_spd);
+  eeprom_write(EEPROM_TODO, m_maxsms);
+*/
 }
 
 void motor_pulse() { //TODO
-
+/*
   // this function is called by timer1 to pulse motors
   // on and off in pulsing mode
 
     if( ! timer_engaged )
     return;
 
-  volatile static byte mstate[2] = {
-    0,0  };
-  volatile static unsigned long pulses[2]  = {
-    1,1  };
+  volatile static byte mstate=0;
+  volatile static unsigned long pulses=1;
 
   volatile static byte pos = 0;
 
   pos++;
 
 
-  for( byte i = 0; i < MAX_MOTORS; i++ ) {
-    if( on_pct[i] > 0 ) {
+    if( on_pct > 0 ) {
       // speed is below min cont. speed
 
-      if( ! mstate[i] ) {
-        if( pulses[i] < off_pct[i] ) {
-          pulses[i]++;
+      if( ! mstate ) {
+        if( pulses < off_pct ) {
+          pulses++;
           continue;
         }
         else {            
           // set port value high for given motor
         //  PORTD |= (B00100000 << i); 
          digitalWriteFast(MOTOR0_P,HIGH); 
-          mstate[i] = 1;
-          pulses[i] = 1;
+          mstate = 1;
+          pulses = 1;
         }
       }
       else {
-        if( pulses[i] < on_pct[i] ) {
-          pulses[i]++;
+        if( pulses < on_pct ) {
+          pulses++;
           continue;
         }
         else {
@@ -301,30 +298,30 @@ void motor_pulse() { //TODO
         }
       } // end else not mstate...
     }  // end if on_pct...
-  }  // end for
 
+*/
 }
 
 
 
 void run_motor_sms() {
-
+/*
   analogWrite(MOTOR0_P, 255);
-
+*/
 } 
 
 void stop_motor_sms() {
-
+/*
   MsTimer2::stop();
 
   analogWrite(MOTOR0_P, 0);
 
   motor_ran++;
-
+*/
 } 
 
 void motor_set_ramp( byte ramp) {
-  // set motor ramp value, adjust
+  /*// set motor ramp value, adjust
   // associated values
 
 
@@ -355,12 +352,12 @@ void motor_set_ramp( byte ramp) {
     m_ramp_mod[0]   = 0;
   }
 
-
+*/
 }  
 
 
 void motor_stop_all() {
-  // stop all motors
+ /* // stop all motors
 
   // disable pulsing interrupt if engaged
   if( timer_engaged ) {
@@ -418,11 +415,12 @@ float motor_cal_adjust(byte type, byte m_spd, byte dir) {
   }
 
   return(m_cal_array[0][m_angle[0]][pos][dir]);
+  */
 }
 
 
 void motor_run_pulsing() {
-
+/* 
   // start pulsing motor movement
 
   if( ! timer_engaged ) {
@@ -444,11 +442,11 @@ void motor_run_pulsing() {
     timer_engaged = true;
     timer_used = true;
 
-  }
+  } */
 }
 
 void motor_execute_ramp_changes() {
-
+/* 
   // check for ramping, and ramp up or down as needed
 
   // no ramp, go to next motor
@@ -482,12 +480,12 @@ void motor_execute_ramp_changes() {
     }
   }
 
-
+ */
 }
 
 
 void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
-Serial.print("w:");
+/* Serial.print("w:");
 Serial.println(which);
     Serial.print("msp:");
 Serial.println(mspd);
@@ -539,7 +537,7 @@ Serial.println("stop");
   }
 
   motor_dir(cur_dir);
-
+ */
 }
 
 

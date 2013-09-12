@@ -450,7 +450,7 @@ void ui_button_down( boolean held ) {
 
   // if not currently in setup menus, or
   // modifying a main screen value
-  if( ! (ui_ctrl_flags & B01000000) & main_scr_input == 0 )
+  if( ! (ui_ctrl_flags & B01000000) && main_scr_input == 0 )
     return;
 
   if( main_scr_input > 0 ) {
@@ -497,7 +497,7 @@ void ui_button_up( boolean held ) {
   
   // if not currently in setup menus, or
   // modifying a main screen value
-  if( ! (ui_ctrl_flags & B01000000) & main_scr_input == 0 )
+  if( ! (ui_ctrl_flags & B01000000) && main_scr_input == 0 )
     return;
 
   if( main_scr_input > 0 ) {
@@ -849,7 +849,7 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
         else if( cur_inp_long == SHUTTER_MODE_IR_CANON ) {
           lcd.print("IR Canon");
         }
-        else ( cur_inp_long == SHUTTER_MODE_IR_NIKON ) {
+        else if ( cur_inp_long == SHUTTER_MODE_IR_NIKON ) {
           lcd.print("IR NIKON");
         }
         break;  
@@ -882,7 +882,7 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
 
 
 void ui_set_backlight(byte value) {
-
+/* //TODO
   // make sure to not use pwm on lcd bkl pin
   // if timer1 has been used at some point
   if( ! timer_used ) {
@@ -895,7 +895,7 @@ void ui_set_backlight(byte value) {
     else {
       digitalWriteFast(LCD_BKL, LOW);
     }
-  }
+  } */
 }
 
 /* 

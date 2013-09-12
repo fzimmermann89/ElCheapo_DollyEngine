@@ -48,7 +48,7 @@
 				 = 14-15
  m_diarev	     = 16-19
 				 = 20-23
- max_ipm	     = 24-27
+ max_cpm	     = 24-27
 				 = 28-31
  m_rpm        	 = 32-35
 				 = 36-39
@@ -134,7 +134,7 @@ void eeprom_saved( boolean saved ) {
 // flash and stack abuse 
 
 
-void eeprom_write(EEPROM_TODO, byte& val, byte len ) {
+void eeprom_write( int pos, byte& val, byte len ) {
   byte* p = (byte*)(void*)&val;
   for( byte i = 0; i < len; i++ )
     EEPROM.write(pos++, *p++);    
@@ -144,22 +144,22 @@ void eeprom_write(EEPROM_TODO, byte& val, byte len ) {
 
 }
 
-void eeprom_write(EEPROM_TODO, unsigned int& val ) {
+void eeprom_write( int pos, unsigned int& val ) {
   byte* p = (byte*)(void*)&val;   
   eeprom_write(EEPROM_TODO, *p, sizeof(int));  
 }
 
-void eeprom_write(EEPROM_TODO, unsigned long& val ) {
+void eeprom_write( int pos, unsigned long& val ) {
   byte* p = (byte*)(void*)&val;   
   eeprom_write(EEPROM_TODO, *p, sizeof(long));    
 }
 
-void eeprom_write(EEPROM_TODO, float& val ) {
+void eeprom_write( int pos, float& val ) {
   byte* p = (byte*)(void*)&val;   
   eeprom_write(EEPROM_TODO, *p, sizeof(float));    
 }
 
-void eeprom_write(EEPROM_TODO, byte& val ) {  
+void eeprom_write( int pos, byte& val ) {  
   EEPROM.write(pos, val);
   // indicate that memory has been saved
   eeprom_saved(true);
@@ -217,7 +217,7 @@ void write_all_eeprom_memory() {
 
   eeprom_write(EEPROM_TODO, cam_max);
   eeprom_write(EEPROM_TODO, m_diarev);
-  eeprom_write(EEPROM_TODO, max_ipm);
+  eeprom_write(EEPROM_TODO, max_cpm);
   eeprom_write(EEPROM_TODO, m_rpm);
   eeprom_write(EEPROM_TODO, min_cpm);
   eeprom_write(EEPROM_TODO, min_spd);
@@ -271,7 +271,7 @@ void restore_eeprom_memory() {
 
   eeprom_read(10, cam_max);
   eeprom_read(16, m_diarev[0]);
-  eeprom_read(24, max_ipm[0]);
+  eeprom_read(24, max_cpm);
   eeprom_read(32, m_rpm[0]);
   eeprom_read(40, min_cpm[0]);
   eeprom_read(48, min_spd[0]);

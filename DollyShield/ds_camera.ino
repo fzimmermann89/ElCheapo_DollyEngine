@@ -30,7 +30,7 @@
  */
 
 void fire_camera(unsigned long exp_tm) {
-  //TODO IR  
+ /*  //TODO IR  
 
   // determine if focus pin should be brought high
   // w. the shutter pin (for some nikons, etc.)
@@ -52,12 +52,12 @@ void fire_camera(unsigned long exp_tm) {
   S_CAM_ENGAGED=true;
   //run_status |= B01000000;
 
-  return;
+  return; */
 }
 
 
 void stop_camera() {
-
+/* 
   digitalWriteFast(CAMERA_PIN, LOW);
 
   // we do this every time, because
@@ -95,10 +95,10 @@ void stop_camera() {
   // update camera cycle complete
  S_CAM_CYCLE_COMPLETE=true; //run_status |= B00100000;
 
-}
+ */}
 
 
-void camera_clear() {
+void camera_clear() {/* 
   // clears out camera engaged settings
   // so that motor control and other actions can 
   // be undertaken.  Used as a timer whenever
@@ -111,26 +111,26 @@ void camera_clear() {
 
   // update camera cycle complete
 S_CAM_CYCLE_COMPLETE=true;  //run_status |= B00100000;
-
+ */
 }  
 
 
 
 void stop_cam_focus() {
-
+/* 
   MsTimer2::stop();
   digitalWriteFast(FOCUS_PIN, LOW);
   pre_focus_clear = 2;
 
-}
+ */}
 
-void clear_cam_focus() {
+void clear_cam_focus() {/* 
   MsTimer2::stop();
   pre_focus_clear = 4;
-}
+ */}
 
 float calc_total_cam_tm() {
-
+/* 
   // calculate total minimum time between exposures 
 
   byte pf_tm = 0;
@@ -142,12 +142,13 @@ float calc_total_cam_tm() {
   float total = (float) ( exp_tm + pf_tm + post_delay_tm  );
 
   if( ! motor_sl_mod )
-    total += m_sms_tm[0];
+    total += m_sms_tm;
 
   total = total / 1000.00;
 
   return(total);
-}
+ */
+ return (0.0);}
 
 void send_ir(){
   for(unsigned int i=1;i<=seq[0];i++){
