@@ -48,9 +48,9 @@ NOTES:
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
-#include <digitalWriteFast.h>
-#include "MsTimer2.h"
-#include "TimerOne.h"
+#include "digitalWriteFast.h"
+//#include "MsTimer2.h"
+//#include "TimerOne.h"
 
 
 
@@ -143,77 +143,78 @@ unsigned int seq[] = {
   16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
 
 // menu strings
-prog_char menu_0[] PROGMEM = "Movements";
-prog_char menu_1[] PROGMEM = "Motor  Setup";
-prog_char menu_2[] PROGMEM = "Camera Setup";
-prog_char menu_3[] PROGMEM = "General Setup";
+const char menu_0[] PROGMEM = "Movements";
+const char menu_1[] PROGMEM = "Motor  Setup";
+const char menu_2[] PROGMEM = "Camera Setup";
+const char menu_3[] PROGMEM = "General Setup";
 
-prog_char manual_menu_0[] PROGMEM = "Manual Move";
-prog_char manual_menu_1[] PROGMEM = "Fast Simulat.";
+const char manual_menu_0[] PROGMEM = "Manual Move";
+const char manual_menu_1[] PROGMEM = "Fast Simulat.";
 
-prog_char axis_menu_0[] PROGMEM = "Ramp In Shots";
-prog_char axis_menu_1[] PROGMEM = "Ramp Out Shots";
-prog_char axis_menu_2[] PROGMEM = "Angel";
-prog_char axis_menu_3[] PROGMEM = "Lead In";
-prog_char axis_menu_4[] PROGMEM = "Lead Out";
-prog_char axis_menu_5[] PROGMEM = "Advanced";
+const char axis_menu_0[] PROGMEM = "Movement Mode";
+const char axis_menu_1[] PROGMEM = "Ramp In Shots";
+const char axis_menu_2[] PROGMEM = "Ramp Out Shots";
+const char axis_menu_3[] PROGMEM = "Angel";
+const char axis_menu_4[] PROGMEM = "Lead In";
+const char axis_menu_5[] PROGMEM = "Lead Out";
+const char axis_menu_6[] PROGMEM = "Advanced";
 
-prog_char axis_adv_menu_0[] PROGMEM = "Calibrate";
-prog_char axis_adv_menu_1[] PROGMEM = "max RPM";
-prog_char axis_adv_menu_2[] PROGMEM = "Dist per Rev";
-prog_char axis_adv_menu_3[] PROGMEM = "Min Cont. Speed";
-prog_char axis_adv_menu_4[] PROGMEM = "Pulse Length";
-prog_char axis_adv_menu_5[] PROGMEM = "Pulse Power";
-prog_char axis_adv_menu_6[] PROGMEM = "Cal. Spd Low";
-prog_char axis_adv_menu_7[] PROGMEM = "Cal. Spd Hi";
+const char axis_adv_menu_0[] PROGMEM = "Calibrate";
+const char axis_adv_menu_1[] PROGMEM = "max RPM";
+const char axis_adv_menu_2[] PROGMEM = "Dist per Rev";
+const char axis_adv_menu_3[] PROGMEM = "Min Cont. Speed";
+const char axis_adv_menu_4[] PROGMEM = "Pulse Length";
+const char axis_adv_menu_5[] PROGMEM = "Pulse Power";
+const char axis_adv_menu_6[] PROGMEM = "Cal. Spd Low";
+const char axis_adv_menu_7[] PROGMEM = "Cal. Spd Hi";
 
-prog_char camera_menu_0[] PROGMEM = "Interval sec";
-prog_char camera_menu_1[] PROGMEM = "Max Shots";
-prog_char camera_menu_2[] PROGMEM = "Exp. Time ms";
-prog_char camera_menu_3[] PROGMEM = "Shutter Type";
-prog_char camera_menu_4[] PROGMEM = "Bulb Mode";
-prog_char camera_menu_5[] PROGMEM = "Repeat";
-prog_char camera_menu_6[] PROGMEM = "Repeat Delay ms";
-prog_char camera_menu_7[] PROGMEM = "PreExp Delay ms";
-prog_char camera_menu_8[] PROGMEM = "PstExp Delay ms";
-prog_char camera_menu_9[] PROGMEM = "Focus Delay ms";
+const char camera_menu_0[] PROGMEM = "Interval sec";
+const char camera_menu_1[] PROGMEM = "Max Shots";
+const char camera_menu_2[] PROGMEM = "Exp. Time ms";
+const char camera_menu_3[] PROGMEM = "Shutter Type";
+const char camera_menu_4[] PROGMEM = "Bulb Mode";
+const char camera_menu_5[] PROGMEM = "Repeat";
+const char camera_menu_6[] PROGMEM = "Repeat Delay ms";
+const char camera_menu_7[] PROGMEM = "PreExp Delay ms";
+const char camera_menu_8[] PROGMEM = "PstExp Delay ms";
+const char camera_menu_9[] PROGMEM = "Focus Delay ms";
 
 
-prog_char set_menu_0[] PROGMEM = "Backlight";
-prog_char set_menu_1[] PROGMEM = "AutoDim (sec)";
-prog_char set_menu_2[] PROGMEM = "Blank LCD";
-prog_char set_menu_3[] PROGMEM = "I/O 1";
-prog_char set_menu_4[] PROGMEM = "I/O 2";
-prog_char set_menu_5[] PROGMEM = "In Delay ms";
-prog_char set_menu_6[] PROGMEM = "Out Delay ms";
-prog_char set_menu_7[] PROGMEM = "USB Trigger";
-prog_char set_menu_8[] PROGMEM = "Invert Dir";
-prog_char set_menu_9[] PROGMEM = "Invert I/O";
-prog_char set_menu_10[] PROGMEM = "Reset Mem";
+const char set_menu_0[] PROGMEM = "Backlight";
+const char set_menu_1[] PROGMEM = "AutoDim (sec)";
+const char set_menu_2[] PROGMEM = "Blank LCD";
+const char set_menu_3[] PROGMEM = "I/O 1";
+const char set_menu_4[] PROGMEM = "I/O 2";
+const char set_menu_5[] PROGMEM = "In Delay ms";
+const char set_menu_6[] PROGMEM = "Out Delay ms";
+const char set_menu_7[] PROGMEM = "USB Trigger";
+const char set_menu_8[] PROGMEM = "Invert Dir";
+const char set_menu_9[] PROGMEM = "Invert I/O";
+const char set_menu_10[] PROGMEM = "Reset Mem";
 
 // menu organization
 
-PROGMEM const char *menu_str[]  = { 
+const char * const menu_str[] PROGMEM = { 
   menu_0,menu_1, menu_2, menu_3};
 
-PROGMEM const char *man_str[]   = { 
+const char * const man_str[] PROGMEM = { 
   manual_menu_0,  manual_menu_1 };
 
-PROGMEM const char *axis0_str[] = { 
+const char * const axis0_str[] PROGMEM = { 
   axis_menu_0,axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5};
 
-PROGMEM const char *cam_str[]   = { 
+const char * const cam_str[] PROGMEM = { 
   camera_menu_0, camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
 
-PROGMEM const char *set_str[]   = { 
+const char * const set_str[] PROGMEM = { 
   set_menu_0, set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_10};
 
-PROGMEM const char *axis_adv_str[]   = { 
+const char * const axis_adv_str[] PROGMEM = { 
   axis_adv_menu_0, axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7};
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 byte max_menu[7]  = {
-  3,1,5,9,10,7};
+  3,1,6,9,10,7};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -358,19 +359,18 @@ io_reg;
 #define EXT_INTV_1 (1 << 0) //B0 = I/O 1 is external intervalometer
 #define EXT_INTV_2 (1 << 1) //B1 = I/O 2 is external intervalometer
 #define EXT_INTV_OK (1 << 2) //B2 = interval OK to fire
-byte external_interval = 0;
-
 //external trigger via alt i/o pins
-#define EXT_TRIG_1_BEFORE (1 << 0) //B0 = I/O 1 external enabled (before)
-#define EXT_TRIG_2_BEFORE (1 << 1) //B1 = I/O 2 external enabled (before)
-#define EXT_TRIG_1_AFTER  (1 << 2) //B2 = I/O 1 external enabled (after)
-#define EXT_TRIG_2_AFTER  (1 << 2) //B3 = I/O 2 external enabled (after)
-byte external_trigger  = 0;
+#define EXT_TRIG_1_BEFORE (1 << 3) //B0 = I/O 1 external enabled (before)
+#define EXT_TRIG_2_BEFORE (1 << 4) //B1 = I/O 2 external enabled (before)
+#define EXT_TRIG_1_AFTER  (1 << 5) //B2 = I/O 1 external enabled (after)
+#define EXT_TRIG_2_AFTER  (1 << 6) //B3 = I/O 2 external enabled (after)
+byte external_io = 0;
 
-// trigger delays
-unsigned long ext_trig_pre_delay = 0;
-unsigned long ext_trig_pst_delay = 0;
-
+// trigger delays //TODO
+//unsigned long ext_trig_pre_delay = 0;
+//unsigned long ext_trig_pst_delay = 0;
+unsigned long ext_in_delay = 0;
+unsigned long ext_out_delay = 0;
 // camera exposure time
 unsigned long exp_tm      = 100;
 
@@ -439,12 +439,28 @@ byte motor_spd_cal[2] = {
 // maximum sms distance //TODO
 unsigned int m_maxsms =  max_cpm * 100;
 
+//SMS or Cont. Mode?
+#define MODE_SMS true
+#define MODE_CONT false
+boolean m_mode=MODE_SMS;
+
 /*
 // for timer1 pulsing mode control
  boolean timer_used = false; */
  //volatile  bool timer_engaged      = false;
  volatile bool motor_engaged      = false;
  volatile bool motor_ran = 0;
+ 
+ //timer 2 globals
+ uint16_t volatile timer2_ms;
+void (*timer2_func)();
+
+ 
+ 
+ 
+ 
+ 
+ 
 
 //TODO
 
@@ -580,7 +596,7 @@ void loop() {
   // we check here to prevent queuing commands when stopped
 
   if( gb_enabled == true && gbtl_trigger() == true ) {
-    external_interval |= B00100000;
+    external_io |= EXT_INTV_OK;
   }
 
   if( S_RUNNING ) { //run_status & B10000000
@@ -608,17 +624,16 @@ void main_loop_handler() {
   static byte    cam_repeated   = 0;
 
 
-  if( cam_max > 0 && shots >= cam_max && ( ok_stop || (m_speed <= 0.0 ) || motor_sl_mod ) ) {
+  if( (cam_max > 0 && shots >= cam_max) && ( ok_stop || (m_speed <= 0.0 ) || m_mode==MODE_SMS ) ) {
     // stop program if max shots exceeded, and complete cycle completed
-    // if in interleave, ignore complete cycle if in pulse
+    // if in interleave, ignore complete cycle if in SMS
     ok_stop = false;
     stop_executing();
     // interrupt further processing      
   }
 
   else  if ( (m_speed > 0) && (m_speed < min_spd ) )  {
-    // if pulse mode is on and
-    //motor needs to be pulsed...
+    // if motor needs to be pulsed...
     motor_run_pulsing();
 
   }
@@ -640,7 +655,7 @@ void main_loop_handler() {
     }// end if motor_engaged && motor_ran
   
   
-  else if( S_CAM_ENGAGED) { //run_status & B01001000
+  else if( S_CAM_ENGAGED) {
     // currently firing the camera
     // do nothing
     ;
@@ -660,6 +675,11 @@ void main_loop_handler() {
       // we change speed in ramps after shots...
       motor_execute_ramp_changes();
       
+      //  is the external trigger to fire?
+        if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
+          alt_ext_trigger_engage(false);
+
+
       
       // check to see if a post-exposure delay is needed
       if( post_delay_tm > 0 ) {
@@ -667,20 +687,14 @@ void main_loop_handler() {
         // post-exposure cycle by pretending to be an
         // exposure
       S_CAM_ENGAGED=true;  
-
 	   //TODO
        // MsTimer2::set(post_delay_tm, camera_clear);
        // MsTimer2::start();
-
         motors_clear = false;
         ok_stop = false;
       }
       else {
-        // no post-exp delay, is the external trigger to fire?
-        if( external_trigger & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) )  // && ext_trig_pst_delay > 0 
-          alt_ext_trigger_engage(false);
-
-
+ 
         //no post-exposure delay, motors can run
         motors_clear = true;
       }
@@ -725,14 +739,14 @@ void main_loop_handler() {
 
   //}   
   
-  else if( gb_enabled == true || external_interval & (EXT_INTV_1|EXT_INTV_2) ) {
+  else if( gb_enabled == true || external_io & (EXT_INTV_1|EXT_INTV_2) ) {
     // external intervalometer is engaged
 
-    if( external_interval & EXT_INTV_OK ) {
+    if( external_io & EXT_INTV_OK ) {
       // external intervalometer has triggered
 
       // clear out ok to fire flag
-      external_interval &= ~EXT_INTV_OK;      
+      external_io &= ~EXT_INTV_OK;      
       do_fire = true;
     }
   }
@@ -746,7 +760,7 @@ void main_loop_handler() {
     // we've had a fire camera event
 
     // is the external trigger to fire? (either as 'before' or 'through')
-    if( (external_trigger & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE))  && ext_trip == false && (cam_repeat == 0 || cam_repeated == 0) ) {
+    if( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE))  && ext_trip == false && (cam_repeat == 0 || cam_repeated == 0) ) {
       alt_ext_trigger_engage(true);
       ext_trip = true;
     }
@@ -787,8 +801,8 @@ void main_loop_handler() {
       else if( focus_tap_tm > 0 && pre_focus_clear == 0 && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
         // pre-focus tap is set, bring focus line high
         digitalWriteFast(FOCUS_PIN, HIGH);
-        MsTimer2::set(focus_tap_tm, stop_cam_focus);
-        MsTimer2::start();
+      //  MsTimer2::set(focus_tap_tm, stop_cam_focus);
+      //  MsTimer2::start();
         pre_focus_clear = 1;
       }
     } // end else (not external trigger...
@@ -800,16 +814,13 @@ void start_executing() {
 
   // clear out external interval flag in case it was
   // set while stopped.
+  external_io&= ~EXT_INTV_OK;
 
-  external_interval &= B11011111;
-
- 
-S_RUNNING=true; //run_status |= B10010000;
-S_MOT_RUNNING=true; //run_status |= B10010000;
  
  // turn on motors
   motor_control(true);
-
+  S_RUNNING=true; 
+  S_MOT_RUNNING=true; 
 
   // if ramping is enabled for a motor, start at a zero
   // speed

@@ -259,7 +259,7 @@ byte get_menu( byte mnu, byte pos ) {
   //Special return codes for calibration, manual move and input.
 
 if (mnu == 0) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
-else if (mnu == 2 && pos == 5) return 5; //Advanced Motor Menu
+else if (mnu == 2 && pos == 6) return 5; //Advanced Motor Menu
 else if (mnu == 5 && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
 else if (mnu == 1) return MENU_MANUAL; 
 else return(MENU_INPUT); //No Submenu, Input Menu.
@@ -697,7 +697,7 @@ void draw_menu(byte dir, boolean value_only) {
 }
 
 
-void draw_values(const char *these[], boolean draw_all, boolean value_only) {
+void draw_values(const char* const these[], boolean draw_all, boolean value_only) {
 
   if( draw_all == true ) {
 
@@ -790,7 +790,7 @@ void draw_values(const char *these[], boolean draw_all, boolean value_only) {
         break;
       case INPUT_SPEED: 
         // cal speed inputs in gobal set menu
-        display_spd_ipm(cur_inp_long);
+        display_spd_cpm(cur_inp_long);
         break;
       case INPUT_FLOAT:
         lcd.print(cur_inp_float, (byte) 2);

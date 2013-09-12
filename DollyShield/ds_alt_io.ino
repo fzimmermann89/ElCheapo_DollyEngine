@@ -55,7 +55,7 @@ void altio_isr_handler(byte which) {
 
     case 4: 
       // set camera ok to fire
-      external_interval |= B00100000;
+      external_io|= EXT_INTV_OK;
       break;
 
     case 8:
@@ -84,9 +84,21 @@ void altio_isr_two() {
 void altio_connect(byte which, byte type) {
 
   input_type[which] = type;
+  //disable every flag for this line
+  external_io &= ~ ((EXT_TRIG_1_BEFORE|EXT_TRIG_1_AFTER|EXT_INTV_1)  << which);
 
-  // type == 5, 6, 7 changes from input to output, handle this
-  // deviation
+// disabled
+  if( type == 0 ) {
+    detachInterrupt(which);
+    if (which==0){
+      digitalWriteFast(2, LOW);
+    }
+    else{
+      digitalWriteFast(3, LOW);
+    }
+    return;
+  }
+  
 
   if( type == 5 || type == 6 || type == 7 ) {
     // output mode
@@ -100,48 +112,24 @@ void altio_connect(byte which, byte type) {
     }
     // set correct flag, as needed
     if( type == 5 ) {
-      external_trigger |= B10000000 >> which;
+      external_io |= (EXT_TRIG_1_BEFORE << which) ;
     }
     else if( type == 6 ) {
-      external_trigger |= B00100000 >> which;
+      external_io |= (EXT_TRIG_1_AFTER << which);
     }
     else {
-      external_trigger |= B10100000 >> which;
+      external_io |= ((EXT_TRIG_1_BEFORE|EXT_TRIG_1_AFTER) << which);
     }
-
-    return;
   }
 
-  if( type == 0 ) {
-    detachInterrupt(which);
-
-    if (which==0){
-      digitalWriteFast(2, LOW);
-    }
-    else{
-      digitalWriteFast(3, LOW);
-    }
-
-    // disable external interval for this line (just in case it
-    // was ever set)
-    external_interval &= (B11111111 ^ (B10100000 >> which));
-    return;
+else {
+	//input mode
+	if( type == 4 ) {
+    // external intervalometer function
+    external_io |= EXT_INTV_1 << which;
   }
-  else if( type == 4 ) {
-    // our external intervalometer functon
-
-    // enable external intervalometer for this line
-    external_interval |= B10000000 >> which;
-  }
-  else {
-    // disable external interval for this line (just in case it
-    // was ever set)
-    external_interval &= (B11111111 ^ (B10100000 >> which));
-  }
-
 
   if (which==0){
-
     // set pin as input
     pinModeFast(2, INPUT);
     // enable pull-up resistor
@@ -149,15 +137,14 @@ void altio_connect(byte which, byte type) {
     attachInterrupt(0, altio_isr_one, altio_dir);
   }
   else{
+	// set pin as input
     pinModeFast(3, INPUT);
     // enable pull-up resistor
     digitalWriteFast(3, HIGH);
     attachInterrupt(1, altio_isr_two, altio_dir);
   }
-
-
-}    
-
+ }    
+}
 void altio_flip_runstat() {
   // if currently running, stop; if not, start
 
@@ -171,42 +158,94 @@ void altio_flip_runstat() {
 
 }
 
-void alt_ext_trigger_engage(boolean predel) {
-
-  unsigned long dly = predel == true ? ext_trig_pre_delay : ext_trig_pst_delay;
+void alt_ext_trigger_engage(unsigned long length) {
   // set flag
-  S_EXT_TRIG_ENGAGED=true; //run_status |= B00001000;
+  S_EXT_TRIG_ENGAGED=true;
 
   // we use the interrupt pins, 2&3
 
-  if( predel == true ) {
-    if( external_trigger & B10000000 ) 
-      digitalWriteFast(2, HIGH);
-    if( external_trigger & B01000000 )
-      digitalWriteFast(3, HIGH);
-  }
-  else {
-    if( external_trigger & B00100000 ) 
-      digitalWriteFast(2, HIGH);
-    if( external_trigger & B00010000 )
-      digitalWriteFast(3, HIGH);
-  }        
-
-  MsTimer2::set(dly, alt_ext_trigger_disengage);
-  MsTimer2::start();
+    if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
+      digitalWriteFast(2, !altio_dir);
+    if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) ) 
+      digitalWriteFast(3, !altio_dir);
+ 
+  //MsTimer2::set(length, alt_ext_trigger_disengage); //TODO
+  //MsTimer2::start();
 }
 
 void alt_ext_trigger_disengage() {
 
-  if( external_trigger & B10100000 )
-    digitalWriteFast(2, LOW);
-  if( external_trigger & B01010000 )
-    digitalWriteFast(3, LOW);
-
-  MsTimer2::stop();
+    if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
+      digitalWriteFast(2, altio_dir);
+    if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) )
+      digitalWriteFast(3, altio_dir);
+ 
+  //MsTimer2::stop();   //TODO
 
   // clear flag...
   S_EXT_TRIG_ENGAGED=false;//run_status &= B11110111;
+}
+
+/*
+
+ ========================================
+ Timer Functions
+ ========================================
+ 
+ */
+ 
+void settimeout(uint16_t ms,void (*f)()){
+  timer2_ms=ms;
+  timer2_func=f;
+}
+
+void initialize_alt_timers() {
+
+  cli();                //disable interrupts
+  //timer 2
+  TCCR2A = 0x00;        //Timer2 Control Reg A: Wave Gen Mode normal
+  TCCR2B = 4;           //set Prescaler to 64
+  TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
+  TIMSK2 |= (1<<OCIE2B);  
+  TIMSK2 |= (1<<TOIE2);   
+  
+  //timer1
+
+
+
+  sei();               //enable interrupts
+}
+
+
+
+void alt_io_motor_set(uint8_t value){
+  OCR2A=value;
+}
+
+void alt_io_display_set(uint8_t value){
+  OCR2B=value;
+}
+
+ISR(TIMER2_COMPA_vect) {
+  //motor off
+ digitalWriteFast(MOTOR0_P, LOW); 
+}
+
+ISR(TIMER2_COMPB_vect) {
+  //display off
+ digitalWriteFast(LCD_BKL, LOW);  
+}
+
+ISR(TIMER2_OVF_vect){
+    
+  if (timer2_ms==0){
+     PORTD&= ~_BV(4);
+  (*timer2_func)();
+  }
+  else timer2_ms--;
+  if (OCR2A>0) digitalWriteFast(MOTOR0_P, HIGH); //motor on
+  if (OCR2B>0) digitalWriteFast(LCD_BKL, HIGH);  //display on
+
 }
 
 

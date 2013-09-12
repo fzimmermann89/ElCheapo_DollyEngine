@@ -138,7 +138,18 @@ void get_m_axis_set( byte pos, boolean read_save) {
   // set axis configurable values
 
   switch(pos) { 
-  case 0:
+   case 0:
+   ui_type=INPUT_CONTSMS;
+    // set Movement Mode (SMS/CONT)
+   if( read_save == true ) {
+      m_mode = cur_inp_bool;
+      eeprom_write(EEPROM_TODO, m_mode);
+    }
+
+    cur_inp_bool = m_mode;
+    break;
+  
+  case 1:
     // set ramp in value
     if( read_save == true ) {
       motor_set_ramp(cur_inp_long);         
@@ -148,7 +159,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_long = m_ramp_in;
     break;
   
-  case 1:
+  case 2:
     // set ramp out value
     if( read_save == true ) {
       motor_set_ramp(cur_inp_long);         
@@ -158,7 +169,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_long = m_ramp_out;
     break;
   
-  case 2: 
+  case 3: 
     // doly angle (for calibration)
     ui_type=INPUT_ANGEL;
 
@@ -170,7 +181,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_long = m_angle;
     break;
    
-  case 3:
+  case 4:
     // set lead-in value
     if( read_save == true ) {
       m_lead_in = cur_inp_long;
@@ -180,7 +191,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_long = m_lead_in;
     break;
 
-  case 4:
+  case 5:
     // set lead-out value
     if( read_save == true ) {
       m_lead_out = cur_inp_long;
@@ -456,11 +467,11 @@ void get_global_set(byte pos, boolean read_save) {
     // output delay
     ui_type=INPUT_LONG;
     if( read_save == true ) {
-      ext_trig_delay = cur_inp_long;
+      ext_out_delay = cur_inp_long;
       eeprom_write(EEPROM_TODO, ext_out_delay);
     }
 
-    cur_inp_long = ext_trig_delay;
+    cur_inp_long = ext_out_delay;
     break;
 
   case 7:
@@ -567,7 +578,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
     // speed for motor
     lcd.setCursor(1,1);
     ui_type=INPUT_LONG;
-    if( ! motor_sl_mod ) {
+    if( m_mode==MODE_SMS) {
       // shoot-move-shoot?
       cur_inp_long = cur_inp_long > m_maxsms ? m_maxsms: cur_inp_long;
     } 
@@ -608,18 +619,12 @@ void get_calibrate_select(byte pos) {
   show_calibrate();
 }
 
-void display_spd_ipm(unsigned int spd) {
+void display_spd_cpm(unsigned int spd) {
 
-  float cur_ipm = motor_calc_ipm(spd, motor_sl_mod);
+  float cur_ipm = motor_calc_ipm(spd, m_mode);
   lcd.print(cur_ipm, 2);
+  lcd.print("cm/min");
 
-  // handle metric conversion
-  if( ui_is_metric ) {
-    lcd.print('c');
-  }
-  else {
-    lcd.print('i');
-  }
 }
 
 void display_spd_pct(byte spd) {

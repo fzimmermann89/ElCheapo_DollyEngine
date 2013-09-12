@@ -35,8 +35,8 @@ void prep_home_screen() {
   lcd.setCursor(0,0);
 
   if(S_RUNNING) {//run_status & B10000000
-    // in 'external intervalometer' mode, show 'ext' inseatd of 'on'
-    if( external_interval & B11000000 || gb_enabled == true ) {
+    // in 'external intervalometer' mode, show 'ext' instead of 'on'
+    if( (external_io & (EXT_INTV_1|EXT_INTV_2)) || gb_enabled == true ) {
       lcd.print("Ext");
     }
     else {
@@ -102,7 +102,7 @@ void show_home() {
 
   if( ui_motor_display ) {
     // display pct 
-    display_spd_ipm(m_speed);
+    display_spd_cpm(m_speed);
   }
   else {
     display_spd_pct(m_speed);
@@ -166,7 +166,7 @@ void show_manual() {
 
   if( ui_motor_display ) {
     // display ipm 
-    display_spd_ipm(m_speed);
+    display_spd_cpm(m_speed);
   }
   else {
     display_spd_pct(m_speed);
@@ -238,7 +238,7 @@ Serial.println("s");
       byte held = ui_button_check();
     }
 
-    m_cal_array[0][m_cur_cal][0][i] = traveled / cur_inp_float;
+    m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
 
   }
 
@@ -276,7 +276,7 @@ Serial.println(completed);
         byte held = ui_button_check();
       }
 
-      m_cal_array[0][m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
+      m_cal_array[m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
     }
   }
 
