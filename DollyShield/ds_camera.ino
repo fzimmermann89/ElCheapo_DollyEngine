@@ -30,55 +30,43 @@
  */
 
 void fire_camera(unsigned long exp_tm) {
- /*  //TODO IR  
+	//Fires the camera by using the selected method.
+ switch (shutter_mode){
+	case SHUTTER_MODE_IR_NIKON:
+	 send_ir(BRAND_NIKON);
+	 break;
+	case SHUTTER_MODE_IR_CANON:
+	 send_ir(BRAND_CANON);
+	 break;
+	case SHUTTER_MODE_CABLE_FOCUS:
+	 digitalWriteFast(FOCUS_PIN, HIGH);
+	 //Fall through
+	case SHUTTER_MODE_CABLE_NO_FOCUS:
+	 digitalWriteFast(CAMERA_PIN, HIGH);
+	 break;
+ }
+   S_CAM_ENGAGED=true; //Set Status flag
 
-  // determine if focus pin should be brought high
-  // w. the shutter pin (for some nikons, etc.)
-  if (!ir_remote){   
-    if( focus_shutter ) //TODO
-      digitalWriteFast(FOCUS_PIN, HIGH);
-
-    digitalWriteFast(CAMERA_PIN, HIGH);
-  }
-  else{
-    send_ir();
-  }
-  // start timer to stop camera exposure
-  MsTimer2::set(exp_tm, stop_camera);
-  MsTimer2::start();
-
-  // update camera currently enaged
-  // (turn on bit)
-  S_CAM_ENGAGED=true;
-  //run_status |= B01000000;
-
-  return; */
 }
 
 
 void stop_camera() {
-/* 
-  digitalWriteFast(CAMERA_PIN, LOW);
+ if (((shutter_mode==NIKON_IR)||(shutter_mode==CANON_IR)) && bulb_mode){
+	 //in Nikon IR-bulb mode send command again  
+	 send_ir(BRAND_NIKON);
+	 } 
+ else if ((shutter_mode==CANON_IR) && bulb_mode){
+	 //in Canon Nikon IR-bulb mode send command again
+     send_ir(BRAND_CANON);
+     }  
+ else{
+	//in both cable modes
+	//we bring down both lines, just in case.. it doesnt hurt.
+	  digitalWriteFast(FOCUS_PIN, LOW);
+	  digitalWriteFast(CAMERA_PIN, LOW);
+	 }	 
 
-  // we do this every time, because
-  // it's possible that the flag
-  // that controls whether or not to
-  // trip focus w. shutter may have
-  // been reset during our exposure,
-  // and failing to do so would keep
-  // the focus pin high for a long
-  // time.
-
-  digitalWriteFast(FOCUS_PIN, LOW);
-
-  // turn off timer - we do this
-  // after the digitalWriteFast() to minimize
-  // over-shooting in case this takes some
-  // unusually-long amount of time
- 
-  // if (ir_remote) send_ir();  
-  MsTimer2::stop();
-
+  //TODO
   // are we supposed to delay before allowing
   // the motors to move?  Register a timer
   // to clear out status flags, otherwise
@@ -90,39 +78,32 @@ void stop_camera() {
   // than the max possible camera exposure timing
 
   // update camera currently engaged
- S_CAM_ENGAGED=false;// run_status &= B10111111;
+ S_CAM_ENGAGED=false;
 
   // update camera cycle complete
- S_CAM_CYCLE_COMPLETE=true; //run_status |= B00100000;
+ S_CAM_CYCLE_COMPLETE=true;
 
- */}
+ }
 
 
-void camera_clear() {/* 
+void camera_clear() {
   // clears out camera engaged settings
   // so that motor control and other actions can 
   // be undertaken.  Used as a timer whenever
   // a camera post delay is set.
 
-  MsTimer2::stop(); // turn off timer
+ S_CAM_ENGAGED=false; 
+ S_CAM_CYCLE_COMPLETE=true;
 
-  // update camera currently engaged
- S_CAM_ENGAGED=false; //run_status &= B10111111;
-
-  // update camera cycle complete
-S_CAM_CYCLE_COMPLETE=true;  //run_status |= B00100000;
- */
 }  
 
 
 
 void stop_cam_focus() {
-/* 
-  MsTimer2::stop();
-  digitalWriteFast(FOCUS_PIN, LOW);
-  pre_focus_clear = 2;
 
- */}
+  digitalWriteFast(FOCUS_PIN, LOW);
+  //pre_focus_clear = 2;
+}
 
 void clear_cam_focus() {/* 
   MsTimer2::stop();
@@ -150,10 +131,10 @@ float calc_total_cam_tm() {
  */
  return (0.0);}
 
-void send_ir(){
-  for(unsigned int i=1;i<=seq[0];i++){
+void send_ir(uint8_t brand){
+  for(unsigned int i=1;i<=seq[brand][0];i++){
     int ir_status=0;
-    int n=seq[i];
+    int n=seq[brand][i];
     while(n>0){
       n--;
       delayMicroseconds(oscd);

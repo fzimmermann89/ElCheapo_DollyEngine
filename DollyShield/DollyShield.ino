@@ -25,6 +25,7 @@
 NOTES:
  -use timer2 for lcd and motor "soft pwm" to use any pin. in slow pulse mode use counter in isr. less overhead than timer1
  -user timer1 in ctc mode with couter for general purpose ms-timer, instead of mstimer2 OR as compare..
+
  -check bulb mode/stop camera using ir
  
  timer1 thoughts:
@@ -65,14 +66,19 @@ NOTES:
 #define FOCUS_PIN 15
 #define IR_PIN 12
 
+//IR Settings
 #define FREQ 38400
 #define oscd 16 //TODO
 
-#define MAX_MOTORS 1
-
-//#define MP_PERIOD 30
-#define MP_PERIOD 30
-
+//IR sequences
+unsigned int seq[][] = {
+	//NIKON
+  {16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+    //CANON
+  {16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+}
+#define IR_NIKON 0
+#define IR_CANON 1
 
 /* User Interface Values */
 
@@ -94,12 +100,10 @@ NOTES:
 #define MAX_LCD_STR 17
 
 
-
 // how many buttons dow we have?
 #define NUM_BUTTONS 5
 
 // button return values
-
 #define BUT0  1
 #define BUT1  2
 #define BUT2  3
@@ -135,12 +139,8 @@ NOTES:
 #define HOLD_BUT_VALINC 10
 
 // ALT input debouncing time
-
 #define ALT_TRIG_THRESH 250
 
-//IR Sequence
-unsigned int seq[] = {
-  16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
 
 // menu strings
 const char menu_0[] PROGMEM = "Movements";
@@ -163,10 +163,9 @@ const char axis_adv_menu_0[] PROGMEM = "Calibrate";
 const char axis_adv_menu_1[] PROGMEM = "max RPM";
 const char axis_adv_menu_2[] PROGMEM = "Dist per Rev";
 const char axis_adv_menu_3[] PROGMEM = "Min Cont. Speed";
-const char axis_adv_menu_4[] PROGMEM = "Pulse Length";
-const char axis_adv_menu_5[] PROGMEM = "Pulse Power";
-const char axis_adv_menu_6[] PROGMEM = "Cal. Spd Low";
-const char axis_adv_menu_7[] PROGMEM = "Cal. Spd Hi";
+const char axis_adv_menu_4[] PROGMEM = "Pulse Power";
+const char axis_adv_menu_5[] PROGMEM = "Cal. Spd Low";
+const char axis_adv_menu_6[] PROGMEM = "Cal. Spd Hi";
 
 const char camera_menu_0[] PROGMEM = "Interval sec";
 const char camera_menu_1[] PROGMEM = "Max Shots";
@@ -210,11 +209,11 @@ const char * const set_str[] PROGMEM = {
   set_menu_0, set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_10};
 
 const char * const axis_adv_str[] PROGMEM = { 
-  axis_adv_menu_0, axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6,axis_adv_menu_7};
+  axis_adv_menu_0, axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6};
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 byte max_menu[7]  = {
-  3,1,6,9,10,7};
+  3,1,6,9,10,6};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -270,9 +269,6 @@ boolean blank_lcd   = false;
 // for dimming lcd
 unsigned int lcd_dim_tm     = 5;
 unsigned long input_last_tm = 0;
-
-// show cm instead of inch?
-//boolean ui_is_metric = false;
 
 // invert L/R displays?
 boolean ui_invdir = false;
@@ -335,14 +331,23 @@ unsigned char bit7:
 }
 io_reg;
 
-#define S_RUNNING  		 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
-#define S_CAM_ENGAGED   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
-#define S_CAM_CYCLE_COMPLETE   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
-#define S_MOT_RUNNING   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
-#define S_EXT_TRIG_ENGAGED   	 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
-#define BIT_6   		 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
-#define BIT_7  			 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
-#define BIT_8			 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
+#define S_F_1                         ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
+#define S_SLOW_MODE_MON                ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
+#define S_SLOW_MODE                   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
+#define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
+#define S_EXT_TRIG_ENGAGE             ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define S_TIMER1_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
+#define S_TIMER2_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
+#define S_TIMER3_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
+
+#define S_RUNNING                     ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit0
+#define S_CAM_ENGAGED                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit1
+#define S_CAM_CYCLE_COMPLETE          ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit2
+#define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit3
+#define S_4                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit4
+#define S_3                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit5
+#define S_2                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit6
+#define S_1                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit7
 
 /* 
  B0 = running
@@ -386,6 +391,7 @@ unsigned int pre_delay_tm;
 
 // shutter mode (0:NikonIR/1:CanonIR/2:Shutter Cab/3:Shut+Foc Cab)
 byte shutter_mode   = 0;
+boolean bulb_mode=false;
 
 // intervalometer time (seconds)
 float cam_interval = 1.0;
@@ -399,11 +405,7 @@ byte cam_repeat = 0;
 // delay between camera repeat cycles
 unsigned int cam_rpt_dly = 250;
 
-byte pre_focus_clear      = 0;
 unsigned long cam_last_tm = 0;
-
-// currently selected motor
-//byte cur_motor = 0;
 
 // set speed for the current motor
 unsigned int m_speed = 0;
@@ -429,8 +431,6 @@ float min_cpm = 20.0;
 // minimumspeed (min cpm->255 scale value) //TODO WHY?
 byte min_spd =  (min_cpm / max_cpm) * 255;
 
-// minimum pulse cycles per motor
-byte m_min_pulse=   20;
 
 // calibration points
 byte motor_spd_cal[2] = {
@@ -444,24 +444,15 @@ unsigned int m_maxsms =  max_cpm * 100;
 #define MODE_CONT false
 boolean m_mode=MODE_SMS;
 
-/*
-// for timer1 pulsing mode control
- boolean timer_used = false; */
- //volatile  bool timer_engaged      = false;
- volatile bool motor_engaged      = false;
- volatile bool motor_ran = 0;
- 
- //timer 2 globals
- uint16_t volatile timer2_ms;
-void (*timer2_func)();
+//slow mode settings
+unsigned int  m_counter_max_on;
+unsigned int  m_counter_max_off;
+unsigned int  m_counter_cur;
 
- 
- 
- 
- 
- 
- 
 
+volatile bool motor_engaged      = false;
+volatile bool motor_ran = 0;
+ 
 //TODO
 
 // motor calibration
@@ -496,29 +487,26 @@ float m_cal_array[3][3][2] = { //TODO sinnvolle Werte voreintragen.
   } 
 }
 ;
-//aktueller Winkel-wert in m_cal_array für den kalibriert wird //warum global? //TODO
-byte m_cur_cal = 0;     
-
 byte m_angle = 0;
 
 boolean m_cal_done = false;
 
-boolean bulb_mode=false;
+
 // ramping data //TODO
 byte m_ramp_in=0;
 byte m_ramp_out=0;
-byte m_ramp_set     = 0;
-float m_ramp_shift  = 0.0;
-byte m_ramp_mod	    = 0;
+byte m_ramp_in_remain=0;
+byte m_ramp_out_remain=0;
 
-// lead-ins for axis movement
-unsigned int m_lead_in  = 0;
-unsigned int m_lead_out = 0;
+// lead-ins
+unsigned int m_lead_in_shoots  = 0;
+unsigned int m_lead_out_shoots = 0;
 
 // for controlling pulsing and sms movement
-unsigned long on_pct  = 0;
-unsigned long off_pct = 0;
+//unsigned long on_pct  = 0; //TODO
+//unsigned long off_pct = 0; //TODO
 unsigned int m_sms_tm = 0;
+
 
 // shots fired
 unsigned long shots = 0;
@@ -528,9 +516,16 @@ unsigned long shots = 0;
  0 = disabled
  1 = start
  2 = stop
+ 3 = toggle on/off
+ 4 = ext intv.
+ 5 = out before
+ 6 = out after
+ 7 = out booth
+ 8 = toggle motor direction
  */
 byte input_type[2]            = {
   0,0};
+  
 unsigned long input_trig_last = 0;
 
 // usb trigger flag
@@ -539,6 +534,12 @@ boolean gb_enabled = false;
 // default alt I/O rising/falling direction
 byte altio_dir = FALLING;
 
+ //timer globals
+ uint16_t volatile timer3_ms;
+void (*timer1_func)();
+void (*timer2_func)();
+void (*timer3_func)();
+ 
 // initialize LCD object
 LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 

@@ -179,8 +179,8 @@ void alt_ext_trigger_disengage() {
       digitalWriteFast(2, altio_dir);
     if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) )
       digitalWriteFast(3, altio_dir);
- 
   //MsTimer2::stop();   //TODO
+ 
 
   // clear flag...
   S_EXT_TRIG_ENGAGED=false;//run_status &= B11110111;
@@ -194,22 +194,23 @@ void alt_ext_trigger_disengage() {
  
  */
  
-void settimeout(uint16_t ms,void (*f)()){
-  timer2_ms=ms;
-  timer2_func=f;
-}
 
 void initialize_alt_timers() {
 
   cli();                //disable interrupts
   //timer 2
   TCCR2A = 0x00;        //Timer2 Control Reg A: Wave Gen Mode normal
-  TCCR2B = 4;           //set Prescaler to 64
+  TCCR2B = 0x0          //set Prescaler to 64
   TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
   TIMSK2 |= (1<<OCIE2B);  
-  TIMSK2 |= (1<<TOIE2);   
+  TIMSK2 |= (1<<TOIE2); //enable timer  
   
   //timer1
+  TCCR1A = 0x00;        //Timer1 Control Reg A: Wave Gen Mode normal
+  TCCR1B = 0x04;        //set Prescaler to 256
+  TIMSK1 &= ~(1<<OCIE1A);//disable Compare Interrupts until needed
+  TIMSK1 &= ~(1<<OCIE1B);  
+  TIMSK1 |= (1<<TOIE1); //enable timer  
 
 
 
@@ -219,8 +220,20 @@ void initialize_alt_timers() {
 
 
 void alt_io_motor_set(uint8_t value){
+  S_SLOW_MODE=false;
   OCR2A=value;
 }
+
+void alt_io_motor_set_slow(uint8_t value){
+  OCR2A=0;
+  m_counter_max_on=pulse_lengh*value;
+  m_counter_max_off=pulse_length*(255-value);
+  m_counter_cur=m_counter_max_on;
+  S_SLOW_MODE=true;
+  S_SLOW_MODE_MON=true;
+  OCR2A=255; //TODO anpassbar machen? kalibrierbar?
+}
+
 
 void alt_io_display_set(uint8_t value){
   OCR2B=value;
@@ -237,18 +250,80 @@ ISR(TIMER2_COMPB_vect) {
 }
 
 ISR(TIMER2_OVF_vect){
-    
-  if (timer2_ms==0){
-     PORTD&= ~_BV(4);
-  (*timer2_func)();
+ if (S_SLOW_MODE){
+	 m_counter_cur--
+	 if (m_counter_cur==0){
+		 //time to switch
+		 
+	    if (S_SLOW_MODE_MON){
+	    //currently on, switch to off
+	    digitalWriteFast(MOTOR0_P, LOW);
+	    //set counter to value when motor should be turned on
+	    S_SLOW_MODE_MON=false;
+	    m_counter_cur=m_counter_on;
+	    
+        }
+	    else{
+	     //currently off, switch to on
+	 	 digitalWriteFast(MOTOR0_P, HIGH);
+	 	 //set counter to value when motor should be turned off
+	 	 S_SLOW_MODE_MON=true;
+	 	 m_counter_cur=m_counter_off;
+        }	 
+     }
+ }
+ if (S_TIMER3_SET){
+  if (timer3_ms==0){
+  (*timer3_func)();
+  S_TIMER3_SET=false;
   }
-  else timer2_ms--;
+  else timer3_ms--;
+ }
+ 
   if (OCR2A>0) digitalWriteFast(MOTOR0_P, HIGH); //motor on
   if (OCR2B>0) digitalWriteFast(LCD_BKL, HIGH);  //display on
 
 }
+void timer1_set(uint16_t ms,void (*f)()){
+  timer1_func=f;
+  S_TIMER1_SET=true;
+  TIMSK1 &= ~(1<<TOIE1) //disable timer while calculating compare value
+  //divide ms by 63 (should be 62.5) and add it to the current timer
+  //value to set new interrupt compare value
+  OCR1A=TCNT+((ms<<6)-ms)
+  TIMSK1 |= (1<<TOIE1) //re-enable timer
+  TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
+}
 
+void timer2_set(uint16_t ms,void (*f)()){
+  timer2_func=f;
+  S_TIMER2_SET=true;
+  TIMSK1 &= ~(1<<TOIE1) //disable timer while calculating compare value
+  //divide ms by 63 (should be 62.5) and add it to the current timer
+  //value to set new interrupt compare value
+  OCR1B=TCNT+((ms<<6)-ms)
+  TIMSK1 |= (1<<TOIE1) //re-enable timer
+  TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
+}
 
+void timer3_set(uint16_t ms,void (*f)()){
+  timer3_ms=ms;
+  timer3_func=f;
+  S_TIMER3_SET=true;
+}
+ISR(TIMER1_COMPA_vect) {
+  //timer 1
+    TIMSK1 &= ~(1<<OCIE1A);
+    (*timer1_func)();
+    S_TIMER1_SET=false;
+}
 
+ISR(TIMER1_COMPB_vect) {
+  //timer 2
+    TIMSK1 &= ~(1<<OCIE1B);
+    (*timer2_func)();
+    S_TIMER2_SET=false;
+   
+}
 
 

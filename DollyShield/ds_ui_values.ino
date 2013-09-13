@@ -240,17 +240,19 @@ switch (pos){
     break;
 
   case 3:
-    // min cont setting
-    ui_type=INPUT_FLOAT;
+    // min cont setting //TODO: Input in CPM instead of speed
+    //ui_type=INPUT_FLOAT;
+    ui_type=INPUT_LONG;
     if( read_save == true ) {
-
-      min_cpm = cur_inp_float;
-      min_spd = 255 * ( min_cpm / max_cpm );
+      min_spd=cur_inp_long;
+      //min_cpm = cur_inp_float;
+      //min_spd = 255 * ( min_cpm / max_cpm );
    
       eeprom_write(EEPROM_TODO, min_cpm);
       eeprom_write(EEPROM_TODO, min_spd);
     } 
-    cur_inp_float = min_cpm;
+//    cur_inp_float = min_cpm;
+    cur_inp_long=min_spd;
     break;
 
 //TODO 4+5
