@@ -1,4 +1,4 @@
-#include "Arduino.h" 
+  #include "Arduino.h" 
 
 #define BIT_READ(value, bit) (((value) >> (bit)) & 0x01)
 #define BIT_SET(value, bit) ((value) |= (1UL << (bit)))
@@ -124,11 +124,14 @@ bitWrite(*(A), __digitalPinToBit(P), (V) );                   \
 SREG=saveSreg;                                             \
 } 
 
-
+// && __builtin_constant_p(V)
 #ifndef digitalWriteFast
 #define digitalWriteFast(P, V) \
 do {                       \
-if (__builtin_constant_p(P) && __builtin_constant_p(V))   __atomicWrite__((uint8_t*) digitalPinToPortReg(P),P,V) \
+if (__builtin_constant_p(P)) {\
+	if(V)   __atomicWrite__((uint8_t*) digitalPinToPortReg(P),P,HIGH) \
+	else     __atomicWrite__((uint8_t*) digitalPinToPortReg(P),P,LOW)\
+}\
 else  digitalWrite((P), (V));         \
 }while (0)
 #endif  //#ifndef digitalWriteFast2
@@ -149,6 +152,15 @@ else pinMode((P), (V)); \
 #endif		
 
 
+#ifndef digitalToggleFast
+	#define digitalToggleFast(P) ( (int) _digitalToggleFast_((P)) )
+	#define _digitalToggleFast_(P ) \
+	(__builtin_constant_p(P) ) ? ( \
+	*digitalPinToPINReg(P)= (1UL << __digitalPinToBit(P)) ): \
+	(digitalWrite((P),!digitalRead((P))))
+#endif
+
+
 #ifndef digitalReadFast
 	#define digitalReadFast(P) ( (int) _digitalReadFast_((P)) )
 	#define _digitalReadFast_(P ) \
@@ -156,4 +168,3 @@ else pinMode((P), (V)); \
 	( BIT_READ(*digitalPinToPINReg(P), __digitalPinToBit(P))) ) : \
 	digitalRead((P))
 #endif
-
