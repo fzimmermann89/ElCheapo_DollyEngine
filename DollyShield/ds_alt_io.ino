@@ -60,7 +60,7 @@ void altio_isr_handler(byte which) {
 
     case 8:
       // switch  motor direction
-      motor_dir(!m_wasdir);
+      motor_dir(!m_dir);
 
       break;
 
@@ -123,8 +123,8 @@ void altio_connect(byte which, byte type) {
   }
 
 else {
-	//input mode
-	if( type == 4 ) {
+  //input mode
+  if( type == 4 ) {
     // external intervalometer function
     external_io |= EXT_INTV_1 << which;
   }
@@ -137,7 +137,7 @@ else {
     attachInterrupt(0, altio_isr_one, altio_dir);
   }
   else{
-	// set pin as input
+  // set pin as input
     pinModeFast(3, INPUT);
     // enable pull-up resistor
     digitalWriteFast(3, HIGH);
@@ -220,12 +220,14 @@ void initialize_alt_timers() {
 
 
 void alt_io_motor_set(uint8_t value){
+  if (value==0)  TIMSK2 &= ~(1<<OCIE2A) //disable motor-on interrupt
+  else  TIMSK2 |= (1<<OCIE2A)           //enable motor-on interrupt
   S_SLOW_MODE=false;
   OCR2A=value;
 }
+}
 
 void alt_io_motor_set_slow(uint8_t value){
-  OCR2A=0;
   m_counter_max_on=m_pulse_length*value;
   m_counter_max_off=m_pulse_length*(255-value);
   m_counter_cur=m_counter_max_on;
@@ -236,6 +238,8 @@ void alt_io_motor_set_slow(uint8_t value){
 
 
 void alt_io_display_set(uint8_t value){
+   if (value==0)  TIMSK2 &= ~(1<<OCIE2B) //disable display-on interrupt
+  else  TIMSK2 |= (1<<OCIE2B)           //enable display-on interrupt
   OCR2B=value;
 }
 
@@ -251,25 +255,25 @@ ISR(TIMER2_COMPB_vect) {
 
 ISR(TIMER2_OVF_vect){
  if (S_SLOW_MODE){
-	 m_counter_cur--;
-	 if (m_counter_cur==0){
-		 //time to switch
-		 
-	    if (S_SLOW_MODE_MON){
-	    //currently on, switch to off
-	    digitalWriteFast(MOTOR0_P, LOW);
-	    //set counter to value when motor should be turned on
-	    S_SLOW_MODE_MON=false;
-	    m_counter_cur=m_counter_max_on;
-	    
+   m_counter_cur--;
+   if (m_counter_cur==0){
+     //time to switch
+     
+      if (S_SLOW_MODE_MON){
+      //currently on, switch to off
+      digitalWriteFast(MOTOR0_P, LOW);
+      //set counter to value when motor should be turned on
+      S_SLOW_MODE_MON=false;
+      m_counter_cur=m_counter_max_on;
+      
         }
-	    else{
-	     //currently off, switch to on
-	 	 digitalWriteFast(MOTOR0_P, HIGH);
-	 	 //set counter to value when motor should be turned off
-	 	 S_SLOW_MODE_MON=true;
-	 	 m_counter_cur=m_counter_max_off;
-        }	 
+      else{
+       //currently off, switch to on
+     digitalWriteFast(MOTOR0_P, HIGH);
+     //set counter to value when motor should be turned off
+     S_SLOW_MODE_MON=true;
+     m_counter_cur=m_counter_max_off;
+        }  
      }
  }
  if (S_TIMER3_SET){

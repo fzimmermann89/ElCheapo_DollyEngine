@@ -1,36 +1,36 @@
-/* 
- 
+/*
+
  MX2 El Cheapo - Motor control functions
  modified Version of Dynamic Perception LLC's DollyShield
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC ds_motor.ino
  (c) FFZ
  For more info go to http://openmoco.org or http://www.thundercorp.de/timelapse
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
  */
 /*
 
  ========================================
  Motor control functions
  ========================================
- 
+
  */
 
 
 void motor_speed_adjust(int val, boolean spd_floor ) {
-/* 
+
   byte c_speed = 0;
   // val is expected to be between -255 and 255;
 
@@ -40,36 +40,28 @@ void motor_speed_adjust(int val, boolean spd_floor ) {
   else {
     c_speed = (int) m_speed + val >= 0 ? m_speed + val : 0;
     // do we need to floor the value at the min speed setting? (man control)
-    if( spd_floor ) 
-    Serial.println("fl");
+    if( spd_floor )
       c_speed = c_speed < min_spd ? min_spd : c_speed;
   }
 
-  motor_set_speed(c_speed );   
- */
+  motor_set_speed(c_speed );
+
 }
 
 void motor_control(boolean state) {
-/*
-  // turn motors on or off
+
+  // turn motor on or off
 
   if( ! state ) {
-    // set motors as not running
-
-    unsigned int ths_spd = m_speed;
-
+      //turn off
     motor_set_speed( 0 );
-
-    m_speed = ths_spd;
-    mcur_spds = ths_spd;
-
-   S_MOT_RUNNING=false;// run_status &= B11101111;
-
+    m_cur_speed = 0;
+    S_MOT_RUNNING=false;
   }
   else {
     // set motors as running...
-   S_MOT_RUNNING=true;// run_status |= B00010000;
-    if( mcur_spds > 0 )
+   S_MOT_RUNNING=true;
+    if( m_cur_speed > 0 )
       motor_set_speed(mcur_spds);
   }
 */
@@ -77,17 +69,43 @@ void motor_control(boolean state) {
 
 
 
-void motor_set_speed( unsigned int m_speed ) {
- /* m_speed = m_speed;
-  m_sms_tm = 0;
+void motor_set_speed( unsigned int speed ) { //TODO datatype of m_speed.
 
+  if (speed==0)
+    //called to disable motor.
+    S_MOT_RUNNING=false;
+    m_sms_tm=0; //disables if in sms-mode
+    m_cur_spds=0; //disables if in cont.-mode
+    alt_io_motor_set(0); //disables slow mode too.
+    return;
+  if (!(ui_ctrl_flags&UI_MANUAL_MODE)){ 
+    //not in manual mode and motors running
+    if (m_mode==MODE_SMS){
+      //SMS mode
+      //calculate times
+      ;
+    }
+    else if (speed<min_spd){
+      //speed below min_speed, so use pulsing mode
+      m_cur_speed=speed;
+      if (S_MOT_RUNNING) alt_io_motor_set_slow(m_cur_speed); //write only to motor if running!
+    }
+    else{
+      //continous mode
+      m_cur_speed=speed;
+      if (S_MOT_RUNNING) alt_io_motor_set(m_cur_speed); //write only to motor if running!
+    }
+  }else{
+    //manual mode
+  }
+}
 
-
+/*
   if( ! motor_sl_mod && ! (ui_ctrl_flags & B00000100) ) {
     // handle when in interleaved mode and not on
     // manual control screen
 
-    float m_pct = ( (float) m_speed / (float) m_maxsms );  
+    float m_pct = ( (float) m_speed / (float) m_maxsms );
 
     m_sms_tm = 60000.0 * m_pct;
 
@@ -112,7 +130,7 @@ Serial.println(m_speed);
 Serial.println("smaller");
     motor_calc_pulse_len(m_speed, false);
 
-  } //      
+  } //
   else {
     on_pct = 0;
   }
@@ -143,7 +161,7 @@ Serial.print("ms:");
 Serial.println(min_spd);
    Serial.print("s:");
     Serial.println(m_speed);
-    
+
   if( m_speed >= min_spd ) {
     analogWrite(MOTOR0_P, m_speed);
  Serial.print("written");
@@ -151,51 +169,22 @@ Serial.println(min_spd);
   }
   else {
     Serial.println("off");
-    // just in case... switching down from 
+    // just in case... switching down from
     // pwm to pulsed...
     digitalWrite(MOTOR0_P,LOW);
   }
 */
 }
 
-void motor_calc_pulse_len(unsigned int m_speed, boolean ignore_cal) {
-/*  // for how many periods should the motor be on and
-  // off? (pulsing mode)     
-Serial.println("calc");
-  float m_pct   = ( (float) m_speed / 255.0 );
-  float periods = 1333.0; // 25 times a second 
 
-  on_pct = periods * m_pct; 
-  off_pct = (float) (periods - on_pct[0]);
-
-  float cal_amt = motor_cal_adjust(1,m_speed, m_wasdir);
-
-  // calibrate, if desired
-  if( ! ignore_cal && cal_amt != 1.0 )
-    off_pct = ( (double) off_pct * ( cal_amt * m_cal_constant )  ); 
-
-  if(on_pct < 1)
-    on_pct = 1;
-
-  // make sure that we're on for a minimum amount of time
-
-  if ( on_pct != 0 && on_pct < m_min_pulse ) {
-    // adjust so that off time is increased relative to on time
-    float diff = (float) m_min_pulse / (float) on_pct;       
-    off_pct = ((float) off_pct * diff);
-    on_pct = m_min_pulse;
-  }
-*/
-}
 
 void motor_dir(byte dir ) {
-/*
-  if( m_wasdir == dir )
+
+  if( m_dir == dir ) //already running in the right direction
     return;
 
-  // get current speed for the motor
-  byte ths_speed = m_speed;
-
+  // get current speed for the motor and save it for writing back later
+  byte ths_speed = m_cur_speed;
 
 
   if( ths_speed > 0 ) {
@@ -203,19 +192,19 @@ void motor_dir(byte dir ) {
     // and let motor settle before moving
     // stop motor
     motor_set_speed( 0 );
-    delay(100);    
+    delay(100);
   }
 
 
-  digitalWriteFast(MOTOR0_DIR, dir);  
-  m_wasdir = dir;
+  digitalWriteFast(MOTOR0_DIR, dir);
+  m_dir = dir;
+  //writing back saved speed
   motor_set_speed( ths_speed );
-  */
 }
 
 
 float motor_calc_ipm(unsigned int spd, boolean ths_mode) {
-/* 
+/*
  // calculate ipm for a given speed and mode
 
     // get max speed for either pulse or sms mode
@@ -224,10 +213,10 @@ float motor_calc_ipm(unsigned int spd, boolean ths_mode) {
   float maxspd = ( ! ths_mode ) ? (float) m_maxsms : 255.0;
 
   // in manual mode, we're always in 0-255 mode
-  if( ui_ctrl_flags & B00000100 ) 
+  if( ui_ctrl_flags & B00000100 )
     maxspd = 255.0;
 
-  float cur_ipm = (float) max_cpm * ( (float) spd / (float) maxspd );      
+  float cur_ipm = (float) max_cpm * ( (float) spd / (float) maxspd );
 
   return(cur_ipm);
   */
@@ -275,10 +264,10 @@ void motor_pulse() { //TODO
           pulses++;
           continue;
         }
-        else {            
+        else {
           // set port value high for given motor
-        //  PORTD |= (B00100000 << i); 
-         digitalWriteFast(MOTOR0_P,HIGH); 
+        //  PORTD |= (B00100000 << i);
+         digitalWriteFast(MOTOR0_P,HIGH);
           mstate = 1;
           pulses = 1;
         }
@@ -291,8 +280,8 @@ void motor_pulse() { //TODO
         else {
 
           // set port value low for given motor
-       //   PORTD &= ( B11111111 ^ ( B00100000 << i ) ); 
-         digitalWriteFast(MOTOR0_P,LOW); 
+       //   PORTD &= ( B11111111 ^ ( B00100000 << i ) );
+         digitalWriteFast(MOTOR0_P,LOW);
           mstate[i] = 0;
           pulses[i] = 1;
         }
@@ -308,7 +297,7 @@ void run_motor_sms() {
 /*
   analogWrite(MOTOR0_P, 255);
 */
-} 
+}
 
 void stop_motor_sms() {
 /*
@@ -318,9 +307,45 @@ void stop_motor_sms() {
 
   motor_ran++;
 */
-} 
+}
 
-void motor_set_ramp( byte ramp) {
+void motor_set_ramp() {
+  //to be called after a shoot to adjust speed for next one.
+  
+  if (shoots<=lead_in){
+    //during lead_in
+    m_cur_speed=0;
+  }
+  else if (shoots<=(lead_in+ramp_in)){
+    //during ramp_in
+    //calculate speed
+    uint8_t speed_step;
+    uint8_t remaining_shoots_for_ramp=1; //TODO
+    speed_step=(m_speed-m_cur_speed)/remaining_shoots_for_ramp;
+    m_cur_speed+=speed_step;
+  }  
+  else if (cam_max>0){
+    //ramp and lead out only make sense if max. shoots are set.
+    if (shoots<=(cam_max-lead_out-ramp_out)){
+      //during normal mode
+      m_cur_speed=m_speed;
+    }
+    else if (shoots<=(cam_max-lead_out)){
+      //during ramp_out
+      //calculate speed
+    uint8_t speed_step;
+    uint8_t remaining_shoots_for_ramp=1; //TODO
+    speed_step=(m_cur_speed)/remaining_shoots_for_ramp;
+    m_cur_speed+=speed_step;
+    else{
+      //during lead_out
+      m_cur_speed=0;
+    }
+  else {
+    //no cam_max set. so normal mode.
+    m_cur_speed=m_speed;
+  }
+} 
   /*// set motor ramp value, adjust
   // associated values
 
@@ -329,7 +354,7 @@ void motor_set_ramp( byte ramp) {
 
   m_ramp_set[0]   = ramp > 255 ? 255 : ramp; //TODO: immer [0]
 
-  // calculate speed change per shot  
+  // calculate speed change per shot
   if( ramp > 0 ) {
     m_ramp_shift[0] = (float) m_speed / ramp;
 
@@ -353,7 +378,7 @@ void motor_set_ramp( byte ramp) {
   }
 
 */
-}  
+
 
 
 void motor_stop_all() {
@@ -379,7 +404,7 @@ float motor_cal_adjust(byte type, byte m_spd, byte dir) {
 
 
   // simplistic for sms mode
-  if( type == 0 ) 
+  if( type == 0 )
     return(m_cal_array[0][m_angle[0]][0][dir]);
 
   // determine which calibration position we fall
@@ -420,7 +445,7 @@ float motor_cal_adjust(byte type, byte m_spd, byte dir) {
 
 
 void motor_run_pulsing() {
-/* 
+/*
   // start pulsing motor movement
 
   if( ! timer_engaged ) {
@@ -446,7 +471,7 @@ void motor_run_pulsing() {
 }
 
 void motor_execute_ramp_changes() {
-/* 
+/*
   // check for ramping, and ramp up or down as needed
 
   // no ramp, go to next motor
@@ -455,17 +480,17 @@ void motor_execute_ramp_changes() {
 
   // handle lead-in
   if( shots <= m_lead_in[0] ) {
-    motor_set_speed(0); 
-    return;  
+    motor_set_speed(0);
+    return;
   }
 
   // ramp up?
   if( m_ramp_set[0] >= ( shots - m_lead_in[0]) ) {
-    // if ramping less than once per shot 
+    // if ramping less than once per shot
     if( m_ramp_mod[0] > 0 && ( shots - m_lead_in[0] ) % m_ramp_mod[0] == 0 ) {
       motor_set_speed(m_speed + 1);
     }
-    else if( m_ramp_mod[0] == 0 ) {  
+    else if( m_ramp_mod[0] == 0 ) {
       motor_set_speed((m_ramp_shift[0] * (shots - m_lead_in[0]) ) );
     }
   }
@@ -475,7 +500,7 @@ void motor_execute_ramp_changes() {
       byte m_spd = m_speed > 0 ? m_speed - 1 : 0;
       motor_set_speed(m_spd);
     }
-    else if( m_ramp_mod[0] == 0 ) {  
+    else if( m_ramp_mod[0] == 0 ) {
       motor_set_speed(m_ramp_shift[0] * (cam_max - shots - m_lead_out[0]) );
     }
   }
@@ -496,7 +521,7 @@ Serial.println(mspd);
   if( which == 1 ) {
     Serial.print("maxs:");
 Serial.println(m_maxsms[0]);
-    float m_pct = ( (float) mspd / (float) m_maxsms[0] );  
+    float m_pct = ( (float) mspd / (float) m_maxsms[0] );
     unsigned int run_tm = 60000.0 * m_pct;
     Serial.print("pct:");
 Serial.println(m_pct);
@@ -515,7 +540,7 @@ Serial.println(m_pct);
   else {
 Serial.println("pulsing");
     byte was_on_pct = on_pct[0];
-    byte was_off_pct = off_pct[0];     
+    byte was_off_pct = off_pct[0];
 
     motor_calc_pulse_len(mspd, true);
 

@@ -604,15 +604,15 @@ void get_mainscr_set(byte pos, boolean read_save) {
 void get_manual_select(byte pos) {
 
 switch (pos) {
-	case 0:  
-	// set in manual mode
-	  ui_ctrl_flags |= B00000100;
-	  show_manual();
-	  break;
-	
-	case 1:
-	//TODO
-	  break;
+  case 0:  
+  // set in manual mode
+    ui_ctrl_flags |= B00000100;
+    show_manual();
+    break;
+  
+  case 1:
+  //TODO
+    break;
 }
 }
 

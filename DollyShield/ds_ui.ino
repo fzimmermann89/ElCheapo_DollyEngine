@@ -369,7 +369,7 @@ void ui_button_center( boolean held ) {
 
   
     if( new_menu == MENU_CALIBRATION || new_menu==MENU_MANUAL ) {
-		  // if drawing motor manual screen or in calibration screen...
+      // if drawing motor manual screen or in calibration screen...
       get_value(cur_menu, cur_pos, false);
       return;
     }
@@ -757,7 +757,7 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
    
 
       switch(ui_type) {
-	   case INPUT_IO:
+     case INPUT_IO:
         // for alt i/o inputs
 
         if( cur_inp_long == 0 ) {

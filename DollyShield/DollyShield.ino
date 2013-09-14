@@ -31,12 +31,12 @@ NOTES:
  timer1 thoughts:
  16bit timer, dh bis 65535.
  bei 16mhz:
- prescaler		zeit pro tick		max zeit		ticks pro ms
- 1				0,0625us			4ms				16000
- 8				0,5us				32ms			2000
- 64				4us					262ms			250
- 256			16us				1s				62.5	~63 	wert=wert<<6-wert
- 1024			64us				4s				15.625  ~16		wert=wert<<4
+ prescaler    zeit pro tick   max zeit    ticks pro ms
+ 1        0,0625us      4ms       16000
+ 8        0,5us       32ms      2000
+ 64       4us         262ms     250
+ 256      16us        1s        62.5  ~63   wert=wert<<6-wert
+ 1024     64us        4s        15.625  ~16   wert=wert<<4
  
  
  */
@@ -72,10 +72,10 @@ NOTES:
 
 //IR sequences
 
-	//NIKON
-unsigned int seq_nikon[]={16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+  //NIKON
+unsigned int seq_nikon[]={14,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
     //CANON
-unsigned int seq_canon[]={16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+unsigned int seq_canon[]={3,16,458,16};
 
 unsigned int *seqs[] = {seq_nikon,seq_canon};
 #define IR_NIKON 0
@@ -414,8 +414,8 @@ unsigned int m_speed = 0;
 // currently set speed (for altering motor speed)
 unsigned int mcur_spds=0;
 
-// prev direction for motor
-byte m_wasdir = 0;
+//direction of motor
+byte m_dir = 0;
 
 // distance (i) per revolution
 float m_diarev =  3.53;
@@ -689,7 +689,7 @@ void main_loop_handler() {
         // post-exposure cycle by pretending to be an
         // exposure
       S_CAM_ENGAGED=true;  
-	   //TODO
+     //TODO
        // MsTimer2::set(post_delay_tm, camera_clear);
        // MsTimer2::start();
         motors_clear = false;
