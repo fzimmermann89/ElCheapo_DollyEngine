@@ -320,12 +320,14 @@ void motor_set_ramp() {
     //during ramp_in
     //calculate speed
     uint8_t speed_step;
-    uint8_t remaining_shoots_for_ramp=1; //TODO
-    speed_step=(m_speed-m_cur_speed)/remaining_shoots_for_ramp;
+    uint8_t remaining_shoots_for_ramp=(lead_in+ramp_in)-shoots+1; //TODO
+    speed_step=(m_speed-m_cur_speed)/(remaining_shoots_for_ramp+1);
     m_cur_speed+=speed_step;
   }  
   else if (cam_max>0){
     //ramp and lead out only make sense if max. shoots are set.
+    
+    //TODO: abhier noch nicht drüber nachgedacht
     if (shoots<=(cam_max-lead_out-ramp_out)){
       //during normal mode
       m_cur_speed=m_speed;
@@ -470,7 +472,7 @@ void motor_run_pulsing() {
   } */
 }
 
-void motor_execute_ramp_changes() {
+void motor_execute_ramp_changes() { //obsolete
 /*
   // check for ramping, and ramp up or down as needed
 
@@ -508,6 +510,15 @@ void motor_execute_ramp_changes() {
  */
 }
 
+uint16_t calc_min_cam_max(){
+uint16_t min_cam_max;
+min_cam_max=ramp_in+ramp_out;
+//if one of the ramps is enabled we need to more max shots than ramp shoots
+if (min_cam_max>0) min_cam_max+=2;
+min_cam_max+=lead_in;
+min_cam_max+=lead_out;
+return min_cam_max;
+}
 
 void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
 /* Serial.print("w:");
