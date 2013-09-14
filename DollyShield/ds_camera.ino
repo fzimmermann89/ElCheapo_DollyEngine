@@ -33,10 +33,10 @@ void fire_camera(unsigned long exp_tm) {
 	//Fires the camera by using the selected method.
  switch (shutter_mode){
 	case SHUTTER_MODE_IR_NIKON:
-	 send_ir(BRAND_NIKON);
+	 send_ir(IR_NIKON);
 	 break;
 	case SHUTTER_MODE_IR_CANON:
-	 send_ir(BRAND_CANON);
+	 send_ir(IR_CANON);
 	 break;
 	case SHUTTER_MODE_CABLE_FOCUS:
 	 digitalWriteFast(FOCUS_PIN, HIGH);
@@ -51,13 +51,13 @@ void fire_camera(unsigned long exp_tm) {
 
 
 void stop_camera() {
- if (((shutter_mode==NIKON_IR)||(shutter_mode==CANON_IR)) && bulb_mode){
+ if ((shutter_mode==SHUTTER_MODE_IR_NIKON) && bulb_mode){
 	 //in Nikon IR-bulb mode send command again  
-	 send_ir(BRAND_NIKON);
+	 send_ir(IR_NIKON);
 	 } 
- else if ((shutter_mode==CANON_IR) && bulb_mode){
+ else if ((shutter_mode==SHUTTER_MODE_IR_CANON) && bulb_mode){
 	 //in Canon Nikon IR-bulb mode send command again
-     send_ir(BRAND_CANON);
+     send_ir(IR_CANON);
      }  
  else{
 	//in both cable modes
@@ -132,9 +132,9 @@ float calc_total_cam_tm() {
  return (0.0);}
 
 void send_ir(uint8_t brand){
-  for(unsigned int i=1;i<=seq[brand][0];i++){
+  for(unsigned int i=1;i<=*(seqs[brand]);i++){
     int ir_status=0;
-    int n=seq[brand][i];
+    int n=*(seqs[brand] + i);
     while(n>0){
       n--;
       delayMicroseconds(oscd);

@@ -71,12 +71,13 @@ NOTES:
 #define oscd 16 //TODO
 
 //IR sequences
-unsigned int seq[][] = {
+
 	//NIKON
-  {16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+unsigned int seq_nikon[]={16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
     //CANON
-  {16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
-}
+unsigned int seq_canon[]={16,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+
+unsigned int *seqs[] = {seq_nikon,seq_canon};
 #define IR_NIKON 0
 #define IR_CANON 1
 
@@ -154,7 +155,7 @@ const char manual_menu_1[] PROGMEM = "Fast Simulat.";
 const char axis_menu_0[] PROGMEM = "Movement Mode";
 const char axis_menu_1[] PROGMEM = "Ramp In Shots";
 const char axis_menu_2[] PROGMEM = "Ramp Out Shots";
-const char axis_menu_3[] PROGMEM = "Angel";
+const char axis_menu_3[] PROGMEM = "Angle";
 const char axis_menu_4[] PROGMEM = "Lead In";
 const char axis_menu_5[] PROGMEM = "Lead Out";
 const char axis_menu_6[] PROGMEM = "Advanced";
@@ -303,7 +304,7 @@ boolean ui_motor_display = true;
 //input type flags
 
  enum  __attribute__((packed)) INPUTS {
-     INPUT_FLOAT, INPUT_LONG, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGEL,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
+     INPUT_FLOAT, INPUT_LONG, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGLE,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
  };
 
 
@@ -335,7 +336,7 @@ io_reg;
 #define S_SLOW_MODE_MON                ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
 #define S_SLOW_MODE                   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
 #define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
-#define S_EXT_TRIG_ENGAGE             ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define S_EXT_TRIG_ENGAGED             ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
 #define S_TIMER1_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
 #define S_TIMER2_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
 #define S_TIMER3_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
@@ -448,7 +449,7 @@ boolean m_mode=MODE_SMS;
 unsigned int  m_counter_max_on;
 unsigned int  m_counter_max_off;
 unsigned int  m_counter_cur;
-
+uint8_t m_pulse_length;
 
 volatile bool motor_engaged      = false;
 volatile bool motor_ran = 0;
@@ -499,8 +500,8 @@ byte m_ramp_in_remain=0;
 byte m_ramp_out_remain=0;
 
 // lead-ins
-unsigned int m_lead_in_shoots  = 0;
-unsigned int m_lead_out_shoots = 0;
+unsigned int m_lead_in  = 0;
+unsigned int m_lead_out = 0;
 
 // for controlling pulsing and sms movement
 //unsigned long on_pct  = 0; //TODO
@@ -769,7 +770,7 @@ void main_loop_handler() {
 
       // make sure we handle pre-focus tap timing
 
-      if( ( pre_focus_clear == 4 || focus_tap_tm == 0 || (cam_repeat > 0 && cam_repeated > 0) ) && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
+      if( ( /*pre_focus_clear == 4 ||*/ focus_tap_tm == 0 || (cam_repeat > 0 && cam_repeated > 0) ) && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
 
         // we always set the start mark at the time of the
         // first exposure in a repeat cycle (or the time of exp
@@ -796,15 +797,15 @@ void main_loop_handler() {
         // camera is all clear to fire, and enough
         // time is elapsed
         fire_camera(exp_tm);
-        pre_focus_clear = 0;
+       // pre_focus_clear = 0;
 
       }
-      else if( focus_tap_tm > 0 && pre_focus_clear == 0 && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
+      else if( focus_tap_tm > 0 && /*pre_focus_clear == 0 &&*/ !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
         // pre-focus tap is set, bring focus line high
         digitalWriteFast(FOCUS_PIN, HIGH);
       //  MsTimer2::set(focus_tap_tm, stop_cam_focus);
       //  MsTimer2::start();
-        pre_focus_clear = 1;
+        //pre_focus_clear = 1;
       }
     } // end else (not external trigger...
   } // end if(do_fire...
@@ -825,9 +826,9 @@ void start_executing() {
 
   // if ramping is enabled for a motor, start at a zero
   // speed
-  if( m_ramp_set >= 1 )
+  /*if( m_ramp_set >= 1 )
     motor_set_speed(0); 
-
+*/
 
   // reset shot counter
   shots = 0;

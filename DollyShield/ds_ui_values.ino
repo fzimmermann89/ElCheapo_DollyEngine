@@ -114,7 +114,7 @@ void move_val(boolean dir) {
     } // end if dir not true
    
     // ceiling on certain values
-    if (ui_type==INPUT_ANGEL ) {
+    if (ui_type==INPUT_ANGLE ) {
       cur_inp_long = cur_inp_long > 2 ? 2 : cur_inp_long;
     }
     else if (ui_type==INPUT_IO ) {
@@ -171,7 +171,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
   
   case 3: 
     // doly angle (for calibration)
-    ui_type=INPUT_ANGEL;
+    ui_type=INPUT_ANGLE;
 
     if( read_save == true ) {
       m_angle = cur_inp_long;
@@ -592,7 +592,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
       motor_set_speed((unsigned int) cur_inp_long); 
       // calculate speed change per shot for ramping
       // if needed - use function to update values
-      motor_set_ramp(m_ramp_set);  //TODO
+    //  motor_set_ramp(m_ramp_set);  //TODO
     }
     cur_inp_long = m_speed;
     break; 

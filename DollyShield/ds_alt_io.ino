@@ -200,7 +200,7 @@ void initialize_alt_timers() {
   cli();                //disable interrupts
   //timer 2
   TCCR2A = 0x00;        //Timer2 Control Reg A: Wave Gen Mode normal
-  TCCR2B = 0x0          //set Prescaler to 64
+  TCCR2B = 0x04;        //set Prescaler to 64
   TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
   TIMSK2 |= (1<<OCIE2B);  
   TIMSK2 |= (1<<TOIE2); //enable timer  
@@ -226,8 +226,8 @@ void alt_io_motor_set(uint8_t value){
 
 void alt_io_motor_set_slow(uint8_t value){
   OCR2A=0;
-  m_counter_max_on=pulse_lengh*value;
-  m_counter_max_off=pulse_length*(255-value);
+  m_counter_max_on=m_pulse_length*value;
+  m_counter_max_off=m_pulse_length*(255-value);
   m_counter_cur=m_counter_max_on;
   S_SLOW_MODE=true;
   S_SLOW_MODE_MON=true;
@@ -251,7 +251,7 @@ ISR(TIMER2_COMPB_vect) {
 
 ISR(TIMER2_OVF_vect){
  if (S_SLOW_MODE){
-	 m_counter_cur--
+	 m_counter_cur--;
 	 if (m_counter_cur==0){
 		 //time to switch
 		 
@@ -260,7 +260,7 @@ ISR(TIMER2_OVF_vect){
 	    digitalWriteFast(MOTOR0_P, LOW);
 	    //set counter to value when motor should be turned on
 	    S_SLOW_MODE_MON=false;
-	    m_counter_cur=m_counter_on;
+	    m_counter_cur=m_counter_max_on;
 	    
         }
 	    else{
@@ -268,7 +268,7 @@ ISR(TIMER2_OVF_vect){
 	 	 digitalWriteFast(MOTOR0_P, HIGH);
 	 	 //set counter to value when motor should be turned off
 	 	 S_SLOW_MODE_MON=true;
-	 	 m_counter_cur=m_counter_off;
+	 	 m_counter_cur=m_counter_max_off;
         }	 
      }
  }
@@ -287,22 +287,22 @@ ISR(TIMER2_OVF_vect){
 void timer1_set(uint16_t ms,void (*f)()){
   timer1_func=f;
   S_TIMER1_SET=true;
-  TIMSK1 &= ~(1<<TOIE1) //disable timer while calculating compare value
+  TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
   //divide ms by 63 (should be 62.5) and add it to the current timer
   //value to set new interrupt compare value
-  OCR1A=TCNT+((ms<<6)-ms)
-  TIMSK1 |= (1<<TOIE1) //re-enable timer
+  OCR1A=TCNT1+((ms<<6)-ms);
+  TIMSK1 |= (1<<TOIE1); //re-enable timer
   TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
 }
 
 void timer2_set(uint16_t ms,void (*f)()){
   timer2_func=f;
   S_TIMER2_SET=true;
-  TIMSK1 &= ~(1<<TOIE1) //disable timer while calculating compare value
+  TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
   //divide ms by 63 (should be 62.5) and add it to the current timer
   //value to set new interrupt compare value
-  OCR1B=TCNT+((ms<<6)-ms)
-  TIMSK1 |= (1<<TOIE1) //re-enable timer
+  OCR1B=TCNT1+((ms<<6)-ms);
+  TIMSK1 |= (1<<TOIE1); //re-enable timer
   TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
 }
 

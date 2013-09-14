@@ -433,8 +433,8 @@ void ui_button_down( boolean held ) {
       update_cal_screen();
       return;
     }
-
-    m_cur_cal = m_cur_cal > 0 ? m_cur_cal - 1 : 0;
+   //TODO
+   // m_cur_cal = m_cur_cal > 0 ? m_cur_cal - 1 : 0;
     show_calibrate();
 
     return;
@@ -482,8 +482,8 @@ void ui_button_up( boolean held ) {
       update_cal_screen();
       return;
     }
-
-    m_cur_cal = m_cur_cal > 1 ? 2 : m_cur_cal + 1;
+    //TODO
+    //m_cur_cal = m_cur_cal > 1 ? 2 : m_cur_cal + 1;
     show_calibrate();    
     return;
   }
@@ -827,7 +827,7 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
           lcd.print("S-M-S");
         }
         break;
-      case INPUT_ANGEL:
+      case INPUT_ANGLE:
         if( cur_inp_long == 0 ) {
           lcd.print(0,DEC);
         }

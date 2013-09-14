@@ -190,7 +190,7 @@ void show_calibrate() {
   lcd.print("Cal M");
   lcd.print(" [");
 
-  byte angle = m_cur_cal * 45;
+  byte angle = 45;//m_cur_cal * 45;//TODO
 
   lcd.print(angle, DEC);
   lcd.print(" Deg]");
@@ -237,8 +237,8 @@ Serial.println("s");
     while( m_cal_done == false ) {
       byte held = ui_button_check();
     }
-
-    m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
+//TODO
+  //  m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
 
   }
 
@@ -275,8 +275,8 @@ Serial.println(completed);
       while(  m_cal_done == false ) {
         byte held = ui_button_check();
       }
-
-      m_cal_array[m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
+//TODO
+   //   m_cal_array[m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
     }
   }
 
