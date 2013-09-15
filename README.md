@@ -1,21 +1,14 @@
 DollyEngine - El Cheapo
 =========================
 
-This is a modification of the DollyEngine firmware for the MX2 Controller (and clones).
+This is a modification of the DollyEngine firmware for the MX2 Controller (and clones) with simplified UI and support for one motor only.
 
 This version of the firmware is ready for compiling in Arduino 1.0+
 
-For more information, see http://dynamicperception.com and http://www.thundercorp.de/timelap/
+All the Pins (including former PWM Pins) can be changed. Currently set up for use with DFRobot Keypad Shield.
 
-Modifications
-=================
--use left to exit menu
--add ir support
--remove 2nd motor
--remove merlin
--change to digitalWriteFast
+For more information, see http://dynamicperception.com and http://www.thundercorp.de/timelapse/
 
-MX2 Firmware 0.92
-=================
-EJD:20130329: Fixed bug at line 391 of sketch ds_ui.ino that not allowed to change the value of the calibration constant
-
+Status / Changelog
+=========================
+CURRENTLY NOT RUNNING!! PROBABLY DOESNT EVEN COMPILE!! WORK IN PROGRESS!!
