@@ -122,6 +122,18 @@ uint16_t calc_total_cam_tm() {
 
 }
 
+uint16_t calc_min_cam_max(){
+  uint16_t min_cam_max;
+  min_cam_max=m_ramp_in+m_ramp_out;
+  //if one of the ramps is enabled we need to more max shots than ramp shots
+  if (min_cam_max>0) min_cam_max+=2;
+  min_cam_max+=m_lead_in;
+  min_cam_max+=m_lead_out;
+  return min_cam_max;
+}
+
+
+
 void send_ir(uint8_t brand){
   //Sends IR sequence defined in seqs at position "brand".
   

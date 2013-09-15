@@ -286,7 +286,7 @@ void execute_calibrate() {
   // 3 * 4 * 2 * 4 = 96
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(EEPROM_TODO, *p, (3*4*2*4))
+  eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
 
 }
 

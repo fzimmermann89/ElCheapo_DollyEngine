@@ -640,11 +640,6 @@ void main_loop_handler() {
     // interrupt further processing      
   }
 
-  else  if ( (m_speed > 0) && (m_speed < min_spd ) )  {
-    // if motor needs to be pulsed...
-    motor_run_pulsing();
-
-  }
 
 
 
@@ -681,7 +676,7 @@ void main_loop_handler() {
 
       // for ramping motor speeds
       // we change speed in ramps after shots...
-      motor_execute_ramp_changes();
+      motor_exec_ramp_lead();
       
       //  is the external trigger to fire?
         if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
@@ -845,7 +840,7 @@ void stop_executing() {
   S_RUNNING=false;
   S_MOT_RUNNING=false;
   S_EXT_TRIG_ENGAGED=false;
-  motor_stop_all();
+  motor_set_speed(0);
 }
 
 boolean gbtl_trigger() {

@@ -71,7 +71,7 @@ void motor_set_speed( unsigned int speed ) { //TODO datatype of m_speed.
   if (speed==0)
     //called to disable motor.
     S_MOT_RUNNING=false;
-  m_sms_tm=0; //disables if in sms-mode
+  m_sms_tm=0; //disables if in sms-mode //TODO Should disable timer
   m_cur_speed=0; //disables if in cont.-mode
   alt_io_motor_set(0); //disables slow mode too.
   return;
@@ -211,16 +211,16 @@ void motor_update_dist(float rpm, float diarev ) {
  */
 
 
-void run_motor_sms() {
+void motor_sms_run() {
   digitalWriteFast(MOTOR0_P,HIGH);
 }
 
-void stop_motor_sms() {
+void motor_sms_stop() {
   digitalWriteFast(MOTOR0_P,LOW);   
   motor_ran++;
 }
 
-void motor_set_ramp() {
+void motor_exec_ramp_lead() {
   //TODO: SMS!!
   //to be called after a shoot to adjust speed for next one.
 
@@ -246,7 +246,7 @@ void motor_set_ramp() {
       //during m_ramp_out
       //calculate speed
       uint8_t speed_step;
-      uint8_t remaining_shots_for_ramp=cam_max-lead_out-shots;
+      uint8_t remaining_shots_for_ramp=cam_max-m_lead_out-shots;
       speed_step=(m_cur_speed)/(remaining_shots_for_ramp+1);
       m_cur_speed+=speed_step;
     } 
@@ -271,7 +271,7 @@ float motor_cal_adjust(byte type, byte speed, byte dir) {
     return(m_cal_array[m_angle][CALPOINT_SMS][dir]);
   if (speed<min_spd) {
     //pulse
-    return m_cal_array[m_angle][CALPOINT_PULSE][dir]);
+    return (m_cal_array[m_angle][CALPOINT_PULSE][dir]);
     }
   else{
     //cont mode
@@ -290,7 +290,7 @@ float motor_cal_adjust(byte type, byte speed, byte dir) {
       unsigned int diff = speed - motor_spd_cal[0];
       float diff_pct = (float) diff / (float) cal_diff;
     
-      float ret = ( m_cal_array[m_angle[0]][CALPOINT_HIGH][dir] * diff_pct ) + ( m_cal_array[m_angle[0]][CALPOINT_LOW][dir] * ( 1.0 - diff_pct ) );
+      float ret = ( m_cal_array[m_angle][CALPOINT_HIGH][dir] * diff_pct ) + ( m_cal_array[m_angle][CALPOINT_LOW][dir] * ( 1.0 - diff_pct ) );
       return(ret);
     }
     else if( speed> motor_spd_cal[1] ) {
@@ -314,16 +314,6 @@ float motor_cal_adjust(byte type, byte speed, byte dir) {
     return(1.0);
    }
   }
-}
-
-uint16_t calc_min_cam_max(){
-  uint16_t min_cam_max;
-  min_cam_max=m_ramp_in+m_ramp_out;
-  //if one of the ramps is enabled we need to more max shots than ramp shots
-  if (min_cam_max>0) min_cam_max+=2;
-  min_cam_max+=m_lead_in;
-  min_cam_max+=m_lead_out;
-  return min_cam_max;
 }
 
 void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
