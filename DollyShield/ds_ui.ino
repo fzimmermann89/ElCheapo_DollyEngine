@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo - UI Functions
+ El Cheapo Dollyshield - UI Functions
  modified Version of Dynamic Perception LLC's DollyShield ds_ui.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
@@ -47,17 +47,17 @@ void init_user_interface() {
 
   // banner
 
-    lcd.print("(c) 2012 DP");
+  lcd.print("(c) DP / FZ");
 
   lcd.setCursor(5,1);
-  lcd.print("mod. by FZ");
+  lcd.print("GPLv3");
 
   delay(750);
 
   lcd.clear(); 
 
   lcd.setCursor(0,0); 
-  lcd.print("MX2 El Cheapo");
+  lcd.print("El Cheapo");
   lcd.setCursor(3,1);
   lcd.print("Ver 0.92.01");
 

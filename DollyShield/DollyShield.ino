@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo
+ El Cheapo Dollyshield
  modified Version of Dynamic Perception LLC's DollyShield
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
@@ -457,37 +457,48 @@ volatile bool motor_ran = 0;
 //TODO
 
 // motor calibration
-float m_cal_constant = 0.69;
-float m_cal_array[3][3][2] = { //TODO sinnvolle Werte voreintragen. 
+//m_cal_array[angle][point][dir]
+#define CALPOINT_SMS   0  //Shoot move shoot
+#define CALPOINT_PULSE 1  //slow speed pulsing
+#define CALPOINT_LOW   2  //cont. speed low
+#define CALPOINT_HIGH  3  //cont. speed high
 
+float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen. 
+{ 
   {
-    {
-      0.61914329,0.61914329                      }
+		{
+      1.0,1.0                      }
+    ,{
+      0.5,0.5                      }
     ,{
       1.0,1.0                      }
     ,{
-      2.01133251,2.11453032                      }
+      2.0,2.0                      }
   }
   ,
-  {
-    {
-      0.61914329,0.61914329                      }
+   {
+		{
+      1.0,1.0                      }
+    ,{
+      0.5,0.5                      }
     ,{
       1.0,1.0                      }
     ,{
-      2.01133251,2.11453032                      }
+      2.0,2.0                      }
   }
   ,
-  {
-    {
-      0.61914329,0.61914329                      }
+   {
+		{
+      1.0,1.0                      }
+    ,{
+      0.5,0.5                      }
     ,{
       1.0,1.0                      }
     ,{
-      2.01133251,2.11453032                      }
-  } 
-}
-;
+      2.0,2.0                      }
+  }
+};
+
 byte m_angle = 0;
 
 boolean m_cal_done = false;
@@ -576,9 +587,9 @@ void setup() {
   input_last_tm=millis();
 
   show_home();
-
+#
   //Output Calibration Data
-  for( byte i = 0; i <= 2; i++) {
+  for( byte i = 0; i <= 3; i++) {
     Serial.print(i, DEC);
     Serial.print(":");
     for ( byte x = 0; x < 2; x++ ) {

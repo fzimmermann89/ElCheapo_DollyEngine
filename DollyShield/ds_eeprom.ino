@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo -  EEPROM Functions
+ El Cheapo Dollyshield -  EEPROM Functions
  modified Version of Dynamic Perception LLC's DollyShield
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC ds_eeprom.ino
  (c) FFZ

@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo - Camera Control Functions
+ El Cheapo Dollyshield - Camera Control Functions
  modified Version of Dynamic Perception LLC's DollyShield ds_camera.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ

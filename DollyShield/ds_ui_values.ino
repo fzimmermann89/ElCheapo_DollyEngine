@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo - UI Values
+ El Cheapo Dollyshield - UI Values
  modified Version of Dynamic Perception LLC's DollyShield ds_ui_values.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
@@ -241,18 +241,15 @@ void get_m_adv_set( byte pos, boolean read_save){
 
   case 3:
     // min cont setting //TODO: Input in CPM instead of speed
-    //ui_type=INPUT_FLOAT;
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_FLOAT;
     if( read_save == true ) {
-      min_spd=cur_inp_long;
-      //min_cpm = cur_inp_float;
-      //min_spd = 255 * ( min_cpm / max_cpm );
+      min_cpm = cur_inp_float;
+      min_spd = 255 * ( min_cpm / max_cpm );
 
       eeprom_write(EEPROM_TODO, min_cpm);
       eeprom_write(EEPROM_TODO, min_spd);
     } 
-    //    cur_inp_float = min_cpm;
-    cur_inp_long=min_spd;
+    cur_inp_float = min_cpm;
     break;
 
     //TODO 4+5

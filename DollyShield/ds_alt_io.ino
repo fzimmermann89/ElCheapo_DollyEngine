@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo - IO Functions and Interrupts
+ El Cheapo Dollyshield - IO Functions and Interrupts
  modified Version of Dynamic Perception LLC's DollyShield ds_alt_io.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ

@@ -1,6 +1,6 @@
 /* 
  
- MX2 El Cheapo - UI Screens
+ El Cheapo Dollyshield - UI Screens
  modified Version of Dynamic Perception LLC's DollyShield ds_ui_screens.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
