@@ -344,7 +344,7 @@ io_reg;
 #define S_RUNNING                     ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit0
 #define S_CAM_ENGAGED                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit1
 #define S_CAM_CYCLE_COMPLETE          ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit2
-#define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit3
+#define S_5                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit3
 #define S_4                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit4
 #define S_3                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit5
 #define S_2                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit6
@@ -412,7 +412,7 @@ unsigned long cam_last_tm = 0;
 unsigned int m_speed = 0;
 
 // currently set speed (for altering motor speed)
-unsigned int mcur_spds=0;
+unsigned int m_cur_speed=0;
 
 //direction of motor
 byte m_dir = 0;
@@ -496,8 +496,6 @@ boolean m_cal_done = false;
 // ramping data //TODO
 byte m_ramp_in=0;
 byte m_ramp_out=0;
-byte m_ramp_in_remain=0;
-byte m_ramp_out_remain=0;
 
 // lead-ins
 unsigned int m_lead_in  = 0;

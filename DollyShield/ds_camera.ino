@@ -134,7 +134,9 @@ void send_ir(uint8_t brand){
       n--;
       delayMicroseconds(oscd);
       //toggle if in "on" cycle
-      if (i%2) digitalToggleFast(IR_PIN);   
+      if (i%2)
+      {digitalToggleFast(IR_PIN); 
+      }  
     }
   }
 }

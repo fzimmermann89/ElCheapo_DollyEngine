@@ -92,7 +92,7 @@ void show_home() {
   char lt = ui_invdir == true ? 'R' : 'L';
   char rt = ui_invdir == true ? 'L' : 'R';
 
-  if( m_wasdir == 1 ) {
+  if( m_dir == 1 ) {
     lcd.print(lt);
   }
   else {
@@ -123,9 +123,9 @@ void show_home() {
 void main_screen_select(boolean dir) {
 
   byte max_inputs = 4;
- 
+
   if( main_scr_input == 0) {
-   //enter main scr setup
+    //enter main scr setup
     lcd.blink();
   }
 
@@ -218,7 +218,7 @@ void execute_calibrate() {
     unsigned int runspd = 0.01 * m_maxsms;
     cur_inp_float = traveled;
     completed++;
-Serial.println("s");
+    Serial.println("s");
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Running ");  
@@ -237,8 +237,8 @@ Serial.println("s");
     while( m_cal_done == false ) {
       byte held = ui_button_check();
     }
-//TODO
-  //  m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
+    //TODO
+    //  m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
 
   }
 
@@ -246,18 +246,18 @@ Serial.println("s");
   // pulse calibration  
   for( byte c = 1; c <= 2; c++ ) {
     byte ths_spd = c == 1 ? motor_spd_cal[0] : motor_spd_cal[1];
-Serial.print("c:");
-Serial.println(c);
+    Serial.print("c:");
+    Serial.println(c);
     for( byte i = 0; i <= 1; i++ ) {
       Serial.print("i:");
-Serial.println(i);
+      Serial.println(i);
 
-      float des_ipm = motor_calc_ipm(ths_spd, true);
+      float des_ipm = motor_calc_cpm(ths_spd, true);
       cur_inp_float = des_ipm;
 
       completed++;
-Serial.print("comp:");
-Serial.println(completed);
+      Serial.print("comp:");
+      Serial.println(completed);
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Running ");  
@@ -275,8 +275,8 @@ Serial.println(completed);
       while(  m_cal_done == false ) {
         byte held = ui_button_check();
       }
-//TODO
-   //   m_cal_array[m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
+      //TODO
+      //   m_cal_array[m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
     }
   }
 
@@ -304,4 +304,5 @@ void update_cal_screen() {
 
   lcd.print(cur_inp_float, 2);
 }
+
 

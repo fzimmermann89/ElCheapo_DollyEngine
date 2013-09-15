@@ -258,11 +258,11 @@ byte get_menu( byte mnu, byte pos ) {
   //MainMenu is menu 0, its submenus are menus 1-4. AdvancedMotorMenu is menu 5. 
   //Special return codes for calibration, manual move and input.
 
-if (mnu == 0) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
-else if (mnu == 2 && pos == 6) return 5; //Advanced Motor Menu
-else if (mnu == 5 && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
-else if (mnu == 1) return MENU_MANUAL; 
-else return(MENU_INPUT); //No Submenu, Input Menu.
+  if (mnu == 0) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
+  else if (mnu == 2 && pos == 6) return 5; //Advanced Motor Menu
+  else if (mnu == 5 && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
+  else if (mnu == 1) return MENU_MANUAL; 
+  else return(MENU_INPUT); //No Submenu, Input Menu.
 
 }
 
@@ -367,7 +367,7 @@ void ui_button_center( boolean held ) {
 
     byte new_menu = get_menu(cur_menu, cur_pos);
 
-  
+
     if( new_menu == MENU_CALIBRATION || new_menu==MENU_MANUAL ) {
       // if drawing motor manual screen or in calibration screen...
       get_value(cur_menu, cur_pos, false);
@@ -433,8 +433,8 @@ void ui_button_down( boolean held ) {
       update_cal_screen();
       return;
     }
-   //TODO
-   // m_cur_cal = m_cur_cal > 0 ? m_cur_cal - 1 : 0;
+    //TODO
+    // m_cur_cal = m_cur_cal > 0 ? m_cur_cal - 1 : 0;
     show_calibrate();
 
     return;
@@ -494,7 +494,7 @@ void ui_button_up( boolean held ) {
     show_manual();
     return;
   }
-  
+
   // if not currently in setup menus, or
   // modifying a main screen value
   if( ! (ui_ctrl_flags & B01000000) && main_scr_input == 0 )
@@ -660,7 +660,7 @@ void draw_menu(byte dir, boolean value_only) {
   cur_pos = cur_pos > max_menu[cur_menu] ? max_menu[cur_menu] : cur_pos;
 
   switch( cur_menu ) {
-     //draw the menu
+    //draw the menu
   case 0:
 
     draw_values(menu_str, draw_all, value_only);
@@ -685,7 +685,7 @@ void draw_menu(byte dir, boolean value_only) {
 
     draw_values(set_str, draw_all, value_only);
     break;
-  
+
   case 5:
     draw_values(axis_adv_str, draw_all, value_only);
 
@@ -754,10 +754,10 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
       // display the correct current
       // temporary input value
 
-   
+
 
       switch(ui_type) {
-     case INPUT_IO:
+      case INPUT_IO:
         // for alt i/o inputs
 
         if( cur_inp_long == 0 ) {
@@ -882,20 +882,20 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
 
 
 void ui_set_backlight(byte value) {
-/* //TODO
-  // make sure to not use pwm on lcd bkl pin
-  // if timer1 has been used at some point
-  if( ! timer_used ) {
-    analogWrite(LCD_BKL, cur_bkl);
-  }
-  else {
-    if( cur_bkl > 0 ) {
-      digitalWriteFast(LCD_BKL, HIGH);
-    }
-    else {
-      digitalWriteFast(LCD_BKL, LOW);
-    }
-  } */
+  /* //TODO
+   // make sure to not use pwm on lcd bkl pin
+   // if timer1 has been used at some point
+   if( ! timer_used ) {
+   analogWrite(LCD_BKL, cur_bkl);
+   }
+   else {
+   if( cur_bkl > 0 ) {
+   digitalWriteFast(LCD_BKL, HIGH);
+   }
+   else {
+   digitalWriteFast(LCD_BKL, LOW);
+   }
+   } */
 }
 
 /* 
@@ -927,6 +927,7 @@ byte pop_menu() {
 void flush_menu() {
   memset(hist_menu, 0, sizeof(hist_menu) / sizeof(hist_menu[0]));
 }
+
 
 
 

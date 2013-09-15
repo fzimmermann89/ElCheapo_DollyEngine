@@ -153,18 +153,19 @@ else pinMode((P), (V)); \
 
 
 #ifndef digitalToggleFast
-	#define digitalToggleFast(P) ( (int) _digitalToggleFast_((P)) )
-	#define _digitalToggleFast_(P ) \
-	(__builtin_constant_p(P) ) ? ( \
-	*digitalPinToPINReg(P)= (1UL << __digitalPinToBit(P)) ): \
-	(digitalWrite((P),!digitalRead((P))))
+	#define digitalToggleFast(P)\
+        do{\
+        if (__builtin_constant_p(P))\
+        {*(digitalPinToPINReg(P))= (1UL << __digitalPinToBit(P));\
+	}else (digitalWrite((P),!digitalRead((P))));\
+        }while(0)
 #endif
 
 
 #ifndef digitalReadFast
 	#define digitalReadFast(P) ( (int) _digitalReadFast_((P)) )
 	#define _digitalReadFast_(P ) \
-	(__builtin_constant_p(P) ) ? ( \
+	if (__builtin_constant_p(P) ) ? ( \
 	( BIT_READ(*digitalPinToPINReg(P), __digitalPinToBit(P))) ) : \
 	digitalRead((P))
 #endif

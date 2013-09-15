@@ -112,7 +112,7 @@ void move_val(boolean dir) {
         cur_inp_long -= mod;
       }
     } // end if dir not true
-   
+
     // ceiling on certain values
     if (ui_type==INPUT_ANGLE ) {
       cur_inp_long = cur_inp_long > 2 ? 2 : cur_inp_long;
@@ -138,37 +138,37 @@ void get_m_axis_set( byte pos, boolean read_save) {
   // set axis configurable values
 
   switch(pos) { 
-   case 0:
-   ui_type=INPUT_CONTSMS;
+  case 0:
+    ui_type=INPUT_CONTSMS;
     // set Movement Mode (SMS/CONT)
-   if( read_save == true ) {
+    if( read_save == true ) {
       m_mode = cur_inp_bool;
       eeprom_write(EEPROM_TODO, m_mode);
     }
 
     cur_inp_bool = m_mode;
     break;
-  
+
   case 1:
     // set ramp in value
     if( read_save == true ) {
-      motor_set_ramp(cur_inp_long);         
+      m_ramp_in=cur_inp_long;         
       eeprom_write(EEPROM_TODO, m_ramp_in);
     }
 
     cur_inp_long = m_ramp_in;
     break;
-  
+
   case 2:
     // set ramp out value
     if( read_save == true ) {
-      motor_set_ramp(cur_inp_long);         
+      m_ramp_out=cur_inp_long;         
       eeprom_write(EEPROM_TODO, m_ramp_out);
     }
 
     cur_inp_long = m_ramp_out;
     break;
-  
+
   case 3: 
     // doly angle (for calibration)
     ui_type=INPUT_ANGLE;
@@ -180,7 +180,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
 
     cur_inp_long = m_angle;
     break;
-   
+
   case 4:
     // set lead-in value
     if( read_save == true ) {
@@ -209,7 +209,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
 
 void get_m_adv_set( byte pos, boolean read_save){
 
-switch (pos){
+  switch (pos){
   case 0:
     // calibrate motor
     get_calibrate_select(0);
@@ -226,7 +226,7 @@ switch (pos){
 
     cur_inp_float = m_rpm;
     break;
-    
+
   case 2:
     // distance per revolution
     ui_type=INPUT_FLOAT;
@@ -247,15 +247,15 @@ switch (pos){
       min_spd=cur_inp_long;
       //min_cpm = cur_inp_float;
       //min_spd = 255 * ( min_cpm / max_cpm );
-   
+
       eeprom_write(EEPROM_TODO, min_cpm);
       eeprom_write(EEPROM_TODO, min_spd);
     } 
-//    cur_inp_float = min_cpm;
+    //    cur_inp_float = min_cpm;
     cur_inp_long=min_spd;
     break;
 
-//TODO 4+5
+    //TODO 4+5
 
   case 6:
     // low calibration spd
@@ -269,14 +269,14 @@ switch (pos){
 
   case 7:
     // high calibration spd
-     ui_type=INPUT_LONG; //ui_type_flags2 |= B01000000;
+    ui_type=INPUT_LONG; //ui_type_flags2 |= B01000000;
     if( read_save == true ) {
       motor_spd_cal[1] = cur_inp_long;
       eeprom_write(EEPROM_TODO, motor_spd_cal[1]);
     }
     cur_inp_long = motor_spd_cal[1];
     break;
-}
+  }
 
 }
 
@@ -312,24 +312,24 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
   case 2:
     // exposure time
-     ui_type=INPUT_LONG;
+    ui_type=INPUT_LONG;
     if( read_save == true ) { 
       exp_tm = cur_inp_long;
       eeprom_write(EEPROM_TODO, exp_tm);
     }
     cur_inp_long = exp_tm;
     break;    
-  
+
   case 3:
-   //Shutter Type
-   ui_type=INPUT_SHUTTER;
-     if( read_save == true ) { 
+    //Shutter Type
+    ui_type=INPUT_SHUTTER;
+    if( read_save == true ) { 
       shutter_mode = cur_inp_long;
       eeprom_write(EEPROM_TODO, shutter_mode);
     }
     cur_inp_long = shutter_mode;
-   break;
-  
+    break;
+
   case 4:
     //bulb mode
     ui_type=INPUT_ONOF;
@@ -344,7 +344,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
   case 5:
     // camera repeat value
-      ui_type=INPUT_LONG;
+    ui_type=INPUT_LONG;
     if( read_save == true ) {
       cur_inp_long = cur_inp_long > 255 ? 255 : cur_inp_long;
       cam_repeat = cur_inp_long;
@@ -355,27 +355,27 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
   case 6:
     // camera repeat delay
-      ui_type=INPUT_LONG;
+    ui_type=INPUT_LONG;
     if( read_save == true) {
       cam_rpt_dly = cur_inp_long;
       eeprom_write(EEPROM_TODO, cam_rpt_dly);
     }
     cur_inp_long = cam_rpt_dly;
     break;
-    
+
   case 7:
     // pre exp delay
-     ui_type=INPUT_LONG;
+    ui_type=INPUT_LONG;
     if( read_save == true ) { 
       post_delay_tm = cur_inp_long;
       eeprom_write(EEPROM_TODO, pre_delay_tm);
     }
     cur_inp_long = pre_delay_tm;
     break;
-    
+
   case 8:
     // post exp delay
-     ui_type=INPUT_LONG;
+    ui_type=INPUT_LONG;
     if( read_save == true ) { 
       post_delay_tm = cur_inp_long;
       eeprom_write(EEPROM_TODO, post_delay_tm);
@@ -385,14 +385,14 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
   case 9:
     // focus delay / tap time
-     ui_type=INPUT_LONG;
+    ui_type=INPUT_LONG;
     if( read_save == true ) {
       focus_tap_tm = cur_inp_long;
       eeprom_write(EEPROM_TODO, focus_tap_tm);
     }
     cur_inp_long = focus_tap_tm;
     break;
-    
+
   }
 }
 
@@ -402,7 +402,7 @@ void get_global_set(byte pos, boolean read_save) {
 
   switch(pos) {
 
-   case 0:
+  case 0:
     // backlight level    
     ui_type=INPUT_LONG;
     if(read_save == true) {
@@ -508,8 +508,8 @@ void get_global_set(byte pos, boolean read_save) {
 
     cur_inp_bool = (altio_dir == FALLING) ? false : true;
     break;
-    
- case 10:
+
+  case 10:
     // reset memory
     ui_type=INPUT_ONOF;
 
@@ -568,12 +568,12 @@ void get_mainscr_set(byte pos, boolean read_save) {
     // dir for motor
     lcd.setCursor(0,1);
     ui_type=INPUT_LTRT;
-    
+
     if( read_save )
       motor_dir(cur_inp_bool);
 
 
-    cur_inp_bool = m_wasdir;
+    cur_inp_bool = m_dir;
     break;
 
   case 4:
@@ -592,7 +592,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
       motor_set_speed((unsigned int) cur_inp_long); 
       // calculate speed change per shot for ramping
       // if needed - use function to update values
-    //  motor_set_ramp(m_ramp_set);  //TODO
+      //  motor_set_ramp(m_ramp_set);  //TODO
     }
     cur_inp_long = m_speed;
     break; 
@@ -603,17 +603,17 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
 void get_manual_select(byte pos) {
 
-switch (pos) {
+  switch (pos) {
   case 0:  
-  // set in manual mode
+    // set in manual mode
     ui_ctrl_flags |= B00000100;
     show_manual();
     break;
-  
+
   case 1:
-  //TODO
+    //TODO
     break;
-}
+  }
 }
 
 void get_calibrate_select(byte pos) {
@@ -623,7 +623,7 @@ void get_calibrate_select(byte pos) {
 
 void display_spd_cpm(unsigned int spd) {
 
-  float cur_ipm = motor_calc_ipm(spd, m_mode);
+  float cur_ipm = motor_calc_cpm(spd, m_mode);
   lcd.print(cur_ipm, 2);
   lcd.print("cm/min");
 
@@ -641,4 +641,5 @@ void display_spd_pct(byte spd) {
   }
   lcd.print('%');
 }
+
 

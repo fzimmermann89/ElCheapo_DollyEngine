@@ -220,12 +220,12 @@ void initialize_alt_timers() {
 
 
 void alt_io_motor_set(uint8_t value){
-  if (value==0)  TIMSK2 &= ~(1<<OCIE2A) //disable motor-on interrupt
-  else  TIMSK2 |= (1<<OCIE2A)           //enable motor-on interrupt
+  if (value==0)  TIMSK2 &= ~(1<<OCIE2A); //disable motor-on interrupt
+  else  TIMSK2 |= (1<<OCIE2A);           //enable motor-on interrupt
   S_SLOW_MODE=false;
   OCR2A=value;
 }
-}
+
 
 void alt_io_motor_set_slow(uint8_t value){
   m_counter_max_on=m_pulse_length*value;
@@ -238,8 +238,8 @@ void alt_io_motor_set_slow(uint8_t value){
 
 
 void alt_io_display_set(uint8_t value){
-   if (value==0)  TIMSK2 &= ~(1<<OCIE2B) //disable display-on interrupt
-  else  TIMSK2 |= (1<<OCIE2B)           //enable display-on interrupt
+   if (value==0)  TIMSK2 &= ~(1<<OCIE2B); //disable display-on interrupt
+  else  TIMSK2 |= (1<<OCIE2B);           //enable display-on interrupt
   OCR2B=value;
 }
 
