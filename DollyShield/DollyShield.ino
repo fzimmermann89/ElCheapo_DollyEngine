@@ -288,12 +288,9 @@ boolean ui_float_tenths = false;
  #define UI_CALIBRATE_MODE (1<<7)     //B7 = in calibrate mode
 byte ui_ctrl_flags = B00000000;
 
-/* calibration screen flags
- 
- B0 = Currently calibrating
- B1 = Done Calibrating
- 
- */
+//calibration screen flags
+#define UI_CAL_CALIBRATING (1<<0)     //B0 = Currently calibrating
+#define UI_CAL_DONE        (1<<1)     //B1 = Done Calibrating
 byte ui_cal_scrn_flags = 0;
 
 // whether to show cpm (true) or % (false)

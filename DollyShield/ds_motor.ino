@@ -265,46 +265,55 @@ float motor_cal_adjust(byte type, byte speed, byte dir) {
    
    //TODO: über calibration array nachdenken.
    
-   // simplistic for sms mode
-   if( type == MODE_SMS )
-   return(m_cal_array[m_angle][0][dir]);
+ 
+  if( type == MODE_SMS )
+    //sms mode
+    return(m_cal_array[m_angle][CALPOINT_SMS][dir]);
+  if (speed<min_spd) {
+    //pulse
+    return m_cal_array[m_angle][CALPOINT_PULSE][dir]);
+    }
+  else{
+    //cont mode
+    // determine which calibration position we fall
+    // into
    
-   // determine which calibration position we fall
-   // into
+    byte pos = 0;
    
-   byte pos = 0;
+    // if between two cal points, get position between them
+    byte cal_diff = motor_spd_cal[CALPOINT_HIGH] - motor_spd_cal[CALPOINT_LOW];
+    byte hi_diff  = 255 - motor_spd_cal[1];
    
-   // if between two cal points, get position between them
-   byte cal_diff = motor_spd_cal[1] - motor_spd_cal[0];
-   byte hi_diff  = 255 - motor_spd_cal[1];
-   
-   if ( speed> motor_spd_cal[0] && speed < motor_spd_cal[1] ) {
-     //between
-     //calculate percentage of "low" and "high" to use
-    unsigned int diff = speed - motor_spd_cal[0];
-    float diff_pct = (float) diff / (float) cal_diff;
+    if ( speed> motor_spd_cal[0] && speed < motor_spd_cal[1] ) {
+      //between
+      //calculate percentage of "low" and "high" to use
+      unsigned int diff = speed - motor_spd_cal[0];
+      float diff_pct = (float) diff / (float) cal_diff;
     
-    float ret = ( m_cal_array[m_angle[0]][2][dir] * diff_pct ) + ( m_cal_array[m_angle[0]][1][dir] * ( 1.0 - diff_pct ) );
-    return(ret);
-   }
-   else if( speed> motor_spd_cal[1] ) {
-   // between high cal point and max speed
-   unsigned int diff = speed - motor_spd_cal[1];
-   float diff_pct = (float) diff / (float) hi_diff;
-  // float ret = m_cal_array[0][m_angle[0]][2][dir] - (m_cal_array[0][m_angle[0]][2][dir] * diff_pct); //TODO
-     float ret = m_cal_array[0][m_angle[0]][2][dir] - (m_cal_array[0][m_angle[0]][2][dir] * diff_pct);
-   return(ret);
-   }
-   else if( m_spd <= motor_spd_cal[0] ) {
-   return(m_cal_array[0][m_angle][1][dir]);
-   }
-   else if( m_spd == motor_spd_cal[1] ) {
-   return(m_cal_array[0][m_angle][2][dir]);
+      float ret = ( m_cal_array[m_angle[0]][CALPOINT_HIGH][dir] * diff_pct ) + ( m_cal_array[m_angle[0]][CALPOINT_LOW][dir] * ( 1.0 - diff_pct ) );
+      return(ret);
+    }
+    else if( speed> motor_spd_cal[1] ) {
+      // between high cal point and max speed
+      unsigned int diff = speed - motor_spd_cal[1];
+      float diff_pct = (float) diff / (float) hi_diff;
+      // float ret = m_cal_array[0][m_angle[0]][2][dir] - (m_cal_array[0][m_angle[0]][2][dir] * diff_pct); //TODO
+      float ret = m_cal_array[m_angle][CALPOINT_HIGH][dir] - (m_cal_array[m_angle][CALPOINT_HIGH][dir] * diff_pct);
+      return(ret);
+    }
+    else if( speed <= motor_spd_cal[0] ) {
+      //below or at low point
+      return(m_cal_array[m_angle][CALPOINT_LOW][dir]);
+    }
+    else if( speed == motor_spd_cal[1] ) {
+      //at high point
+      return(m_cal_array[m_angle][CALPOINT_HIGH][dir]);
    }
    else {
-   return(1.0);
+     //where are we now? //TODO
+    return(1.0);
    }
-
+  }
 }
 
 uint16_t calc_min_cam_max(){

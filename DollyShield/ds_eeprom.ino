@@ -232,11 +232,11 @@ void write_all_eeprom_memory() {
   eeprom_write(EEPROM_TODO, cam_interval);
 
   // handle m_cal_array in a sane manner
-  // float m_cal_array[1][3][3][2] 
-  // 1 * 3 * 3 * 2 * 4 = 72
+  // float m_cal_array[3][4][2] 
+  // 3 * 4 * 2 * 4 = 96
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(EEPROM_TODO, *p, (1*3*3*2*4));
+  eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
 
   eeprom_write(EEPROM_TODO, input_type[0]);
   eeprom_write(EEPROM_TODO, input_type[1]);
@@ -286,12 +286,13 @@ void restore_eeprom_memory() {
   eeprom_read(63, m_maxsms[0]);
   eeprom_read(67, cam_interval);
 
+  
   // handle m_cal_array in a sane manner
-  // float m_cal_array[1][3][3][2] 
-  // 1 * 3 * 3 * 2 * 4 = 72
+  // float m_cal_array[3][4][2] 
+  // 3 * 4 * 2 * 4 = 96
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_read(71, *p, 72);
+  eeprom_read(71, *p, (3*4*2*4));
 
   eeprom_read(217, input_type[0]);
   eeprom_read(218, input_type[1]);

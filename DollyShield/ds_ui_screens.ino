@@ -202,7 +202,7 @@ void show_calibrate() {
 void execute_calibrate() {
 
   // in calibration  
-  ui_cal_scrn_flags |= B10000000;
+  ui_cal_scrn_flags |= UI_CAL_CALIBRATING;
   // floating point input
   ui_type = INPUT_FLOAT;
 
@@ -218,22 +218,22 @@ void execute_calibrate() {
     unsigned int runspd = 0.01 * m_maxsms;
     cur_inp_float = traveled;
     completed++;
-    Serial.println("s");
+    
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Running ");  
     lcd.print('[');
     lcd.print(completed, DEC);
-    lcd.print(" of 6]");
+    lcd.print(" of 8]");
 
     // sms moving in i dir
     // at 6% of total distance
-    motor_run_calibrate(1, runspd, i);
+   // motor_run_calibrate(1, runspd, i);
 
     update_cal_screen();
 
     m_cal_done = false;
-
+//where is cal_done set??
     while( m_cal_done == false ) {
       byte held = ui_button_check();
     }
@@ -241,17 +241,13 @@ void execute_calibrate() {
     //  m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
 
   }
-
-
-  // pulse calibration  
+  //pulse calibration
+    //TODO
+  // cont. calibration  
   for( byte c = 1; c <= 2; c++ ) {
+		//get speed for calibration
     byte ths_spd = c == 1 ? motor_spd_cal[0] : motor_spd_cal[1];
-    Serial.print("c:");
-    Serial.println(c);
     for( byte i = 0; i <= 1; i++ ) {
-      Serial.print("i:");
-      Serial.println(i);
-
       float des_ipm = motor_calc_cpm(ths_spd, true);
       cur_inp_float = des_ipm;
 
@@ -263,9 +259,9 @@ void execute_calibrate() {
       lcd.print("Running ");  
       lcd.print('[');
       lcd.print(completed, DEC);
-      lcd.print(" of 6]");
+      lcd.print(" of 8]");
 
-      // pulse moving in i dir
+      // cont moving in i dir
       motor_run_calibrate(2, ths_spd, i);
 
       update_cal_screen();
@@ -281,16 +277,16 @@ void execute_calibrate() {
   }
 
 
-  ui_cal_scrn_flags &= B01111111;
-  ui_cal_scrn_flags |= B01000000;
+  ui_cal_scrn_flags &= ~UI_CAL_CALIBRATING;
+  ui_cal_scrn_flags |= UI_CAL_DONE;
 
   // save values to memory
   // handle m_cal_array in a sane manner
-  // float m_cal_array[2][3][3][2] 
-  // 2 * 3 * 3 * 2 * 4 = 144
+  // float m_cal_array[3][4][2] 
+  // 3 * 4 * 2 * 4 = 96
 
   byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(EEPROM_TODO, *p, 144);
+  eeprom_write(EEPROM_TODO, *p, (3*4*2*4))
 
 }
 
