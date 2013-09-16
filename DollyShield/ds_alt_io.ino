@@ -1,6 +1,7 @@
 /* 
  
  El Cheapo Dollyshield - IO Functions and Interrupts
+ * This file needs additional effort when porting to different hardware *
  modified Version of Dynamic Perception LLC's DollyShield ds_alt_io.ino
  (c) 2010-2011 C.A. Church / Dynamic Perception LLC
  (c) FFZ
@@ -187,12 +188,17 @@ void alt_ext_trigger_disengage() {
 }
 
 /*
-
  ========================================
  Timer Functions
  ========================================
- 
+ *This is used to be independent of hardware PWMs.
+ *Needed for the DFRobot Shield, which has the LCD Pins at the PWM Pins.
+ *Replacement of former used Timer1 and Mstimer2 library to offer 2 timers,
+ *independent from PWM functionality.
+ *All the Registers are set up for ATMega 168/328 used on regular arduinos.  
  */
+ 
+ 
  
 
 void initialize_alt_timers() {
