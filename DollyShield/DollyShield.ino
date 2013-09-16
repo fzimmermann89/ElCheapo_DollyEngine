@@ -359,14 +359,15 @@ io_reg;
  */
 
 // external intervalometer
-#define EXT_INTV_1 (1 << 0) //B0 = I/O 1 is external intervalometer
-#define EXT_INTV_2 (1 << 1) //B1 = I/O 2 is external intervalometer
-#define EXT_INTV_OK (1 << 2) //B2 = interval OK to fire
+#define EXT_INTV_1   (1 << 0) //B0 = I/O 1 is external intervalometer
+#define EXT_INTV_2   (1 << 1) //B1 = I/O 2 is external intervalometer
+#define EXT_INTV_USB (1 << 2) //B1 = USB Trigger enabled
+#define EXT_INTV_OK  (1 << 3) //B2 = interval OK to fire
 //external trigger via alt i/o pins
-#define EXT_TRIG_1_BEFORE (1 << 3) //B0 = I/O 1 external enabled (before)
-#define EXT_TRIG_2_BEFORE (1 << 4) //B1 = I/O 2 external enabled (before)
-#define EXT_TRIG_1_AFTER  (1 << 5) //B2 = I/O 1 external enabled (after)
-#define EXT_TRIG_2_AFTER  (1 << 6) //B3 = I/O 2 external enabled (after)
+#define EXT_TRIG_1_BEFORE (1 << 4) //B0 = I/O 1 external enabled (before)
+#define EXT_TRIG_2_BEFORE (1 << 5) //B1 = I/O 2 external enabled (before)
+#define EXT_TRIG_1_AFTER  (1 << 6) //B2 = I/O 1 external enabled (after)
+#define EXT_TRIG_2_AFTER  (1 << 7) //B3 = I/O 2 external enabled (after)
 byte external_io = 0;
 
 // trigger delays //TODO
@@ -388,11 +389,11 @@ unsigned long ext_out_delay = 0;
 unsigned int cam_rpt_dly = 250;
 
 // external intervalometer
-#define FOCUS_DELAY   (1 << 0) //B0 = In focus delay
-#define PREEXP_DELAY  (1 << 1) //B1 = In pre exposure delay
-#define POSTEXP_DELAY (1 << 2) //B2 = In post exposure delay
-#define REPEAT_DELAY  (1 << 2) //B2 = In delay between repeats
-byte currently_in_delay = 0;
+#define DELAY_FOCUS   (1 << 0) //B0 = In focus delay
+#define DELAY_PREEXP  (1 << 1) //B1 = In pre exposure delay
+#define DELAY_POSTEXP (1 << 2) //B2 = In post exposure delay
+#define DELAY_REPEAT  (1 << 2) //B2 = In delay between repeats
+byte cur_in_delay = 0;
 
 
  enum  __attribute__((packed)) SHUTTER_MODE {
@@ -544,8 +545,6 @@ byte input_type[2]            = {
   
 unsigned long input_trig_last = 0;
 
-// usb trigger flag
-boolean gb_enabled = false;
 
 // default alt I/O rising/falling direction
 byte altio_dir = FALLING;
@@ -610,7 +609,7 @@ void loop() {
   // check for signal from gbtimelapse serial command.
   // we check here to prevent queuing commands when stopped
 
-  if( gb_enabled == true && gbtl_trigger() == true ) {
+  if( (external_io&EXT_INTV_USB) && gbtl_trigger() == true ) {
     external_io |= EXT_INTV_OK;
   }
 
@@ -639,7 +638,7 @@ void main_loop_handler() {
   static byte    cam_repeated   = 0;
 
 
-  if( (cam_max > 0 && shots >= cam_max) && ( ok_stop || (m_speed <= 0.0 ) || m_mode==MODE_SMS ) ) {
+  if( (cam_max > 0 && shots >= cam_max) && ( ok_stop || (m_speed <= 0 ) || m_mode==MODE_SMS ) ) {
     // stop program if max shots exceeded, and complete cycle completed
     // if in interleave, ignore complete cycle if in SMS
     ok_stop = false;
@@ -655,7 +654,7 @@ void main_loop_handler() {
   // is blocked in some way.  After making sure we're
   // not blocked, we check to see if its time to fire the
   // camera
-
+/*
   if( motor_engaged && motor_ran ) {      
       // motor has run one
       // cycle, let the camera fire
@@ -663,21 +662,21 @@ void main_loop_handler() {
       ok_stop       = true;
       in_sms_cycle  = false;
     }// end if motor_engaged && motor_ran
-  
-  
+  */
+  else if(cur_in_delay) {
+    // currently in an delay, waiting for timer to complete
+    //do nothing
+    ;
+  }
   else if( S_CAM_ENGAGED) {
     // currently firing the camera
     // do nothing
     ;
   }
-  else if(S_CAM_CYCLE_COMPLETE) { //run_status & B00100000
+  else if(S_CAM_CYCLE_COMPLETE) {
     // camera cycle completed
     // clear exposure cycle complete flag
-   S_CAM_CYCLE_COMPLETE=false;
-   
-    if( camera_fired == true ) {
-      // the shot just fired
-      camera_fired = false;
+      S_CAM_CYCLE_COMPLETE=false;
       shots++;
 
       // for ramping motor speed and leads
@@ -692,68 +691,15 @@ void main_loop_handler() {
 
       
       // check to see if a post-exposure delay is needed
-      
-      //TODO other delay
-      
       if( post_delay_tm > 0 ) {
-        // we block anything from happening while in the
-        // post-exposure cycle by pretending to be an
-        // exposure
-      S_CAM_ENGAGED=true;  
-       
-       //TODO
-       // MsTimer2::set(post_delay_tm, camera_clear);
-       // MsTimer2::start();
-        motors_clear = false;
-        ok_stop = false;
+      //start post exposure delay
+      cur_in_delay|=DELAY_POSTEXP;
+      timer2_set(post_delay_tm,clear_delay_postexp);
       }
-      else {
- 
-        //no post-exposure delay, motors can run
-        motors_clear = true;
-      }
-    }//end cam_fired==true 
-    else {
-      // this was a post-exposure delay cycle completing, not
-      // an actual shot
-  /* //TODO //why? already done?
-      // is the external trigger to fire?
-      if( external_trigger & B00110000 && ext_trig_pst_delay > 0 )
-        alt_ext_trigger_engage(false);
-*/
-
-      // we can set the motors clear to move now
-      motors_clear = true;        
-    }
-  }//end S_CAM_CYCLE_COMPLETE
-
-  //else if( motors_clear == true && !motor_sl_mod && ( m_sms_tm > 0 ) ) {
-
-    //// if we're set to go to s-m-s and motor is set to move
-    //// start motor moving
-
-    //motor_ran = 0;
-
-    //// set motor to move, and then
-    //// set timer to turn them off  
-
-    //if( m_sms_tm > 0 ) {
-      //// start motor
-      //run_motor_sms(); 
-      //MsTimer2::set(m_sms_tm, stop_motor_sms);
-    //}
-
-
-    //// engage timer
-    //MsTimer2::start();
-
-    //motor_engaged = true;
-    //motors_clear = false;
-    //ok_stop      = false;
-
-  //}   
+        
+  }
   
-  else if( gb_enabled == true || external_io & (EXT_INTV_1|EXT_INTV_2) ) {
+  else if(external_io & (EXT_INTV_1|EXT_INTV_2|EXT_INTV_USB) ) {
     // external intervalometer is engaged
 
     if( external_io & EXT_INTV_OK ) {
@@ -781,7 +727,7 @@ void main_loop_handler() {
          
           
     // is the external trigger to fire? (either as 'before' or 'through')
-    if( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE) && !(S_EXT_TRIG_ENGAGED))  {
+    if ( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE)) && !(S_EXT_TRIG_ENGAGED))  {
       alt_ext_trigger_engage(TODO);
     }
     else {

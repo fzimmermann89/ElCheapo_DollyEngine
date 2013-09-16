@@ -474,14 +474,15 @@ void get_global_set(byte pos, boolean read_save) {
     break;
 
   case 7:
-    // GB enable
+    // USB Trigger enable
     ui_type=INPUT_ONOF;
     if( read_save == true ) {
-      gb_enabled = cur_inp_bool;
+      if (cur_in_bool) external_io|=EXT_INTV_USB;
+      else external_io&=!EXT_INTV_USB;
       eeprom_write(EEPROM_TODO, gb_enabled);
     }
 
-    cur_inp_bool = gb_enabled;
+    cur_inp_bool = ((external_io&&EXT_INTV_USB)!=0);
     break;
 
   case 8:

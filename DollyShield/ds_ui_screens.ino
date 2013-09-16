@@ -36,7 +36,7 @@ void prep_home_screen() {
 
   if(S_RUNNING) {//run_status & B10000000
     // in 'external intervalometer' mode, show 'ext' instead of 'on'
-    if( (external_io & (EXT_INTV_1|EXT_INTV_2)) || gb_enabled == true ) {
+    if (external_io & (EXT_INTV_1|EXT_INTV_2|EXT_INTV_USB) ) {
       lcd.print("Ext");
     }
     else {

@@ -327,7 +327,7 @@ void restore_eeprom_memory() {
 
 
 
-void eeprom_versioning() {
+boolean eeprom_versioning_ok() {
   // determine if eeprom version is correct 
   // so we can automatically flush saved memory 
   // when a new firmware is loaded 
@@ -336,9 +336,7 @@ void eeprom_versioning() {
   eeprom_read(247, eeprom_ver);
 
   // wipe out any saved eeprom settings
-  return( eeprom_ver == FIRMWARE_VERSION ) {
-
-  }  
+  return( eeprom_ver == FIRMWARE_VERSION );
 
 
 }
