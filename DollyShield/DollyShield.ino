@@ -32,17 +32,17 @@ NOTES:
  16bit timer, dh bis 65535.
  bei 16mhz:
  prescaler    zeit pro tick   max zeit    ticks pro ms
- 1        0,0625us      4ms       16000
+ 1        0,0625us    4ms       16000
  8        0,5us       32ms      2000
  64       4us         262ms     250
- 256      16us        1s        62.5  ~63   wert=wert<<6-wert
- 1024     64us        4s        15.625  ~16   wert=wert<<4
+ 256      16us        1s        62.5        ~63   wert=wert<<6-wert
+ 1024     64us        4s        15.625      ~16   wert=wert<<4
  
  
  */
 
 #define EEPROM_TODO 123
-
+#define TODO 123
 
 
 
@@ -372,17 +372,28 @@ byte external_io = 0;
 // trigger delays //TODO
 //unsigned long ext_trig_pre_delay = 0;
 //unsigned long ext_trig_pst_delay = 0;
-unsigned long ext_in_delay = 0;
-unsigned long ext_out_delay = 0;
+
 // camera exposure time
 unsigned long exp_tm      = 100;
 
 // tap focus before exposing
 unsigned int focus_tap_tm = 0;
 
-// other delays in ms
-unsigned int post_delay_tm      = 100;
-unsigned int pre_delay_tm;
+//delays in ms
+unsigned int post_delay_tm      = 100; //Post Exposue
+unsigned int pre_delay_tm;             //Pre Expuse
+unsigned long ext_in_delay = 0;        //Delay after 
+unsigned long ext_out_delay = 0;
+// delay between camera repeat cycles
+unsigned int cam_rpt_dly = 250;
+
+// external intervalometer
+#define FOCUS_DELAY   (1 << 0) //B0 = In focus delay
+#define PREEXP_DELAY  (1 << 1) //B1 = In pre exposure delay
+#define POSTEXP_DELAY (1 << 2) //B2 = In post exposure delay
+#define REPEAT_DELAY  (1 << 2) //B2 = In delay between repeats
+byte currently_in_delay = 0;
+
 
  enum  __attribute__((packed)) SHUTTER_MODE {
      SHUTTER_MODE_IR_NIKON=0, SHUTTER_MODE_IR_CANON=1, SHUTTER_MODE_CABLE_NO_FOCUS=2, SHUTTER_MODE_CABLE_FOCUS=3};
@@ -400,22 +411,20 @@ unsigned int cam_max  = 0;
 // camera repeat shots
 byte cam_repeat = 0;
 
-// delay between camera repeat cycles
-unsigned int cam_rpt_dly = 250;
-
+// last time we entered a repeat cycle or last time we shot if no repeat is set
 unsigned long cam_last_tm = 0;
 
 // set speed for the current motor
 unsigned int m_speed = 0;
 
-// currently set speed (for altering motor speed)
+// currently active speed
 unsigned int m_cur_speed=0;
 
 //direction of motor
 byte m_dir = 0;
 
-// distance (i) per revolution
-float m_diarev =  3.53;
+// distance (cm) per revolution
+float m_diarev =  1.0;
 
 // motor RPMs
 float m_rpm    = 9;
@@ -430,7 +439,7 @@ float min_cpm = 20.0;
 byte min_spd =  (min_cpm / max_cpm) * 255;
 
 
-// calibration points
+// calibration points //TODO unit?
 byte motor_spd_cal[2] = {
   2,10};
 
@@ -448,8 +457,8 @@ unsigned int  m_counter_max_off;
 unsigned int  m_counter_cur;
 uint8_t m_pulse_length;
 
-volatile bool motor_engaged      = false;
-volatile bool motor_ran = 0;
+//volatile bool motor_engaged      = false;
+//volatile bool motor_ran = 0;
  
 //TODO
 
@@ -542,7 +551,7 @@ boolean gb_enabled = false;
 byte altio_dir = FALLING;
 
  //timer globals
- uint16_t volatile timer3_ms;
+unsigned int volatile timer3_ms;
 void (*timer1_func)();
 void (*timer2_func)();
 void (*timer3_func)();
@@ -568,15 +577,13 @@ void setup() {
   // saved memory after a new firmware load -
   // saving lots of support questions =)
 
-  eeprom_versioning();
-
   // did we previously save settings to eeprom?
-  if( eeprom_saved() ) {
+  if( eeprom_versioning_ok()&& eeprom_saved() ) {
     // restore saved memory
     restore_eeprom_memory();
   }
   else {
-    // when memory has been cleared, or nothing has been
+    // when wrong version of nothing has been
     // saved, make sure eeprom contains default values
     write_all_eeprom_memory();
   }
@@ -762,55 +769,56 @@ void main_loop_handler() {
     // internal intervalometer triggers
     do_fire = true;
   }
+  
 
   if( do_fire == true ) {
     // we've had a fire camera event
-
+    
+    // we always set the start mark at the time of the
+    // entering the first delay in a repeat cycle
+    if( cam_repeat == 0 || cam_repeated == 0 )
+          cam_last_tm  = millis();
+         
+          
     // is the external trigger to fire? (either as 'before' or 'through')
-    if( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE))  && ext_trip == false && (cam_repeat == 0 || cam_repeated == 0) ) {
-      alt_ext_trigger_engage(true);
-      ext_trip = true;
+    if( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE) && !(S_EXT_TRIG_ENGAGED))  {
+      alt_ext_trigger_engage(TODO);
     }
     else {
 
-      // make sure we handle pre-focus tap timing
 
-      if( ( /*pre_focus_clear == 4 ||*/ focus_tap_tm == 0 || (cam_repeat > 0 && cam_repeated > 0) ) && !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
+      if( ( focus_tap_tm == 0  || pre_focus_clear == 4 || (cam_repeat > 0 && cam_repeated > 0) ) && !(S_EXT_TRIG_ENGAGED) ) {
+        //not waiting for ext trigger to be done
+        //no pre-exposure focus delay or already done
+        
+        fire_camera(exp_tm);
+        
+        // setup for next call 
 
-        // we always set the start mark at the time of the
-        // first exposure in a repeat cycle (or the time of exp
-        // if no repeat cycle is in play
-
-        if( cam_repeat == 0 || cam_repeated == 0 )
-          cam_last_tm  = millis();
 
         // deal with camera repeat actions
         if( cam_repeat == 0 || (cam_repeat > 0  && cam_repeated >= cam_repeat) ) {
+            //no more repeats
           camera_fired = true;
           do_fire = false;
           ext_trip = false;
           cam_repeated = 0;
         }
         else if( cam_repeat > 0 ) {
-          // only delay ater the first shot
-          if( cam_repeated > 0 )
-            delay(cam_rpt_dly); // blocking delay between camera firings (we should fix this later!)
-
-          cam_repeated++;
+         //more repeats
+        delay(cam_rpt_dly); // blocking delay between camera firings (we should fix this later!)
+        cam_repeated++;
         }
 
-        // camera is all clear to fire, and enough
-        // time is elapsed
-        fire_camera(exp_tm);
-       // pre_focus_clear = 0;
 
       }
-      else if( focus_tap_tm > 0 && /*pre_focus_clear == 0 &&*/ !(S_EXT_TRIG_ENGAGED) ) { //run_status & B00001000
+      else if( focus_tap_tm > 0 && pre_focus_clear == 0  !(S_EXT_TRIG_ENGAGED) ) {
+          
         // pre-focus tap is set, bring focus line high
         digitalWriteFast(FOCUS_PIN, HIGH);
-      //  MsTimer2::set(focus_tap_tm, stop_cam_focus);
-      //  MsTimer2::start();
-        //pre_focus_clear = 1;
+        //set timer to disable focus line
+      timer2_set(focus_tap_tm, stop_cam_focus);
+     pre_focus_clear = 1;
       }
     } // end else (not external trigger...
   } // end if(do_fire...

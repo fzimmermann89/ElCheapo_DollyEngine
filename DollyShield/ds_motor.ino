@@ -158,6 +158,10 @@ void motor_update_dist(float rpm, float diarev ) {
    eeprom_write(EEPROM_TODO, m_maxsms);
    
 }
+void motor_calc_sms_tm()
+{
+    m_sms_tm=m_cur_speed*m_cal_array[m_angle][CALPOINT_SMS][0];
+}
 
 /*void motor_pulse() { //TODO
   // this function is called by timer1 to pulse motors
@@ -212,7 +216,9 @@ void motor_update_dist(float rpm, float diarev ) {
 
 
 void motor_sms_run() {
+  timer1_set(m_sms_tm,motor_sms_stop);
   digitalWriteFast(MOTOR0_P,HIGH);
+  
 }
 
 void motor_sms_stop() {

@@ -100,27 +100,21 @@
  use_ir         = 267
  */
 
-
+#define EEPROM_IS_SAVED 170
 
 
 boolean eeprom_saved() {
 
   // read eeprom saved status
-
+  // is Magic Value in position 0?
   byte saved = EEPROM.read(0);
-
-  // EEPROM memory is by default set to 1, so we
-  // set it to zero if we've written data to eeprom
-  return( ! saved );
+  return(saved==EEPROM_IS_SAVED );
 }
 
 void eeprom_saved( boolean saved ) {
   // set eeprom saved status
-
-  // EEPROM memory is by default set to 1, so we
-  // set it to zero if we've written data to eeprom
-
-  EEPROM.write(0, !saved);
+  // write Magic Value to position 0
+  EEPROM.write(0, EEPROM_IS_SAVED);
 }
 
 
@@ -146,17 +140,17 @@ void eeprom_write( int pos, byte& val, byte len ) {
 
 void eeprom_write( int pos, unsigned int& val ) {
   byte* p = (byte*)(void*)&val;   
-  eeprom_write(EEPROM_TODO, *p, sizeof(int));  
+  eeprom_write(pos, *p, sizeof(int));  
 }
 
 void eeprom_write( int pos, unsigned long& val ) {
   byte* p = (byte*)(void*)&val;   
-  eeprom_write(EEPROM_TODO, *p, sizeof(long));    
+  eeprom_write(pos, *p, sizeof(long));    
 }
 
 void eeprom_write( int pos, float& val ) {
   byte* p = (byte*)(void*)&val;   
-  eeprom_write(EEPROM_TODO, *p, sizeof(float));    
+  eeprom_write(pos, *p, sizeof(float));    
 }
 
 void eeprom_write( int pos, byte& val ) {  
@@ -342,13 +336,8 @@ void eeprom_versioning() {
   eeprom_read(247, eeprom_ver);
 
   // wipe out any saved eeprom settings
-  if( eeprom_ver != FIRMWARE_VERSION ) {
-    eeprom_ver = FIRMWARE_VERSION;
-    eeprom_write(EEPROM_TODO, eeprom_ver);
-    // order of operations is important, this must line
-    // must happen after the eeprom_write(EEPROM_TODO, as
-    // it automatically updates the eeprom saved status
-    eeprom_saved(false);
+  return( eeprom_ver == FIRMWARE_VERSION ) {
+
   }  
 
 

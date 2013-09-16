@@ -300,7 +300,7 @@ void timer1_set(uint16_t ms,void (*f)()){
   TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
   //divide ms by 63 (should be 62.5) and add it to the current timer
   //value to set new interrupt compare value
-  OCR1A=TCNT1+((ms<<6)-ms);
+  OCR1A=TCNT1+(ms/63);
   TIMSK1 |= (1<<TOIE1); //re-enable timer
   TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
 }
@@ -311,7 +311,7 @@ void timer2_set(uint16_t ms,void (*f)()){
   TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
   //divide ms by 63 (should be 62.5) and add it to the current timer
   //value to set new interrupt compare value
-  OCR1B=TCNT1+((ms<<6)-ms);
+  OCR1B=TCNT1+(ms/63;
   TIMSK1 |= (1<<TOIE1); //re-enable timer
   TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
 }
