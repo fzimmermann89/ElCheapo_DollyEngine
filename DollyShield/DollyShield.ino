@@ -49,7 +49,7 @@ NOTES:
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
-#include "digitalWriteFast.h"
+#include "digitalWriteFastMod.h"
 //#include "MsTimer2.h"
 //#include "TimerOne.h"
 
