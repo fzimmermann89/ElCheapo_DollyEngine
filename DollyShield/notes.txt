@@ -4,6 +4,14 @@
 	ext_trigger_pre_delay und post_delay. den gesammten trigger krams nochmal ansehen!!
 	motor_sl_mod angefangen rauszunehmen
  
+ TODO
+ ======
+ SMS mode: speed calculation, mainhandler, ramp
+ calibration
+ main handler
+ 
+ 
+ 
  
  
  

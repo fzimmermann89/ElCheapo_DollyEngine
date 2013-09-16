@@ -673,11 +673,11 @@ void main_loop_handler() {
       camera_fired = false;
       shots++;
 
-
-      // for ramping motor speeds
-      // we change speed in ramps after shots...
+      // for ramping motor speed and leads
+      // we change speed after shots...
       motor_exec_ramp_lead();
-      
+      //TODO what about SMS
+      motor_set_speed(m_cur_speed);
       //  is the external trigger to fire?
         if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
           alt_ext_trigger_engage(false);
@@ -685,12 +685,16 @@ void main_loop_handler() {
 
       
       // check to see if a post-exposure delay is needed
+      
+      //TODO other delay
+      
       if( post_delay_tm > 0 ) {
         // we block anything from happening while in the
         // post-exposure cycle by pretending to be an
         // exposure
       S_CAM_ENGAGED=true;  
-     //TODO
+       
+       //TODO
        // MsTimer2::set(post_delay_tm, camera_clear);
        // MsTimer2::start();
         motors_clear = false;
