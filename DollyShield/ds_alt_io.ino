@@ -159,32 +159,27 @@ void altio_flip_runstat() {
 
 }
 
-void alt_ext_trigger_engage(unsigned long length) {
+void alt_ext_trigger_engage{
   // set flag
   S_EXT_TRIG_ENGAGED=true;
-
-  // we use the interrupt pins, 2&3
-
-    if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
-      digitalWriteFast(2, !altio_dir);
-    if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) ) 
-      digitalWriteFast(3, !altio_dir);
- 
-  //MsTimer2::set(length, alt_ext_trigger_disengage); //TODO
-  //MsTimer2::start();
+  // set the pins according to the enabled triggers
+  if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
+    digitalWriteFast(2, !altio_dir);
+  if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) ) 
+    digitalWriteFast(3, !altio_dir);
+  // set timer to disengage trigger
+  timer3_set(length_ext_out,alt_ext_trigger_disengage);
+  
 }
 
 void alt_ext_trigger_disengage() {
-
-    if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
-      digitalWriteFast(2, altio_dir);
-    if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) )
-      digitalWriteFast(3, altio_dir);
-  //MsTimer2::stop();   //TODO
- 
-
+  // set the pins according to the enabled triggers
+  if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
+    digitalWriteFast(2, altio_dir);
+  if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) )
+    digitalWriteFast(3, altio_dir);
   // clear flag...
-  S_EXT_TRIG_ENGAGED=false;//run_status &= B11110111;
+  S_EXT_TRIG_ENGAGED=false;
 }
 
 /*
@@ -295,43 +290,61 @@ ISR(TIMER2_OVF_vect){
 
 }
 void timer1_set(uint16_t ms,void (*f)()){
-  timer1_func=f;
-  S_TIMER1_SET=true;
-  TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
-  //divide ms by 63 (should be 62.5) and add it to the current timer
-  //value to set new interrupt compare value
-  OCR1A=TCNT1+(ms/63);
-  TIMSK1 |= (1<<TOIE1); //re-enable timer
-  TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
+  if (ms==0){
+    //no delay given, do it instanly  
+    f();
+  }
+  else{
+    timer1_func=f;
+    S_TIMER1_SET=true;
+    TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
+    //multiply ms by 63 (should be 62.5 ticks per ms) and add it to the current timer
+    //value to set new interrupt compare value
+    OCR1A=TCNT1+(ms*63);
+    TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
+    TIMSK1 |= (1<<TOIE1); //re-enable timer
+  }
 }
 
 void timer2_set(uint16_t ms,void (*f)()){
-  timer2_func=f;
-  S_TIMER2_SET=true;
-  TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
-  //divide ms by 63 (should be 62.5) and add it to the current timer
-  //value to set new interrupt compare value
-  OCR1B=TCNT1+(ms/63);
-  TIMSK1 |= (1<<TOIE1); //re-enable timer
-  TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
+  if (ms==0){
+    //no delay given, do it instanly  
+    f();
+  }
+  else{
+    timer2_func=f;
+    S_TIMER2_SET=true;
+    TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
+    //multiplay ms by 63 (should be 62.5 ticks per ms) and add it to the current timer
+    //value to set new interrupt compare value
+    OCR1B=TCNT1+(ms*63);
+    TIMSK1 |= (1<<TOIE1); //re-enable timer
+    TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
+  }
 }
 
 void timer3_set(uint16_t ms,void (*f)()){
-  timer3_ms=ms;
-  timer3_func=f;
-  S_TIMER3_SET=true;
+   if (ms==0){
+    //no delay given, do it instanly  
+    f();
+  }
+  else{
+    timer3_ms=ms;
+    timer3_func=f;
+    S_TIMER3_SET=true;
+  }
 }
 ISR(TIMER1_COMPA_vect) {
   //timer 1
     TIMSK1 &= ~(1<<OCIE1A);
-    (*timer1_func)();
+    (*timer1_func)(timer1_param);
     S_TIMER1_SET=false;
 }
 
 ISR(TIMER1_COMPB_vect) {
   //timer 2
     TIMSK1 &= ~(1<<OCIE1B);
-    (*timer2_func)();
+    (*timer2_func)(timer1_param);
     S_TIMER2_SET=false;
    
 }

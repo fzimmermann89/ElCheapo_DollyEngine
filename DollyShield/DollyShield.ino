@@ -377,23 +377,24 @@ byte external_io = 0;
 // camera exposure time
 unsigned long exp_tm      = 100;
 
-// tap focus before exposing
-unsigned int focus_tap_tm = 0;
+
 
 //delays in ms
-unsigned int post_delay_tm      = 100; //Post Exposue
-unsigned int pre_delay_tm;             //Pre Expuse
-unsigned long ext_in_delay = 0;        //Delay after 
-unsigned long ext_out_delay = 0;
-// delay between camera repeat cycles
-unsigned int cam_rpt_dly = 250;
+unsigned int delay_postexp   = 100;    //Post Exposue
+unsigned int delay_preexp;   = 0;      //Pre Expuse
+unsigned int delay_ext_in    = 0;      //Delay after Intervalometer till shot
+unsigned int delay_ext_out   = 200;      //Time ext_trigger is enabled before or after shot
+unsigned int length_ext_out  = 100;    //Time for which the trigger is enabled
+unsigned int delay_focus     = 0;      //Time to wait after focus signal has been sent
+unsigned int  delay_repeat   = 250;    // delay between camera repeat cycles
 
-// external intervalometer
-#define DELAY_FOCUS   (1 << 0) //B0 = In focus delay
-#define DELAY_PREEXP  (1 << 1) //B1 = In pre exposure delay
-#define DELAY_POSTEXP (1 << 2) //B2 = In post exposure delay
-#define DELAY_REPEAT  (1 << 2) //B2 = In delay between repeats
-byte cur_in_delay = 0;
+// TODO delay status flags
+#define DELAY_IN     (1 << 0) //B0 = currently in any delay
+#define DELAY_DONE_FOCUS
+#define DELAY_DONE_PREEXP  (1 << 1) //B1 = In pre exposure delay
+#define DELAY_DONE_POSTEXP (1 << 2) //B2 = In post exposure delay
+#define DELAY_DONE_REPEAT  (1 << 2) //B2 = In delay between repeats
+byte delay_status = 0;
 
 
  enum  __attribute__((packed)) SHUTTER_MODE {
@@ -473,7 +474,7 @@ uint8_t m_pulse_length;
 float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen. 
 { 
   {
-		{
+    {
       1.0,1.0                      }
     ,{
       0.5,0.5                      }
@@ -484,7 +485,7 @@ float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen.
   }
   ,
    {
-		{
+    {
       1.0,1.0                      }
     ,{
       0.5,0.5                      }
@@ -495,7 +496,7 @@ float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen.
   }
   ,
    {
-		{
+    {
       1.0,1.0                      }
     ,{
       0.5,0.5                      }
@@ -590,7 +591,7 @@ void setup() {
   input_last_tm=millis();
 
   show_home();
-#
+
   //Output Calibration Data
   for( byte i = 0; i <= 3; i++) {
     Serial.print(i, DEC);
@@ -634,40 +635,22 @@ void main_loop_handler() {
   static boolean ok_stop        = false;
   static boolean in_sms_cycle   = false;
   static boolean do_fire        = false;
-  static boolean ext_trip       = false;
+ // static boolean ext_trip       = false;
   static byte    cam_repeated   = 0;
 
 
-  if( (cam_max > 0 && shots >= cam_max) && ( ok_stop || (m_speed <= 0 ) || m_mode==MODE_SMS ) ) {
-    // stop program if max shots exceeded, and complete cycle completed
-    // if in interleave, ignore complete cycle if in SMS
-    ok_stop = false;
+  if( (cam_max > 0 && shots >= cam_max) {
+    // stop program if max shots exceeded
     stop_executing();
     // interrupt further processing      
   }
-
-
-
 
   // we need to determine if we can shoot the camera
   // by seeing if it is currently being fired, or 
   // is blocked in some way.  After making sure we're
   // not blocked, we check to see if its time to fire the
   // camera
-/*
-  if( motor_engaged && motor_ran ) {      
-      // motor has run one
-      // cycle, let the camera fire
-      motor_engaged = false;
-      ok_stop       = true;
-      in_sms_cycle  = false;
-    }// end if motor_engaged && motor_ran
-  */
-  else if(cur_in_delay) {
-    // currently in an delay, waiting for timer to complete
-    //do nothing
-    ;
-  }
+  
   else if( S_CAM_ENGAGED) {
     // currently firing the camera
     // do nothing
@@ -686,9 +669,7 @@ void main_loop_handler() {
       motor_set_speed(m_cur_speed);
       //  is the external trigger to fire?
         if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
-          alt_ext_trigger_engage(false);
-
-
+          timer2_set(ext_out_delay,alt_ext_trigger_engage);
       
       // check to see if a post-exposure delay is needed
       if( post_delay_tm > 0 ) {
@@ -718,6 +699,8 @@ void main_loop_handler() {
   
 
   if( do_fire == true ) {
+    
+    
     // we've had a fire camera event
     
     // we always set the start mark at the time of the
@@ -725,15 +708,26 @@ void main_loop_handler() {
     if( cam_repeat == 0 || cam_repeated == 0 )
           cam_last_tm  = millis();
          
-          
-    // is the external trigger to fire? (either as 'before' or 'through')
-    if ( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE)) && !(S_EXT_TRIG_ENGAGED))  {
-      alt_ext_trigger_engage(TODO);
+    //TODO when should it fire?
+    //it should fire @trigger_delay before the shot
+    //
+    // is the external trigger to fire before shot?
+    if ( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE)) //und nicht engaged und nicht done 
+    { 
+      //calculate when the trigger is to be enabled
+      //shot will happen in (delay_preexp+delay_focus+100),
+      //trigger should be enabled ext_out_delay ms before that.
+      unsigned int calc_delay=(delay_pre+delay_focus+100)-ext_out_delay
+      timer2_set(calc_delay,alt_ext_trigger_engage);
     }
-    else {
-
-
-      if( ( focus_tap_tm == 0  || pre_focus_clear == 4 || (cam_repeat > 0 && cam_repeated > 0) ) && !(S_EXT_TRIG_ENGAGED) ) {
+    
+    timer1_set(delay_preexp,focus_camera);
+    delay_status=true; //TODO
+    
+    if (delay_status==false){
+    //if not in_delay
+    if((cam_repeat > 0 && cam_repeated > 0) ) {
+        
         //not waiting for ext trigger to be done
         //no pre-exposure focus delay or already done
         
@@ -741,13 +735,11 @@ void main_loop_handler() {
         
         // setup for next call 
 
-
         // deal with camera repeat actions
         if( cam_repeat == 0 || (cam_repeat > 0  && cam_repeated >= cam_repeat) ) {
             //no more repeats
-          camera_fired = true;
+           S_CAM_CYCLE_COMPLETE=true;
           do_fire = false;
-          ext_trip = false;
           cam_repeated = 0;
         }
         else if( cam_repeat > 0 ) {
@@ -755,19 +747,10 @@ void main_loop_handler() {
         delay(cam_rpt_dly); // blocking delay between camera firings (we should fix this later!)
         cam_repeated++;
         }
-
+}
 
       }
-      else if( focus_tap_tm > 0 && pre_focus_clear == 0  !(S_EXT_TRIG_ENGAGED) ) {
-          
-        // pre-focus tap is set, bring focus line high
-        digitalWriteFast(FOCUS_PIN, HIGH);
-        //set timer to disable focus line
-      timer2_set(focus_tap_tm, stop_cam_focus);
-     pre_focus_clear = 1;
-      }
-    } // end else (not external trigger...
-  } // end if(do_fire...
+ }
 }
 
 void start_executing() {

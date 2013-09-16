@@ -85,12 +85,17 @@ void stop_camera() {
 
  }
 
-
+void focus_camera(){
+  if (shutter_mode==SHUTTER_MODE_CABLE_FOCUS){
+    digitalWriteFast(FOCUS_PIN, HIGH);
+    timer1_set(100,stop_cam_focus);
+  }
+  else delay_status=false; //TODO
+} 
 void camera_clear() {
   // clears out camera engaged settings
   // so that motor control and other actions can 
-  // be undertaken.  Used as a timer whenever
-  // a camera post delay is set.
+  // be undertaken. 
 
  S_CAM_ENGAGED=false; 
  S_CAM_CYCLE_COMPLETE=true;
@@ -98,17 +103,15 @@ void camera_clear() {
 }  
 
 
-
 void stop_cam_focus() {
-
   digitalWriteFast(FOCUS_PIN, LOW);
-  //pre_focus_clear = 2;
+  //enable timer after Focus
+  timer1_set(delay_focus,clear_cam_focus);
 }
 
-void clear_cam_focus() {/* 
-  MsTimer2::stop();
-  pre_focus_clear = 4;
- */}
+void clear_cam_focus() {
+  delay_status=false; //TODO: welches delay_status bit wann wo wie setzen?
+  }
 
 uint16_t calc_total_cam_tm() {
   // calculate total minimum time between exposures 
