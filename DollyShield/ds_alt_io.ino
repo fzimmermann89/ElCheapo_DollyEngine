@@ -160,8 +160,6 @@ void altio_flip_runstat() {
 }
 
 void alt_ext_trigger_engage(){
-  // set flag
-  S_EXT_TRIG_ENGAGED=true;
   // set the pins according to the enabled triggers
   if( external_io & (EXT_TRIG_1_AFTER|EXT_TRIG_1_BEFORE) ) 
     digitalWriteFast(2, !altio_dir);
@@ -178,8 +176,6 @@ void alt_ext_trigger_disengage() {
     digitalWriteFast(2, altio_dir);
   if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) )
     digitalWriteFast(3, altio_dir);
-  // clear flag...
-  S_EXT_TRIG_ENGAGED=false;
 }
 
 /*
@@ -349,5 +345,5 @@ ISR(TIMER1_COMPB_vect) {
    
 }
 void clear_delay(){
-delay_status=false; //TODO
+S_IN_DELAY=false; //TODO
 }

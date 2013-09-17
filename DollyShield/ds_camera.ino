@@ -90,7 +90,7 @@ void focus_camera(){
     digitalWriteFast(FOCUS_PIN, HIGH);
     timer1_set(100,stop_cam_focus);
   }
-  else delay_status=false; //TODO
+  else S_IN_DELAY=false; //TODO
 } 
 void camera_clear() {
   // clears out camera engaged settings

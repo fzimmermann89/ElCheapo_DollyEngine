@@ -41,6 +41,8 @@ NOTES:
  
  */
 
+#define DEBUG
+
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
@@ -317,11 +319,11 @@ unsigned char bit7:
 }
 io_reg;
 
-#define S_F_1                         ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
-#define S_SLOW_MODE_MON                ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
+#define S_IN_DELAY                    ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit0
+#define S_SLOW_MODE_MON               ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
 #define S_SLOW_MODE                   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
 #define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
-#define S_EXT_TRIG_ENGAGED             ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define S_DELAY_DONE                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
 #define S_TIMER1_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
 #define S_TIMER2_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
 #define S_TIMER3_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
@@ -329,7 +331,7 @@ io_reg;
 #define S_RUNNING                     ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit0
 #define S_CAM_ENGAGED                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit1
 #define S_CAM_CYCLE_COMPLETE          ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit2
-#define S_5                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit3
+#define S_EXT_TRIG_SETUP              ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit3
 #define S_4                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit4
 #define S_3                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit5
 #define S_2                           ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR1))->bit6
@@ -358,23 +360,19 @@ io_reg;
 #define EXT_TRIG_2_AFTER  (1 << 7) //B3 = I/O 2 external enabled (after)
 byte external_io = 0;
 
-// trigger delays //TODO
-//unsigned long ext_trig_pre_delay = 0;
-//unsigned long ext_trig_pst_delay = 0;
 
 // camera exposure time
 unsigned long exp_tm      = 100;
 
 
-
 //delays in ms
 unsigned int delay_postexp   = 100;    //Post Exposue
-unsigned int delay_preexp    = 0;      //Pre Expuse
+unsigned int delay_preexp    = 0;      //Pre Expose
 unsigned int delay_ext_in    = 0;      //Delay after Intervalometer till shot
 unsigned int delay_ext_out   = 200;      //Time ext_trigger is enabled before or after shot
 unsigned int length_ext_out  = 100;    //Time for which the trigger is enabled
 unsigned int delay_focus     = 0;      //Time to wait after focus signal has been sent
-unsigned int  delay_repeat   = 250;    // delay between camera repeat cycles
+unsigned int delay_repeat    = 250;    // delay between camera repeat cycles
 
 // TODO delay status flags
 #define DELAY_IN     (1 << 0) //B0 = currently in any delay
@@ -498,22 +496,18 @@ byte m_angle = 0;
 boolean m_cal_done = false;
 
 
-// ramping data //TODO
+// ramping data
 byte m_ramp_in=0;
 byte m_ramp_out=0;
 
 // lead-ins
-unsigned int m_lead_in  = 0;
-unsigned int m_lead_out = 0;
+byte m_lead_in  = 0;
+byte m_lead_out = 0;
 
-// for controlling pulsing and sms movement
-//unsigned long on_pct  = 0; //TODO
-//unsigned long off_pct = 0; //TODO
-unsigned int m_sms_tm = 0;
 
 
 // shots fired
-unsigned long shots = 0;
+unsigned int shots = 0;
 
 // function types for alt inputs...
 /* 
@@ -536,7 +530,7 @@ unsigned long input_trig_last = 0;
 // default alt I/O rising/falling direction
 byte altio_dir = FALLING;
 
- //timer globals
+//timer globals
 unsigned int volatile timer3_ms;
 void (*timer1_func)();
 void (*timer2_func)();
@@ -577,7 +571,7 @@ void setup() {
   input_last_tm=millis();
 
   show_home();
-
+#ifdef DEBUG
   //Output Calibration Data
   for( byte i = 0; i <= 3; i++) {
     Serial.print(i, DEC);
@@ -588,6 +582,7 @@ void setup() {
     }
     Serial.println("");
   } 
+#endif  
 
 }
 
@@ -600,10 +595,10 @@ void loop() {
     external_io |= EXT_INTV_OK;
   }
 
-  if( S_RUNNING ) { //run_status & B10000000
+  if( S_RUNNING ) {
     // program is running
     main_loop_handler();
-  } // end if running
+  }
 
 
   // always check the UI for input or
@@ -616,7 +611,7 @@ void loop() {
 void main_loop_handler() {
   static boolean do_fire        = false;
   static byte    cam_repeated   = 0;
-
+  
   if( cam_max > 0 && shots >= cam_max) {
     // stop program if max shots exceeded
     stop_executing();
@@ -629,8 +624,8 @@ void main_loop_handler() {
   // not blocked, we check to see if its time to fire the
   // camera
   
-  else if( S_CAM_ENGAGED) {
-    // currently firing the camera
+  else if( S_IN_DELAY||S_CAM_ENGAGED) {
+    // in delay or firing the camera 
     // do nothing
     ;
   }
@@ -652,7 +647,7 @@ void main_loop_handler() {
       // check to see if a post-exposure delay is needed
       if( delay_postexp > 0 ) {
       //start post exposure delay
-     delay_status|=DELAY_IN;
+     S_IN_DELAY=true;
       timer2_set(delay_postexp,clear_delay);
       }
         
@@ -676,39 +671,39 @@ void main_loop_handler() {
   }
   
 
+
   if( do_fire == true ) {
-    
-    
     // we've had a fire camera event
+    // we are not in an delay
     
-    // we always set the start mark at the time of the
-    // entering the first delay in a repeat cycle
-    if( cam_repeat == 0 || cam_repeated == 0 )
-          cam_last_tm  = millis();
-         
-    //TODO when should it fire?
-    //it should fire @trigger_delay before the shot
-    //
-    // is the external trigger to fire before shot?
-    if (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE)) //und nicht engaged und nicht done 
-    { 
-      //calculate when the trigger is to be enabled
-      //shot will happen in (delay_preexp+delay_focus+100),
-      //trigger should be enabled delay_ext_out ms before that.
-      unsigned int calc_delay=(delay_preexp+delay_focus+100)-delay_ext_out;
-      timer2_set(calc_delay,alt_ext_trigger_engage);
+    if(cam_repeated == 0 ){
+      //first shot of repeat cylce
+      cam_last_tm  = millis();
+      // is the external trigger to fire before shot and hasn't been setup yet?
+      if ((external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE))&&!S_EXT_TRIG_SETUP)
+      { 
+        //calculate when the trigger is to be enabled
+        //shot will happen in (delay_preexp+delay_focus+100),
+        //trigger should be enabled delay_ext_out ms before that.
+        unsigned int calc_delay=(delay_preexp+delay_focus+100)-delay_ext_out;
+        timer2_set(calc_delay,alt_ext_trigger_engage);
+        S_EXT_TRIG_SETUP=true;
+      }
+    //start delays for first exposue  
+    if (S_DELAYS_DONE==false) {
+      timer1_set(delay_preexp,focus_camera);
+      S_IN_DELAY=true;
+    }
+  }
+  else{ 
+    //in repeat cycle
+    if (S_DELAYS_DONE==false){
+      timer1_set(delay_repeat,focus_camera);
+      S_IN_DELAY=true;
     }
     
-    timer1_set(delay_preexp,focus_camera);
-    delay_status=true; //TODO
-    
-    if (delay_status==false){
-    //if not in_delay
-    if((cam_repeat > 0 && cam_repeated > 0) ) {
-        
-        //not waiting for ext trigger to be done
-        //no pre-exposure focus delay or already done
-        
+    if (S_IN_DELAY==false&&S_DELAYS_DONE==true){
+    //delays are done
         fire_camera(exp_tm);
         
         // setup for next call 
@@ -716,15 +711,13 @@ void main_loop_handler() {
         // deal with camera repeat actions
         if( cam_repeat == 0 || (cam_repeat > 0  && cam_repeated >= cam_repeat) ) {
             //no more repeats
-           S_CAM_CYCLE_COMPLETE=true;
+          S_CAM_CYCLE_COMPLETE=true;
           do_fire = false;
           cam_repeated = 0;
         }
         else if( cam_repeat > 0 ) {
-         //more repeats
-        delay(delay_repeat); // blocking delay between camera firings (we should fix this later!)
         cam_repeated++;
-        }
+        
 }
 
       }
@@ -738,32 +731,20 @@ void start_executing() {
   // set while stopped.
   external_io&= ~EXT_INTV_OK;
 
- 
- // turn on motors
-  motor_control(true);
+ // turn on main_handler
   S_RUNNING=true; 
-  S_MOT_RUNNING=true; 
-
-  // if ramping is enabled for a motor, start at a zero
-  // speed
-  /*if( m_ramp_set >= 1 )
-    motor_set_speed(0); 
-*/
-
-  // reset shot counter
   shots = 0;
+  
 }
 
 void stop_executing() {
-  //run_status &= B01100111;
+  //stops program execution and motors
   S_RUNNING=false;
   S_MOT_RUNNING=false;
-  S_EXT_TRIG_ENGAGED=false;
   motor_set_speed(0);
 }
 
 boolean gbtl_trigger() {
-
   if( Serial.available() > 0 ) {
     char thsChar = Serial.read();
 
