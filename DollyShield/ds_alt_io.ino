@@ -347,3 +347,7 @@ ISR(TIMER1_COMPB_vect) {
 void clear_delay(){
 S_IN_DELAY=false; //TODO
 }
+
+void restart(){
+  asm volatile ("  jmp 0");  
+}

@@ -760,42 +760,38 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
       case INPUT_IO:
         // for alt i/o inputs
 
-        if( cur_inp_long == 0 ) {
+        if( cur_inp_int == 0 ) {
           lcd.print("Disabled");
         }
-        else if( cur_inp_long == 1 ) {
+        else if( cur_inp_int == 1 ) {
           lcd.print("Start");
         }
-        else if( cur_inp_long == 2 ) {
+        else if( cur_inp_int == 2 ) {
           lcd.print("Stop");
         }
-        else if( cur_inp_long == 3 ) {
+        else if( cur_inp_int == 3 ) {
           lcd.print("Toggle");
         }
-        else if( cur_inp_long == 4 ) {
+        else if( cur_inp_int == 4 ) {
           lcd.print("Ext. Interval.");
         }
-        else if( cur_inp_long == 5 ) {
+        else if( cur_inp_int == 5 ) {
           lcd.print("Out Before");
         }
-        else if( cur_inp_long == 6 ){
+        else if( cur_inp_int == 6 ){
           lcd.print("Out After");
         }
-        else if(cur_inp_long == 7 ) {
+        else if(cur_inp_int == 7 ) {
           lcd.print("Out Both");
         }
         else {
           lcd.print("Change Dir");
         }
         break;
-      case INPUT_SPEED: 
-        // cal speed inputs in gobal set menu
-        display_spd_cpm(cur_inp_long);
-        break;
       case INPUT_FLOAT:
         lcd.print(cur_inp_float, (byte) 2);
         break;
-      case INPUT_ONOF:
+      case INPUT_ONOFF:
         if (cur_inp_bool == true) {
           lcd.print("On");
         } 
@@ -803,6 +799,14 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
           lcd.print("Off");
         }
         break;
+       case INPUT_OKCANCEL:
+        if (cur_inp_bool == true) {
+          lcd.print("OK");
+        } 
+        else {
+          lcd.print("Cancel");
+        }
+        break;  
       case INPUT_LTRT:
         if (cur_inp_bool == true) {
           lcd.print("Rt");
@@ -828,10 +832,10 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         }
         break;
       case INPUT_ANGLE:
-        if( cur_inp_long == 0 ) {
+        if( cur_inp_int == 0 ) {
           lcd.print(0,DEC);
         }
-        else if( cur_inp_long == 1 ) {
+        else if( cur_inp_int == 1 ) {
           lcd.print(45,DEC);
         }
         else {
@@ -840,21 +844,21 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         break;
       case INPUT_SHUTTER:
         // for shutter type
-        if( cur_inp_long == SHUTTER_MODE_CABLE_FOCUS ) {
+        if( cur_inp_int == SHUTTER_MODE_CABLE_FOCUS ) {
           lcd.print("Cable+Focus");
         }
-        else if( cur_inp_long == SHUTTER_MODE_CABLE_NO_FOCUS ) {
+        else if( cur_inp_int == SHUTTER_MODE_CABLE_NO_FOCUS ) {
           lcd.print("Cable");
         }
-        else if( cur_inp_long == SHUTTER_MODE_IR_CANON ) {
+        else if( cur_inp_int == SHUTTER_MODE_IR_CANON ) {
           lcd.print("IR Canon");
         }
-        else if ( cur_inp_long == SHUTTER_MODE_IR_NIKON ) {
+        else if ( cur_inp_int == SHUTTER_MODE_IR_NIKON ) {
           lcd.print("IR NIKON");
         }
         break;  
       default:
-        lcd.print((unsigned long)cur_inp_long);
+        lcd.print((unsigned long)cur_inp_int);
         return;
       }
 

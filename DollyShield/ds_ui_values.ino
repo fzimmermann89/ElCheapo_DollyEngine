@@ -38,7 +38,7 @@ void get_value( byte menu, byte pos, boolean read_save ) {
     return;
 
   //set as non-floating point/bool by default
-  ui_type = INPUT_ONOF;
+  ui_type = INPUT_ONOFF;
 
   switch(menu) {
   case 1:
@@ -65,8 +65,8 @@ void get_value( byte menu, byte pos, boolean read_save ) {
 
 
 void move_val(boolean dir) {
-
   // increase or decrease input value
+  
   if( ui_type==INPUT_FLOAT) {
     // float type
 
@@ -78,12 +78,18 @@ void move_val(boolean dir) {
 
     // floating point input
     if( dir == true ) {
-      // increase value
-      cur_inp_float += mod;
+    // increase value till max
+    if( cur_inp_float > cur_inp_float_max-mod ) {
+        cur_inp_float = cur_inp_float_max;
+      }
+      else {
+        cur_inp_float += mod;
+      }
     }
     else {
-      if( cur_inp_float < mod ) {
-        cur_inp_float = 0.0;
+			//decrease value till min
+      if( cur_inp_float < cur_inp_float_min+mod ) {
+        cur_inp_float = cur_inp_float_min;
       }
       else {
         cur_inp_float -= mod;
@@ -92,49 +98,64 @@ void move_val(boolean dir) {
     }
 
   }
-  else if( ui_type==INPUT_ONOF ||ui_type==INPUT_LTRT ||ui_type==INPUT_CMPCT || ui_type==INPUT_CONTSMS ) {
+  else if( ui_type==INPUT_ONOFF ||ui_type==INPUT_LTRT ||ui_type==INPUT_CMPCT || ui_type==INPUT_CONTSMS ||ui_type==INPUT_OKCANCEL ) {
     // any boolean type
-
     cur_inp_bool = ! cur_inp_bool;
   }
   else {
-    // unsigned long type
+    // unsigned int type
+    
+     // ceiling on certain special values values
+    if (ui_type==INPUT_ANGLE ) {
+      cur_inp_int_max = 2
+      cur_int_int_min = 0
+      inp_val_mult    = 1
+    }
+    else if (ui_type==INPUT_IO ) {
+      cur_inp_int_max = 8
+      cur_int_int_min = 0
+      inp_val_mult    = 1
+    }
+    else if (ui_type==INPUT_SHUTTER ) {
+    cur_inp_int_max = 3
+    cur_int_int_min = 0
+    inp_val_mult    = 1
+    }
+    
+    
+    
+    
     unsigned long mod = (1 * inp_val_mult);
     // long input
     if( dir == true ) {
-      cur_inp_long += mod;
-    }
-    else {
-      if( cur_inp_long < mod ) {
-        cur_inp_long = 0;
+    // increase value till max
+    if( cur_inp_int > cur_inp_int_max-mod ) {
+        cur_inp_int = cur_inp_int_max;
       }
       else {
-        cur_inp_long -= mod;
+        cur_inp_int += mod;
       }
-    } // end if dir not true
-
-    // ceiling on certain values
-    if (ui_type==INPUT_ANGLE ) {
-      cur_inp_long = cur_inp_long > 2 ? 2 : cur_inp_long;
     }
-    else if (ui_type==INPUT_IO ) {
-      cur_inp_long = cur_inp_long > 8 ? 8 : cur_inp_long;
-    }
-    else if (ui_type==INPUT_SHUTTER ) {
-      cur_inp_long = cur_inp_long > 3 ? 3 : cur_inp_long;
+    else {
+			//decrease value till min
+      if( cur_inp_int < cur_inp_int_min+mod ) {
+        cur_inp_int = cur_inp_int_min;
+      }
+      else {
+        cur_inp_int -= mod;
+      }
+
     }
 
-  } // end else long type...
 
+
+  }
 }
 
 
 
 
 void get_m_axis_set( byte pos, boolean read_save) {
-
-  ui_type = INPUT_LONG;
-
   // set axis configurable values
 
   switch(pos) { 
@@ -151,22 +172,28 @@ void get_m_axis_set( byte pos, boolean read_save) {
 
   case 1:
     // set ramp in value
+    ui_type = INPUT_UINT;
+    cur_inp_int_max=255;
+    cur_inp_int_min=0;
     if( read_save == true ) {
-      m_ramp_in=cur_inp_long;         
+      m_ramp_in=cur_inp_int;         
       eeprom_write(EEPROM_TODO, m_ramp_in);
     }
 
-    cur_inp_long = m_ramp_in;
+    cur_inp_int = m_ramp_in;
     break;
 
   case 2:
     // set ramp out value
+    ui_type = INPUT_UINT;
+    cur_inp_int_max=255;
+    cur_inp_int_min=0;
     if( read_save == true ) {
-      m_ramp_out=cur_inp_long;         
+      m_ramp_out=cur_inp_int;         
       eeprom_write(EEPROM_TODO, m_ramp_out);
     }
 
-    cur_inp_long = m_ramp_out;
+    cur_inp_int = m_ramp_out;
     break;
 
   case 3: 
@@ -174,31 +201,37 @@ void get_m_axis_set( byte pos, boolean read_save) {
     ui_type=INPUT_ANGLE;
 
     if( read_save == true ) {
-      m_angle = cur_inp_long;
+      m_angle = cur_inp_int;
       eeprom_write(EEPROM_TODO, m_angle);
     }
 
-    cur_inp_long = m_angle;
+    cur_inp_int = m_angle;
     break;
 
   case 4:
     // set lead-in value
+    ui_type = INPUT_UINT;
+    cur_inp_int_max=255;
+    cur_inp_int_min=0;
     if( read_save == true ) {
-      m_lead_in = cur_inp_long;
+      m_lead_in = cur_inp_int;
       eeprom_write(EEPROM_TODO, m_lead_in);
     }
 
-    cur_inp_long = m_lead_in;
+    cur_inp_int = m_lead_in;
     break;
 
   case 5:
     // set lead-out value
+    ui_type = INPUT_UINT;
+    cur_inp_int_max=255;
+    cur_inp_int_min=0;
     if( read_save == true ) {
-      m_lead_out = cur_inp_long;
+      m_lead_out = cur_inp_int;
       eeprom_write(EEPROM_TODO, m_lead_out);
     }
 
-    cur_inp_long = m_lead_out;
+    cur_inp_int = m_lead_out;
     break;
 
 
@@ -216,7 +249,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     break;
 
   case 1:
-    ui_type =INPUT_FLOAT;
+    ui_type = INPUT_FLOAT;
     // set rpm
     if( read_save == true ) {
       m_rpm = cur_inp_float;
@@ -256,22 +289,22 @@ void get_m_adv_set( byte pos, boolean read_save){
 
   case 6:
     // low calibration spd
-    ui_type=INPUT_LONG; //ui_type_flags2 |= B01000000;
+    ui_type=INPUT_UINT; //TODO min max
     if( read_save == true ) {
-      motor_spd_cal[0] = cur_inp_long;
+      motor_spd_cal[0] = cur_inp_int;
       eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
     }
-    cur_inp_long = motor_spd_cal[0];
+    cur_inp_int = motor_spd_cal[0];
     break;
 
   case 7:
     // high calibration spd
-    ui_type=INPUT_LONG; //ui_type_flags2 |= B01000000;
+    ui_type=INPUT_UINT; //TODO min max
     if( read_save == true ) {
-      motor_spd_cal[1] = cur_inp_long;
+      motor_spd_cal[1] = cur_inp_int;
       eeprom_write(EEPROM_TODO, motor_spd_cal[1]);
     }
-    cur_inp_long = motor_spd_cal[1];
+    cur_inp_int = motor_spd_cal[1];
     break;
   }
 
@@ -299,38 +332,42 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
   case 1:
     // max shots
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_max=UINT_MAX;
+    cur_inp_int_min=calc_min_cam_max;
+
     if( read_save == true ) {
-      cam_max = cur_inp_long;
+      cam_max = cur_inp_int;
       eeprom_write(EEPROM_TODO, cam_max);
     }
-    cur_inp_long = cam_max;
+    cur_inp_int = cam_max;
     break;
 
   case 2:
     // exposure time
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0
+    cur_inp_int_max=UINT_MAX;  //TODO what about bulb?
     if( read_save == true ) { 
-      exp_tm = cur_inp_long;
+      exp_tm = cur_inp_int;
       eeprom_write(EEPROM_TODO, exp_tm);
     }
-    cur_inp_long = exp_tm;
+    cur_inp_int = exp_tm;
     break;    
 
   case 3:
     //Shutter Type
     ui_type=INPUT_SHUTTER;
     if( read_save == true ) { 
-      shutter_mode = cur_inp_long;
+      shutter_mode = cur_inp_int;
       eeprom_write(EEPROM_TODO, shutter_mode);
     }
-    cur_inp_long = shutter_mode;
+    cur_inp_int = shutter_mode;
     break;
 
   case 4:
     //bulb mode
-    ui_type=INPUT_ONOF;
-
+    ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       bulb_mode = cur_inp_bool;
       eeprom_write(EEPROM_TODO, bulb_mode);
@@ -341,53 +378,62 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
   case 5:
     // camera repeat value
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=255;
     if( read_save == true ) {
-      cur_inp_long = cur_inp_long > 255 ? 255 : cur_inp_long;
-      cam_repeat = cur_inp_long;
+      cam_repeat = cur_inp_int;
       eeprom_write(EEPROM_TODO, cam_repeat);
     }
-    cur_inp_long = cam_repeat;
+    cur_inp_int = cam_repeat;
     break;
 
   case 6:
     // camera repeat delay
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=UINT_MAX;
     if( read_save == true) {
-      delay_repeat = cur_inp_long;
+      delay_repeat = cur_inp_int;
       eeprom_write(EEPROM_TODO, delay_repeat);
     }
-    cur_inp_long = delay_repeat;
+    cur_inp_int = delay_repeat;
     break;
 
   case 7:
     // pre exp delay
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=UINT_MAX;
     if( read_save == true ) { 
-      delay_postexp = cur_inp_long;
+      delay_postexp = cur_inp_int;
       eeprom_write(EEPROM_TODO, delay_preexp);
     }
-    cur_inp_long = delay_preexp;
+    cur_inp_int = delay_preexp;
     break;
 
   case 8:
     // post exp delay
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=UINT_MAX;
     if( read_save == true ) { 
-      delay_postexp = cur_inp_long;
+      delay_postexp = cur_inp_int;
       eeprom_write(EEPROM_TODO, delay_postexp);
     }
-    cur_inp_long = delay_postexp;
+    cur_inp_int = delay_postexp;
     break;
 
   case 9:
     // focus delay / tap time
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0; //TODO oder 100?
+    cur_inp_int_max=UINT_MAX;
     if( read_save == true ) {
-      delay_focus = cur_inp_long;
+      delay_focus = cur_inp_int;
       eeprom_write(EEPROM_TODO, delay_focus);
     }
-    cur_inp_long = delay_focus;
+    cur_inp_int = delay_focus;
     break;
 
   }
@@ -401,29 +447,31 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 0:
     // backlight level    
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=255;
     if(read_save == true) {
-      cur_bkl = cur_inp_long > 255 ? 255 : cur_inp_long;
       ui_set_backlight(cur_bkl);
       eeprom_write(EEPROM_TODO, cur_bkl);
     }
-    cur_inp_long = cur_bkl;
+    cur_inp_int = cur_bkl;
     break;
 
   case 1:
     // lcd dim time
-    ui_type=INPUT_LONG;
+    cur_inp_int_min=0;
+    cur_inp_int_max=255;
     if( read_save == true ) {
-      lcd_dim_tm = cur_inp_long;
+      lcd_dim_tm = cur_inp_int;
       eeprom_write(EEPROM_TODO, lcd_dim_tm);
     }
 
-    cur_inp_long = lcd_dim_tm;
+    cur_inp_int = lcd_dim_tm;
     break;
 
   case 2:
     // blank lcd   
-    ui_type=INPUT_ONOF;
+    ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       blank_lcd = cur_inp_bool;
       eeprom_write(EEPROM_TODO, blank_lcd);
@@ -436,46 +484,50 @@ void get_global_set(byte pos, boolean read_save) {
     // input 1
     ui_type=INPUT_IO;
     if( read_save == true ) {
-      altio_connect(0, cur_inp_long);
+      altio_connect(0, cur_inp_int);
       eeprom_write(EEPROM_TODO,input_type[0]);
     }
-    cur_inp_long = input_type[0];
+    cur_inp_int = input_type[0];
     break;
 
   case 4: 
     // input 2 
     ui_type=INPUT_IO;
     if( read_save == true ) {
-      altio_connect(1, cur_inp_long);
+      altio_connect(1, cur_inp_int);
       eeprom_write(EEPROM_TODO,input_type[1]);
     }
-    cur_inp_long = input_type[1];
+    cur_inp_int = input_type[1];
     break;
 
   case 5: 
     // input delay
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=UINT_MAX;
     if( read_save == true ) {
-      delay_ext_in = cur_inp_long;
+      delay_ext_in = cur_inp_int;
       eeprom_write(EEPROM_TODO, delay_ext_in);
     }
-    cur_inp_long =  delay_ext_in;
+    cur_inp_int =  delay_ext_in;
     break;
 
   case 6:
     // output delay
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=UINT_MAX;
     if( read_save == true ) {
-      delay_ext_out = cur_inp_long;
+      delay_ext_out = cur_inp_int;
       eeprom_write(EEPROM_TODO, delay_ext_out);
     }
 
-    cur_inp_long = delay_ext_out;
+    cur_inp_int = delay_ext_out;
     break;
 
   case 7:
     // USB Trigger enable
-    ui_type=INPUT_ONOF;
+    ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       if (cur_inp_bool) external_io|=EXT_INTV_USB;
       else external_io&=!EXT_INTV_USB;
@@ -487,7 +539,7 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 8:
     // invert dir display
-    ui_type=INPUT_ONOF;
+    ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       ui_invdir = cur_inp_bool;
       eeprom_write(EEPROM_TODO, ui_invdir);
@@ -498,7 +550,7 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 9:
     // flip I/O trigger type
-    ui_type=INPUT_ONOF;
+    ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       altio_dir = (cur_inp_bool == false) ? FALLING : RISING;
       eeprom_write(EEPROM_TODO, altio_dir);
@@ -509,11 +561,17 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 10:
     // reset memory
-    ui_type=INPUT_ONOF;
+    ui_type=INPUT_OKCANCEL;
 
     if( read_save == true ) {
-      if( cur_inp_bool )
+      if( cur_inp_bool ){
         eeprom_saved(false);
+        lcd.setCursor(0,0);
+        lcd.print("Reset");
+        motor_set_speed(0);
+        delay(500);
+        restart();
+       }
     }
     cur_inp_bool = false;
     break;
@@ -534,7 +592,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
   case 1:
     // on/off
     lcd.setCursor(0,0);
-    ui_type=INPUT_ONOF;
+    ui_type=INPUT_ONOFF;
     if( read_save ) {
       if( cur_inp_bool > 0 ) {   
         // if set to positive value
@@ -577,27 +635,25 @@ void get_mainscr_set(byte pos, boolean read_save) {
   case 4:
     // speed for motor
     lcd.setCursor(1,1);
-    ui_type=INPUT_LONG;
+    ui_type=INPUT_UINT;
     if( m_mode==MODE_SMS) {
       // shoot-move-shoot?
-      cur_inp_long = cur_inp_long > m_maxsms ? m_maxsms: cur_inp_long;
+      cur_inp_int = cur_inp_int > m_maxsms ? m_maxsms: cur_inp_int;
     } 
     else {       
-      cur_inp_long = cur_inp_long > 255 ? 255 : cur_inp_long;
+      cur_inp_int = cur_inp_int > 255 ? 255 : cur_inp_int;
     }
 
     if( read_save ) {
-      motor_set_speed((unsigned int) cur_inp_long); 
+      motor_set_speed((unsigned int) cur_inp_int); 
       // calculate speed change per shot for ramping
       // if needed - use function to update values
       //  motor_set_ramp(m_ramp_set);  //TODO
     }
-    cur_inp_long = m_speed;
+    cur_inp_int = m_speed;
     break; 
   }
 }
-
-
 
 void get_manual_select(byte pos) {
 

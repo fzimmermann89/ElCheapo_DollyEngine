@@ -48,6 +48,7 @@ NOTES:
 #include <LiquidCrystal.h>
 #include "digitalWriteFastMod.h"
 #include "helper.h"
+#include <limits.h>
 
 
 #define FIRMWARE_VERSION  92
@@ -228,8 +229,14 @@ byte cur_pos_sel   = 0;
 byte cur_inp_pos   = 0;
 
 // input buffers
-unsigned long cur_inp_long  = 0;
+unsigned int cur_inp_int  = 0;
+unsigned int cur_inp_int_max = UINT_MAX;
+unsigned int cur_inp_int_min = 0;
+
 float cur_inp_float         = 0.0;
+float cur_inp_float_max     = UINT_MAX;
+float cur_inp_float_min     = 0.0;
+
 boolean cur_inp_bool        = false;
 
 // which input are we on, if on
@@ -258,7 +265,7 @@ byte cur_bkl     = 255;
 boolean blank_lcd   = false;
 
 // for dimming lcd
-unsigned int lcd_dim_tm     = 5;
+byte lcd_dim_tm     = 5;
 unsigned long input_last_tm = 0;
 
 // invert L/R displays?
@@ -291,7 +298,7 @@ boolean ui_motor_display = true;
 //input type flags
 
  enum  __attribute__((packed)) INPUTS {
-     INPUT_FLOAT, INPUT_LONG, INPUT_ONOF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGLE,INPUT_IO,INPUT_SPEED,INPUT_PREPOST
+     INPUT_FLOAT, INPUT_UINT, INPUT_ONOFF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGLE,INPUT_IO,INPUT_OKCANCEL)
  };
 
 
