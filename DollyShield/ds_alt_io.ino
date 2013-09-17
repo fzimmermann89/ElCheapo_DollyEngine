@@ -159,7 +159,7 @@ void altio_flip_runstat() {
 
 }
 
-void alt_ext_trigger_engage{
+void alt_ext_trigger_engage(){
   // set flag
   S_EXT_TRIG_ENGAGED=true;
   // set the pins according to the enabled triggers
@@ -168,7 +168,7 @@ void alt_ext_trigger_engage{
   if( external_io & (EXT_TRIG_2_AFTER|EXT_TRIG_2_BEFORE) ) 
     digitalWriteFast(3, !altio_dir);
   // set timer to disengage trigger
-  timer3_set(length_ext_out,alt_ext_trigger_disengage);
+  timer3_set(length_ext_out, alt_ext_trigger_disengage);
   
 }
 
@@ -239,7 +239,7 @@ void alt_io_motor_set_slow(uint8_t value){
 
 
 void alt_io_display_set(uint8_t value){
-   if (value==0)  TIMSK2 &= ~(1<<OCIE2B); //disable display-on interrupt
+  if (value==0)  TIMSK2 &= ~(1<<OCIE2B); //disable display-on interrupt
   else  TIMSK2 |= (1<<OCIE2B);           //enable display-on interrupt
   OCR2B=value;
 }
@@ -289,7 +289,8 @@ ISR(TIMER2_OVF_vect){
   if (OCR2B>0) digitalWriteFast(LCD_BKL, HIGH);  //display on
 
 }
-void timer1_set(uint16_t ms,void (*f)()){
+
+void timer1_set(uint16_t ms, Callback f){
   if (ms==0){
     //no delay given, do it instanly  
     f();
@@ -306,10 +307,10 @@ void timer1_set(uint16_t ms,void (*f)()){
   }
 }
 
-void timer2_set(uint16_t ms,void (*f)()){
+void timer2_set(uint16_t ms, Callback f){
   if (ms==0){
     //no delay given, do it instanly  
-    f();
+    (*f)();
   }
   else{
     timer2_func=f;
@@ -322,11 +323,10 @@ void timer2_set(uint16_t ms,void (*f)()){
     TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
   }
 }
-
-void timer3_set(uint16_t ms,void (*f)()){
+void timer3_set(uint16_t ms, Callback f){
    if (ms==0){
     //no delay given, do it instanly  
-    f();
+    (*f)();
   }
   else{
     timer3_ms=ms;
@@ -337,16 +337,17 @@ void timer3_set(uint16_t ms,void (*f)()){
 ISR(TIMER1_COMPA_vect) {
   //timer 1
     TIMSK1 &= ~(1<<OCIE1A);
-    (*timer1_func)(timer1_param);
+    (*timer1_func)();
     S_TIMER1_SET=false;
 }
 
 ISR(TIMER1_COMPB_vect) {
   //timer 2
     TIMSK1 &= ~(1<<OCIE1B);
-    (*timer2_func)(timer1_param);
+    (*timer2_func)();
     S_TIMER2_SET=false;
    
 }
-
-
+void clear_delay(){
+delay_status=false; //TODO
+}

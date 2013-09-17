@@ -116,9 +116,9 @@ void clear_cam_focus() {
 uint16_t calc_total_cam_tm() {
   // calculate total minimum time between exposures 
   // add 100ms pre-focus tap clear value
-  uint16_t pf_tm = focus_tap_tm>0?focus_tap_tm + 100:0;
+  uint16_t pf_tm = delay_focus>0?delay_focus + 100:0;
   //TODO: use all the times.
-  uint16_t total = (exp_tm + pf_tm + post_delay_tm  );
+  uint16_t total = (exp_tm + pf_tm + delay_postexp  );
 
   if( !m_mode==MODE_SMS ) total += m_sms_tm;
   return(total);

@@ -354,40 +354,40 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     // camera repeat delay
     ui_type=INPUT_LONG;
     if( read_save == true) {
-      cam_rpt_dly = cur_inp_long;
-      eeprom_write(EEPROM_TODO, cam_rpt_dly);
+      delay_repeat = cur_inp_long;
+      eeprom_write(EEPROM_TODO, delay_repeat);
     }
-    cur_inp_long = cam_rpt_dly;
+    cur_inp_long = delay_repeat;
     break;
 
   case 7:
     // pre exp delay
     ui_type=INPUT_LONG;
     if( read_save == true ) { 
-      post_delay_tm = cur_inp_long;
-      eeprom_write(EEPROM_TODO, pre_delay_tm);
+      delay_postexp = cur_inp_long;
+      eeprom_write(EEPROM_TODO, delay_preexp);
     }
-    cur_inp_long = pre_delay_tm;
+    cur_inp_long = delay_preexp;
     break;
 
   case 8:
     // post exp delay
     ui_type=INPUT_LONG;
     if( read_save == true ) { 
-      post_delay_tm = cur_inp_long;
-      eeprom_write(EEPROM_TODO, post_delay_tm);
+      delay_postexp = cur_inp_long;
+      eeprom_write(EEPROM_TODO, delay_postexp);
     }
-    cur_inp_long = post_delay_tm;
+    cur_inp_long = delay_postexp;
     break;
 
   case 9:
     // focus delay / tap time
     ui_type=INPUT_LONG;
     if( read_save == true ) {
-      focus_tap_tm = cur_inp_long;
-      eeprom_write(EEPROM_TODO, focus_tap_tm);
+      delay_focus = cur_inp_long;
+      eeprom_write(EEPROM_TODO, delay_focus);
     }
-    cur_inp_long = focus_tap_tm;
+    cur_inp_long = delay_focus;
     break;
 
   }
@@ -456,30 +456,30 @@ void get_global_set(byte pos, boolean read_save) {
     // input delay
     ui_type=INPUT_LONG;
     if( read_save == true ) {
-      ext_in_delay = cur_inp_long;
-      eeprom_write(EEPROM_TODO, ext_in_delay);
+      delay_ext_in = cur_inp_long;
+      eeprom_write(EEPROM_TODO, delay_ext_in);
     }
-    cur_inp_long =  ext_in_delay;
+    cur_inp_long =  delay_ext_in;
     break;
 
   case 6:
     // output delay
     ui_type=INPUT_LONG;
     if( read_save == true ) {
-      ext_out_delay = cur_inp_long;
-      eeprom_write(EEPROM_TODO, ext_out_delay);
+      delay_ext_out = cur_inp_long;
+      eeprom_write(EEPROM_TODO, delay_ext_out);
     }
 
-    cur_inp_long = ext_out_delay;
+    cur_inp_long = delay_ext_out;
     break;
 
   case 7:
     // USB Trigger enable
     ui_type=INPUT_ONOF;
     if( read_save == true ) {
-      if (cur_in_bool) external_io|=EXT_INTV_USB;
+      if (cur_inp_bool) external_io|=EXT_INTV_USB;
       else external_io&=!EXT_INTV_USB;
-      eeprom_write(EEPROM_TODO, gb_enabled);
+      eeprom_write(EEPROM_TODO, external_io);
     }
 
     cur_inp_bool = ((external_io&&EXT_INTV_USB)!=0);

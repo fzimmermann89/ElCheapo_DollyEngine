@@ -39,8 +39,8 @@
  //TODO
  flash enabled   = 0
  (was exp_tm)    = 1-2*
- focus_tap_tm    = 3-4
- post_delay_tm   = 5-6
+ delay_focus    = 3-4
+ delay_postexp   = 5-6
  focus_shutter   = 7
  = 8-9
  cam_max         = 10-11
@@ -90,7 +90,7 @@
  m_cal_constant[1] = 243-246
  firmware_version  = 247-248
  cam_repeat     = 249
- cam_rpt_dly    = 250-251
+ delay_repeat    = 250-251
  ext_trig_pre_dly = 252-255
  ext_trig_pst_dly = 256-259
  exp_tm         = 260-263
@@ -205,8 +205,8 @@ void eeprom_read( int pos, float& val ) {
 void write_all_eeprom_memory() {
 /*
   // write default values into eeprom
-  eeprom_write(EEPROM_TODO, focus_tap_tm);
-  eeprom_write(EEPROM_TODO, post_delay_tm);
+  eeprom_write(EEPROM_TODO, delay_focus);
+  eeprom_write(EEPROM_TODO, delay_postexp);
   eeprom_write(EEPROM_TODO, focus_shutter);
 
   eeprom_write(EEPROM_TODO, cam_max);
@@ -240,7 +240,7 @@ void write_all_eeprom_memory() {
   eeprom_write(EEPROM_TODO, motor_spd_cal);
   eeprom_write(EEPROM_TODO, m_cal_constant);
   eeprom_write(EEPROM_TODO, cam_repeat);
-  eeprom_write(EEPROM_TODO, cam_rpt_dly);
+  eeprom_write(EEPROM_TODO, delay_repeat);
 
   eeprom_write(EEPROM_TODO, ext_trig_pre_delay);
   eeprom_write(EEPROM_TODO, ext_trig_pst_delay);
@@ -259,8 +259,8 @@ void restore_eeprom_memory() {
 /*
   // read eeprom stored values back into RAM
 
-  eeprom_read(3, focus_tap_tm);
-  eeprom_read(5, post_delay_tm);
+  eeprom_read(3, delay_focus);
+  eeprom_read(5, delay_postexp);
   eeprom_read(7, focus_shutter);
 
   eeprom_read(10, cam_max);
@@ -301,7 +301,7 @@ void restore_eeprom_memory() {
   eeprom_read(239, m_cal_constant[0]);
 
   eeprom_read(249, cam_repeat);
-  eeprom_read(250, cam_rpt_dly);
+  eeprom_read(250, delay_repeat);
 
   eeprom_read(252, ext_trig_pre_delay);
   eeprom_read(256, ext_trig_pst_delay);

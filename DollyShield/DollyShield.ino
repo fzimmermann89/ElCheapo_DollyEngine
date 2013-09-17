@@ -41,23 +41,16 @@ NOTES:
  
  */
 
-#define EEPROM_TODO 123
-#define TODO 123
-
-
-
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
 #include "digitalWriteFastMod.h"
-//#include "MsTimer2.h"
-//#include "TimerOne.h"
-
+#include "helper.h"
 
 
 #define FIRMWARE_VERSION  92
 
-// motor PWM
+// motor pins
 #define MOTOR0_P 3
 #define MOTOR0_DIR 13
 
@@ -66,23 +59,6 @@ NOTES:
 #define FOCUS_PIN 15
 #define IR_PIN 12
 
-//IR Settings
-#define FREQ 38400
-#define oscd 16 //TODO
-
-//IR sequences
-
-  //NIKON
-unsigned int seq_nikon[]={14,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
-    //CANON
-unsigned int seq_canon[]={3,16,458,16};
-
-unsigned int *seqs[] = {seq_nikon,seq_canon};
-#define IR_NIKON 0
-#define IR_CANON 1
-
-/* User Interface Values */
-
 // lcd pins
 #define LCD_RS  8
 #define LCD_EN  9
@@ -90,16 +66,14 @@ unsigned int *seqs[] = {seq_nikon,seq_canon};
 #define LCD_D5  5
 #define LCD_D6  6
 #define LCD_D7  7
+#define LCD_BKL 10
 
-// which input is our button
+// button pin
 #define BUT_PIN A0
 
-// lcd backlight pin
-#define LCD_BKL 10
 
 // max # of LCD characters (including newline)
 #define MAX_LCD_STR 17
-
 
 // how many buttons dow we have?
 #define NUM_BUTTONS 5
@@ -142,6 +116,18 @@ unsigned int *seqs[] = {seq_nikon,seq_canon};
 // ALT input debouncing time
 #define ALT_TRIG_THRESH 250
 
+//IR Settings
+#define FREQ 38400
+#define oscd 16 //TODO
+
+//IR sequences
+//NIKON
+unsigned int const seq_nikon[]={14,77,1069,15,61,16,137,15,2427,77,1069,15,61,16,10};
+//CANON
+unsigned int const seq_canon[]={3,16,458,16};
+unsigned int const *seqs[] = {seq_nikon,seq_canon};
+#define IR_NIKON 0
+#define IR_CANON 1
 
 // menu strings
 const char menu_0[] PROGMEM = "Movements";
@@ -193,7 +179,6 @@ const char set_menu_9[] PROGMEM = "Invert I/O";
 const char set_menu_10[] PROGMEM = "Reset Mem";
 
 // menu organization
-
 const char * const menu_str[] PROGMEM = { 
   menu_0,menu_1, menu_2, menu_3};
 
@@ -220,13 +205,16 @@ byte max_menu[7]  = {
 byte hist_menu[5] = {
   0,0,0,0,0};
 
+// lcd buffer
+char lcd_buf[MAX_LCD_STR];
+
 
 //Special Return Codes used / Magic Values
+#define EEPROM_TODO 123
+#define TODO 123
 #define MENU_MANUAL 254
 #define MENU_CALIBRATION 253
 #define MENU_INPUT 255
-
-char lcd_buf[MAX_LCD_STR];
 
 // what is our currently selected menu?
 // what is our current position?
@@ -381,7 +369,7 @@ unsigned long exp_tm      = 100;
 
 //delays in ms
 unsigned int delay_postexp   = 100;    //Post Exposue
-unsigned int delay_preexp;   = 0;      //Pre Expuse
+unsigned int delay_preexp    = 0;      //Pre Expuse
 unsigned int delay_ext_in    = 0;      //Delay after Intervalometer till shot
 unsigned int delay_ext_out   = 200;      //Time ext_trigger is enabled before or after shot
 unsigned int length_ext_out  = 100;    //Time for which the trigger is enabled
@@ -460,9 +448,7 @@ unsigned int  m_counter_cur;
 uint8_t m_pulse_length;
 
 //volatile bool motor_engaged      = false;
-//volatile bool motor_ran = 0;
- 
-//TODO
+volatile bool motor_ran = 0;  //TODO
 
 // motor calibration
 //m_cal_array[angle][point][dir]
@@ -628,18 +614,10 @@ void loop() {
 }
 
 void main_loop_handler() {
-
-
-  static boolean camera_fired   = false;
-  static boolean motors_clear   = false;
-  static boolean ok_stop        = false;
-  static boolean in_sms_cycle   = false;
   static boolean do_fire        = false;
- // static boolean ext_trip       = false;
   static byte    cam_repeated   = 0;
 
-
-  if( (cam_max > 0 && shots >= cam_max) {
+  if( cam_max > 0 && shots >= cam_max) {
     // stop program if max shots exceeded
     stop_executing();
     // interrupt further processing      
@@ -669,13 +647,13 @@ void main_loop_handler() {
       motor_set_speed(m_cur_speed);
       //  is the external trigger to fire?
         if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
-          timer2_set(ext_out_delay,alt_ext_trigger_engage);
+          timer2_set(delay_ext_out, alt_ext_trigger_engage);
       
       // check to see if a post-exposure delay is needed
-      if( post_delay_tm > 0 ) {
+      if( delay_postexp > 0 ) {
       //start post exposure delay
-      cur_in_delay|=DELAY_POSTEXP;
-      timer2_set(post_delay_tm,clear_delay_postexp);
+     delay_status|=DELAY_IN;
+      timer2_set(delay_postexp,clear_delay);
       }
         
   }
@@ -712,12 +690,12 @@ void main_loop_handler() {
     //it should fire @trigger_delay before the shot
     //
     // is the external trigger to fire before shot?
-    if ( (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE)) //und nicht engaged und nicht done 
+    if (external_io & (EXT_TRIG_1_BEFORE|EXT_TRIG_2_BEFORE)) //und nicht engaged und nicht done 
     { 
       //calculate when the trigger is to be enabled
       //shot will happen in (delay_preexp+delay_focus+100),
-      //trigger should be enabled ext_out_delay ms before that.
-      unsigned int calc_delay=(delay_pre+delay_focus+100)-ext_out_delay
+      //trigger should be enabled delay_ext_out ms before that.
+      unsigned int calc_delay=(delay_preexp+delay_focus+100)-delay_ext_out;
       timer2_set(calc_delay,alt_ext_trigger_engage);
     }
     
@@ -744,7 +722,7 @@ void main_loop_handler() {
         }
         else if( cam_repeat > 0 ) {
          //more repeats
-        delay(cam_rpt_dly); // blocking delay between camera firings (we should fix this later!)
+        delay(delay_repeat); // blocking delay between camera firings (we should fix this later!)
         cam_repeated++;
         }
 }
