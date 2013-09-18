@@ -328,7 +328,7 @@ io_reg;
 #define S_SLOW_MODE_MON               ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
 #define S_SLOW_MODE                   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
 #define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
-#define S_DELAYS_DONE                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define S_DELAYS_DONE                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
 #define S_TIMER1_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
 #define S_TIMER2_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
 #define S_TIMER3_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
@@ -451,7 +451,7 @@ boolean m_mode=MODE_SMS;
 unsigned int  m_counter_max_on;
 unsigned int  m_counter_max_off;
 unsigned int  m_counter_cur;
-uint8_t m_pulse_length;
+uint8_t m_pulse_length = 255; //TODO: sinnvollen wert voreintragen
 
 //volatile bool motor_engaged      = false;
 volatile bool motor_ran = 0;  //TODO
@@ -645,10 +645,7 @@ void main_loop_handler() {
       // for ramping motor speed and leads
       // we change speed after shots...
       m_cur_speed=motor_calc_speed_ramp_lead(m_cur_speed, shots);
-      //TODO what about SMS
       motor_set_speed(m_cur_speed);
-      
-      
       
       // is the external trigger to fire?
         if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
@@ -657,7 +654,7 @@ void main_loop_handler() {
       // check to see if a post-exposure delay is needed
       if( delay_postexp > 0 ) {
       //start post exposure delay
-     S_IN_DELAY=true;
+      S_IN_DELAY=true;
       timer2_set(delay_postexp,clear_delay);
       }
         

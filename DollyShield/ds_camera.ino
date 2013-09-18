@@ -90,7 +90,7 @@ void focus_camera(){
     digitalWriteFast(FOCUS_PIN, HIGH);
     timer1_set(100,stop_cam_focus);
   }
-  else S_IN_DELAY=false; //TODO
+  else S_IN_DELAY=false;
 } 
 void camera_clear() {
   // clears out camera engaged settings
@@ -117,10 +117,10 @@ uint16_t calc_total_cam_tm() {
   // calculate total minimum time between exposures 
   // add 100ms pre-focus tap clear value
   uint16_t pf_tm = delay_focus>0?delay_focus + 100:0;
-  //TODO: use all the times.
-  uint16_t total = (exp_tm + pf_tm + delay_postexp  );
+  //all the delays used in in mainhandler
+  uint16_t total = (exp_tm + pf_tm + delay_postexp+ delay_preexp)+cam_repeat* (exp_tm + pf_tm + delay_repeat);
 
-  if( !m_mode==MODE_SMS ) total += m_sms_tm;
+  if( m_mode==MODE_SMS ) total += m_sms_tm; //time used to drive the motors
   return(total);
 
 }

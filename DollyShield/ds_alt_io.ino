@@ -332,20 +332,20 @@ void timer3_set(uint16_t ms, Callback f){
 }
 ISR(TIMER1_COMPA_vect) {
   //timer 1
-    TIMSK1 &= ~(1<<OCIE1A);
-    (*timer1_func)();
-    S_TIMER1_SET=false;
+  TIMSK1 &= ~(1<<OCIE1A);
+  (*timer1_func)();
+  S_TIMER1_SET=false;
 }
 
 ISR(TIMER1_COMPB_vect) {
   //timer 2
-    TIMSK1 &= ~(1<<OCIE1B);
-    (*timer2_func)();
-    S_TIMER2_SET=false;
+  TIMSK1 &= ~(1<<OCIE1B);
+  (*timer2_func)();
+  S_TIMER2_SET=false;
    
 }
 void clear_delay(){
-S_IN_DELAY=false; //TODO
+  S_IN_DELAY=false;
 }
 
 void restart(){

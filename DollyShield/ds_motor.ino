@@ -66,17 +66,18 @@ void motor_control(boolean state) {
 
 }
 
-void motor_set_speed( unsigned int speed ) { //TODO datatype of m_speed.
+void motor_set_speed( uint8_t speed ) { 
 //TODO: Calibration
-  if (speed==0)
-    //called to disable motor.
+  if (speed==0){
+   //called to disable motor.
     S_MOT_RUNNING=false;
-  m_sms_tm=0; //disables if in sms-mode //TODO Should disable timer
-  m_cur_speed=0; //disables if in cont.-mode
-  alt_io_motor_set(0); //disables slow mode too.
-  return;
-  if (!(ui_ctrl_flags&UI_MANUAL_MODE)){ 
-    //not in manual mode and motors running
+    m_sms_tm=0; //disables if in sms-mode //TODO Should disable timer
+    m_cur_speed=0; //disables if in cont.-mode
+    alt_io_motor_set(0); //disables slow mode too.
+  }
+  else if (!(ui_ctrl_flags&UI_MANUAL_MODE)){ 
+    //not in manual mode
+    m_cur_speed=speed;
     if (m_mode==MODE_SMS){
       //SMS mode
       //calculate times
@@ -84,18 +85,17 @@ void motor_set_speed( unsigned int speed ) { //TODO datatype of m_speed.
     }
     else if (speed<min_spd){
       //speed below min_speed, so use pulsing mode
-      m_cur_speed=speed;
       if (S_MOT_RUNNING) alt_io_motor_set_slow(m_cur_speed); //write only to motor if running!
     }
     else{
       //continous mode
-      m_cur_speed=speed;
       if (S_MOT_RUNNING) alt_io_motor_set(m_cur_speed); //write only to motor if running!
     }
   }
   else{
-    //manual mode
+    //manual mode //TODO
   }
+  return;
 }
 
 void motor_dir(byte dir ) {
@@ -163,57 +163,6 @@ void motor_calc_sms_tm()
     m_sms_tm=m_cur_speed*m_cal_array[m_angle][CALPOINT_SMS][0];
 }
 
-/*void motor_pulse() { //TODO
-  // this function is called by timer1 to pulse motors
-   // on and off in pulsing mode
-   
-   if( ! timer_engaged )
-   return;
-   
-   volatile static byte mstate=0;
-   volatile static unsigned long pulses=1;
-   
-   volatile static byte pos = 0;
-   
-   pos++;
-   
-   
-   if( on_pct > 0 ) {
-   // speed is below min cont. speed
-   
-   if( ! mstate ) {
-   if( pulses < off_pct ) {
-   pulses++;
-   continue;
-   }
-   else {
-   // set port value high for given motor
-   //  PORTD |= (B00100000 << i);
-   digitalWriteFast(MOTOR0_P,HIGH);
-   mstate = 1;
-   pulses = 1;
-   }
-   }
-   else {
-   if( pulses < on_pct ) {
-   pulses++;
-   continue;
-   }
-   else {
-   
-   // set port value low for given motor
-   //   PORTD &= ( B11111111 ^ ( B00100000 << i ) );
-   digitalWriteFast(MOTOR0_P,LOW);
-   mstate[i] = 0;
-   pulses[i] = 1;
-   }
-   } // end else not mstate...
-   }  // end if on_pct...
-   
-  
-}
- */
-
 
 void motor_sms_run() {
   timer1_set(m_sms_tm,motor_sms_stop);
@@ -237,7 +186,7 @@ uint8_t motor_calc_speed_ramp_lead(uint8_t cur_speed, uint16_t cur_shots) {
     //during m_ramp_in
     //calculate speed
     uint8_t speed_step;
-    uint8_t remaining_shots_for_ramp=(m_lead_in+m_ramp_in)-cur_shots+1; //TODO
+    uint8_t remaining_shots_for_ramp=(m_lead_in+m_ramp_in)-cur_shots+1;
     speed_step=(m_speed-cur_speed)/(remaining_shots_for_ramp+1);
     return (cur_speed+speed_step);
   }  

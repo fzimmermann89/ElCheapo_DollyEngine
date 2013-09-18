@@ -87,7 +87,7 @@ void move_val(boolean dir) {
       }
     }
     else {
-			//decrease value till min
+      //decrease value till min
       if( cur_inp_float < cur_inp_float_min+mod ) {
         cur_inp_float = cur_inp_float_min;
       }
@@ -137,7 +137,7 @@ void move_val(boolean dir) {
       }
     }
     else {
-			//decrease value till min
+      //decrease value till min
       if( cur_inp_int < cur_inp_int_min+mod ) {
         cur_inp_int = cur_inp_int_min;
       }
@@ -241,7 +241,6 @@ void get_m_axis_set( byte pos, boolean read_save) {
 }
 
 void get_m_adv_set( byte pos, boolean read_save){
-
   switch (pos){
   case 0:
     // calibrate motor
@@ -249,8 +248,11 @@ void get_m_adv_set( byte pos, boolean read_save){
     break;
 
   case 1:
-    ui_type = INPUT_FLOAT;
     // set rpm
+    ui_type = INPUT_FLOAT;
+    cur_inp_float_max=100.0;
+    cur_inp_float_min=0;
+
     if( read_save == true ) {
       m_rpm = cur_inp_float;
       motor_update_dist(m_rpm, m_diarev);
@@ -263,7 +265,8 @@ void get_m_adv_set( byte pos, boolean read_save){
   case 2:
     // distance per revolution
     ui_type=INPUT_FLOAT;
-
+    cur_inp_float_max=100.0;
+    cur_inp_float_min=0;
     if( read_save == true ) {
       m_diarev = cur_inp_float;
       motor_update_dist(m_rpm, m_diarev);
@@ -273,11 +276,12 @@ void get_m_adv_set( byte pos, boolean read_save){
     break;
 
   case 3:
-    // min cont setting //TODO: Input in CPM instead of speed
     ui_type=INPUT_FLOAT;
+    cur_inp_float_max=max_cpm;
+    cur_inp_float_min=0;
     if( read_save == true ) {
       min_cpm = cur_inp_float;
-      min_spd = 255 * ( min_cpm / max_cpm );
+      min_spd = 255 * ( min_cpm / max_cpm ); //TODO
 
       eeprom_write(EEPROM_TODO, min_cpm);
       eeprom_write(EEPROM_TODO, min_spd);
@@ -285,27 +289,43 @@ void get_m_adv_set( byte pos, boolean read_save){
     cur_inp_float = min_cpm;
     break;
 
-    //TODO 4+5
-
-  case 6:
-    // low calibration spd
-    ui_type=INPUT_UINT; //TODO min max
+  case 4:
+    // pulse power
+    ui_type=INPUT_UINT;
+    cur inp_int_max=255;
+    cur inp_int_min=0;
     if( read_save == true ) {
-      motor_spd_cal[0] = cur_inp_int;
+      m_pulse_length = cur_inp_int;
       eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
     }
-    cur_inp_int = motor_spd_cal[0];
+    cur_inp_int = m_pulse_length;
     break;
 
-  case 7:
-    // high calibration spd
-    ui_type=INPUT_UINT; //TODO min max
+
+  case 5:
+    // low calibration spd
+    ui_type=INPUT_FLOAT;
+    cur_inp_float_max=max_cpm;
+    cur_inp_float_min=min_cpm;
     if( read_save == true ) {
-      motor_spd_cal[1] = cur_inp_int;
+      motor_spd_cal[0] = calc_speed(cur_inp_float)
+      eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
+    }
+    cur_inp_float = calc_cpm(motor_spd_cal[0]);
+    break;
+
+  case 6:
+    // high calibration spd
+    ui_type=INPUT_FLOAT;
+    cur_inp_float_max=max_cpm;
+    cur_inp_float_min=min_cpm;
+    if( read_save == true ) {
+      motor_spd_cal[1] = calc_speed(cur_inp_float)
       eeprom_write(EEPROM_TODO, motor_spd_cal[1]);
     }
-    cur_inp_int = motor_spd_cal[1];
+    cur_inp_float = calc_cpm(motor_spd_cal[1]);
     break;
+
   }
 
 }
@@ -322,7 +342,8 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     // interval timer
     ui_type=INPUT_FLOAT;
     ui_float_tenths = true;
-
+    cur_inp_float_min=calc_total_cam_tm()/1000;
+    cur_inp_float_max=UINT_MAX
     if( read_save == true ) { 
       cam_interval = cur_inp_float;
       eeprom_write(EEPROM_TODO, cam_interval);
@@ -459,6 +480,7 @@ void get_global_set(byte pos, boolean read_save) {
 
   case 1:
     // lcd dim time
+    ui_type=INPUT_UINT;
     cur_inp_int_min=0;
     cur_inp_int_max=255;
     if( read_save == true ) {
