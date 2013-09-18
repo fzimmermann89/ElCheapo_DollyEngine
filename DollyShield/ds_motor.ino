@@ -226,44 +226,43 @@ void motor_sms_stop() {
   motor_ran++;
 }
 
-void motor_exec_ramp_lead() {
-  //TODO: SMS!!
-  //to be called after a shoot to adjust speed for next one.
+uint8_t motor_calc_speed_ramp_lead(uint8_t cur_speed, uint16_t cur_shots) {
+  //to be called after a shoot to calculate speed for next one
 
-  if (shots<=m_lead_in){
+  if (cur_shots<=m_lead_in){
     //during m_lead_in
-    m_cur_speed=0;
+    return 0;
   }
-  else if (shots<=(m_lead_in+m_ramp_in)){
+  else if (cur_shots<=(m_lead_in+m_ramp_in)){
     //during m_ramp_in
     //calculate speed
     uint8_t speed_step;
-    uint8_t remaining_shots_for_ramp=(m_lead_in+m_ramp_in)-shots+1; //TODO
-    speed_step=(m_speed-m_cur_speed)/(remaining_shots_for_ramp+1);
-    m_cur_speed+=speed_step;
+    uint8_t remaining_shots_for_ramp=(m_lead_in+m_ramp_in)-cur_shots+1; //TODO
+    speed_step=(m_speed-cur_speed)/(remaining_shots_for_ramp+1);
+    return (cur_speed+speed_step);
   }  
   else if (cam_max>0){
     //ramp and lead out only make sense if max. shots are set.
-    if (shots<(cam_max-m_lead_out-m_ramp_out)){
+    if (cur_shots<(cam_max-m_lead_out-m_ramp_out)){
       //during normal mode
-      m_cur_speed=m_speed;
+      return m_speed;
     }
-    else if (shots<(cam_max-m_lead_out)){
+    else if (cur_shots<(cam_max-m_lead_out)){
       //during m_ramp_out
       //calculate speed
       uint8_t speed_step;
-      uint8_t remaining_shots_for_ramp=cam_max-m_lead_out-shots;
-      speed_step=(m_cur_speed)/(remaining_shots_for_ramp+1);
-      m_cur_speed+=speed_step;
+      uint8_t remaining_shots_for_ramp=cam_max-m_lead_out-cur_shots;
+      speed_step=(cur_speed)/(remaining_shots_for_ramp+1);
+      return (cur_speed-speed_step);
     } 
     else{
         //during m_lead_out or finished.
-        m_cur_speed=0;
+        return 0;
     }
   }  
   else {
     //no cam_max set. so normal mode.
-    m_cur_speed=m_speed;
+    return m_speed;
   }
 }
    

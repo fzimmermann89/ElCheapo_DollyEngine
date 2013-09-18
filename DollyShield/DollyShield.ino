@@ -41,8 +41,6 @@ NOTES:
  
  */
 
-#define DEBUG
-
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
@@ -581,7 +579,8 @@ void setup() {
   input_last_tm=millis();
 
   show_home();
-#ifdef DEBUG
+  
+#ifdef DEBUG_ON
   //Output Calibration Data
   for( byte i = 0; i <= 3; i++) {
     Serial.print(i, DEC);
@@ -610,7 +609,6 @@ void loop() {
     main_loop_handler();
   }
 
-
   // always check the UI for input or
   // updates
 
@@ -621,7 +619,6 @@ void loop() {
 void main_loop_handler() {
   static boolean do_fire        = false;
   static byte    cam_repeated   = 0;
-  
   if( cam_max > 0 && shots >= cam_max) {
     // stop program if max shots exceeded
     stop_executing();
@@ -647,10 +644,13 @@ void main_loop_handler() {
 
       // for ramping motor speed and leads
       // we change speed after shots...
-      motor_exec_ramp_lead();
+      m_cur_speed=motor_calc_speed_ramp_lead(m_cur_speed, shots);
       //TODO what about SMS
       motor_set_speed(m_cur_speed);
-      //  is the external trigger to fire?
+      
+      
+      
+      // is the external trigger to fire?
         if( external_io & (EXT_TRIG_2_AFTER | EXT_TRIG_1_AFTER) ) 
           timer2_set(delay_ext_out, alt_ext_trigger_engage);
       

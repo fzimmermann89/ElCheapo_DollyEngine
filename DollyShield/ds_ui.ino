@@ -70,7 +70,7 @@ void init_user_interface() {
 
   // set the update screen flag (draw main
   // screen)
-  ui_ctrl_flags |= B10000000;
+  ui_ctrl_flags |= UI_UPDATE_DISP;
 
   delay(3000);
 
@@ -81,47 +81,49 @@ void check_user_interface() {
 
 
   // turn off/on lcd backlight if needed
-  if( (ui_ctrl_flags & B00000010) && (input_last_tm < (millis() - (lcd_dim_tm * 1000))) ) {
-
-    ui_ctrl_flags &= B11111101;
-
+  if( (ui_ctrl_flags & UI_LCD_BKL_ON) && (input_last_tm < (millis() - (lcd_dim_tm * 1000))) ) {
+		//unset flag
+    ui_ctrl_flags &= ~UI_LCD_BKL_ON;
+    //disable display if blank lcd is enabled
     if( blank_lcd ) 
       lcd.noDisplay();
-
-    digitalWrite(LCD_BKL, 0);
+    //disable backlight  
+		alt_io_display_set(0);
+    
   }
-  else if( (! (ui_ctrl_flags & B00000010)) && (input_last_tm > millis() - (lcd_dim_tm * 1000)) ) {
-    ui_ctrl_flags |= B00000010;
-
+  else if( (! (ui_ctrl_flags & UI_LCD_BKL_ON)) && (input_last_tm > millis() - (lcd_dim_tm * 1000)) ) {
+    //set flag
+    ui_ctrl_flags |= UI_LCD_BKL_ON;
+    //enable display and backlight
     lcd.display();
-    analogWrite(LCD_BKL, cur_bkl);
+    alt_io_display_set (cur_bkl);
   }
 
   // if we're set to update the display
   // (on-demand or once a second when not
   // in a menu)
-  if( ui_ctrl_flags & B10000000 ||
-    ( (ui_update_tm < millis() - 1000) && ! (ui_ctrl_flags & B01000000) ) ) {
+  if( ui_ctrl_flags & UI_UPDATE_DISP  ||
+    ( (ui_update_tm < millis() - 1000) && ! (ui_ctrl_flags & UI_SETUP_MENU ) ) ) {
 
     // determine whether to show home or manual screen      
-    if( ! ( ui_ctrl_flags & B00000100 ) ) {
+    if( ! ( ui_ctrl_flags & UI_MANUAL_MODE  ) ) {
       show_home();
     }
-
 
     else {
       show_manual();
     }
-
-    ui_ctrl_flags &= B01111111;
+		//confirm that we have updated the display
+    ui_ctrl_flags &= ~UI_UPDATE_DISP ;
     ui_update_tm = millis();
   }
 
-  byte held = ui_button_check();
+
 
   // make sure to turn off motor if in manual
-  // control and no button is held
-  if( ui_ctrl_flags & B00000100 && held == false &&  S_MOT_RUNNING)//run_status & B00010000
+  // control and no button is held  
+  byte held = ui_button_check();
+  if( ui_ctrl_flags & UI_MANUAL_MODE  && held == false &&  S_MOT_RUNNING)
     motor_control( false);
 
 
@@ -129,7 +131,7 @@ void check_user_interface() {
 
 
 byte ui_button_check() {
-
+//TODO WTF??
   static byte hold_but_cnt = 0;
 
   get_button_pressed();
@@ -308,10 +310,11 @@ void handle_input( byte button, boolean held ) {
 void ui_button_center( boolean held ) {
   // center button
 
-  // on calibration screen
+  
 
-  if( ui_ctrl_flags & B00000001 ) {
-
+  if( ui_ctrl_flags & UI_CALIBRATE_MODE  ) {
+	// on calibration screen 
+	//TODO
     if( ui_cal_scrn_flags & B01000000 ) {
       // completed calibrating
       ui_cal_scrn_flags &= B00111111;
@@ -340,49 +343,43 @@ void ui_button_center( boolean held ) {
   }
 
 
-  // if in manual control
-  if( ui_ctrl_flags & B00000100  ) {
+  // if in manual control: center exits manual mode
+  if( ui_ctrl_flags & UI_MANUAL_MODE ) {
     // clear out manual ctrl flag
-    ui_ctrl_flags &= B11111011;
+    ui_ctrl_flags &= ~UI_MANUAL_MODE
 
     // resume back to setup menu
-    ui_ctrl_flags |= B01000000;
-    cur_menu = 1; // show manual menu again
+    ui_ctrl_flags |= UI_SETUP_MENU;
+    cur_menu = 1; // show manual menu again //TODO: richtiges menu?
     draw_menu(0, false);
     return;
   }
 
-
-  if( ! (ui_ctrl_flags & B01000000) ) {
-    // not in any setup menu
-    ui_ctrl_flags |= B01000000;
+ // not in any setup menu, enter setup menu
+  if( ! (ui_ctrl_flags & UI_SETUP_MENU) ) {
+    ui_ctrl_flags |= UI_SETUP_MENU;
     cur_menu = 0;
     draw_menu(0,false);
   }
   else {
-
-
     // in a setup menu, find
     // the next menu to go to
 
     byte new_menu = get_menu(cur_menu, cur_pos);
-
-
     if( new_menu == MENU_CALIBRATION || new_menu==MENU_MANUAL ) {
       // if drawing motor manual screen or in calibration screen...
       get_value(cur_menu, cur_pos, false);
       return;
     }
 
-
-    if( new_menu == MENU_INPUT && ! (ui_ctrl_flags & B00100000) )  {
+    if( new_menu == MENU_INPUT && ! (ui_ctrl_flags & UI_VALUE_ENTRY) )  {
       // this is not a menu, but an input of some
       // sort
 
-      draw_menu(3,true);
+      draw_menu(3,true); //TODO
       return;
     }
-    else if( ui_ctrl_flags & B00100000 ) {
+    else if( ui_ctrl_flags & UI_VALUE_ENTRY ) {
       // exiting out of value entry (save...)
       // go to previous menu
 
@@ -396,9 +393,10 @@ void ui_button_center( boolean held ) {
       ui_float_tenths = false;
 
       // clear in value setting flag
+      ui_ctrl_flags &= ~UI_VALUE_ENTRY ;
       // and the flag indicating that
       // we've already displayed this value
-      ui_ctrl_flags &= B11001111;
+      ui_ctrl_flags &= ~UI_DRAWN_INITAL_VALUE
       draw_menu(0,false);
     }
     else {
@@ -409,7 +407,7 @@ void ui_button_center( boolean held ) {
       push_menu(cur_menu);
 
       // clear in value setting flag
-      ui_ctrl_flags &= B11011111;
+      ui_ctrl_flags &= ~UI_VALUE_ENTRY;
 
       // set menu to new menu
       cur_menu = new_menu;
@@ -423,9 +421,9 @@ void ui_button_center( boolean held ) {
 
 void ui_button_down( boolean held ) {
 
-  // on calibration screen
+  // on calibration screen //TODO
 
-  if( ui_ctrl_flags & B00000001 ) {
+  if( ui_ctrl_flags & UI_CALIBRATE_MODE  ) {
 
     if( ui_cal_scrn_flags & B10000000 ) {
       // in calibrating settings
@@ -442,7 +440,7 @@ void ui_button_down( boolean held ) {
 
 
   // if in manual motor mode...
-  if( ui_ctrl_flags & B00000100 ) {
+  if( ui_ctrl_flags & UI_MANUAL_MODE) {
     motor_speed_adjust( -1 * inp_val_mult, true);
     show_manual();
     return;
@@ -450,7 +448,8 @@ void ui_button_down( boolean held ) {
 
   // if not currently in setup menus, or
   // modifying a main screen value
-  if( ! (ui_ctrl_flags & B01000000) && main_scr_input == 0 )
+  // then do nothing
+  if( ! (ui_ctrl_flags & UI_SETUP_MENU) && main_scr_input == 0 )
     return;
 
   if( main_scr_input > 0 ) {
@@ -458,9 +457,9 @@ void ui_button_down( boolean held ) {
     // save present value
     get_mainscr_set(main_scr_input, true);
     // set screen to update
-    ui_ctrl_flags |= B10000000;
+    ui_ctrl_flags |= UI_UPDATE_DISP ;
   }
-  else if( ui_ctrl_flags & B00100000 ) {
+  else if( ui_ctrl_flags & UI_VALUE_ENTRY ) {
     // entering a value
     move_val(false);
     draw_menu(3,true);
@@ -474,8 +473,8 @@ void ui_button_down( boolean held ) {
 
 void ui_button_up( boolean held ) {
 
-  // on calibration screen
-  if( ui_ctrl_flags & B00000001 ) {
+  // on calibration screen //TODO
+  if( ui_ctrl_flags &  UI_CALIBRATE_MODE ) {
     if( ui_cal_scrn_flags & B10000000 ) {
       // in calibrating settings
       move_val(true);
@@ -489,7 +488,7 @@ void ui_button_up( boolean held ) {
   }
 
   // if in manual motor mode...
-  if( ui_ctrl_flags & B00000100 ) {
+  if( ui_ctrl_flags & UI_MANUAL_MODE ) {
     motor_speed_adjust(1 + inp_val_mult, true);
     show_manual();
     return;
@@ -497,7 +496,8 @@ void ui_button_up( boolean held ) {
 
   // if not currently in setup menus, or
   // modifying a main screen value
-  if( ! (ui_ctrl_flags & B01000000) && main_scr_input == 0 )
+  // then do nothing
+  if( ! (ui_ctrl_flags & UI_SETUP_MENU ) && main_scr_input == 0 )
     return;
 
   if( main_scr_input > 0 ) {
@@ -506,9 +506,9 @@ void ui_button_up( boolean held ) {
     get_mainscr_set(main_scr_input, true);
 
     // set screen to update
-    ui_ctrl_flags |= B10000000;
+    ui_ctrl_flags |= UI_UPDATE_DISP;
   }
-  else if( ui_ctrl_flags & B00100000 ) {
+  else if( ui_ctrl_flags & UI_VALUE_ENTRY ) {
     // entering a value
     move_val(true);
     draw_menu(3,true);
@@ -523,15 +523,15 @@ void ui_button_rt( boolean held ) {
 
   // clear out calibration screen value, if
   // set
-  if( ui_ctrl_flags & B00000001 )
-    ui_ctrl_flags &= B11111110;
+    ui_ctrl_flags &= ~UI_CALIBRATE_MODE ;
 
   // if in manual control
-  if( ui_ctrl_flags & B00000100 ) {
+  if( ui_ctrl_flags & UI_MANUAL_MODE ) {
     if( held == true ) {
-      // change motor direction
+      // set motor direction
       motor_dir(false);
-      if( ! (S_MOT_RUNNING) )//run_status & B00010000
+      //enabled motors if not already running
+      if( ! (S_MOT_RUNNING) )
         motor_control(true);
     }
     show_manual();
@@ -541,7 +541,7 @@ void ui_button_rt( boolean held ) {
   }  
 
 
-  if( ! (ui_ctrl_flags & B01000000) ) {
+  if( ! (ui_ctrl_flags & UI_SETUP_MENU) ) {
     // we're on main screen, rt switches value we can
     // adjust
     main_screen_select(true);
@@ -553,52 +553,46 @@ void ui_button_rt( boolean held ) {
 
 void ui_button_lt(boolean held) {
   // if in manual control
-  if( ui_ctrl_flags & B00000100 ) {
+  if( ui_ctrl_flags & UI_MANUAL_MODE ) {
     if( held == true ) {        
       // change motor direction
       motor_dir(true);
       // get motor moving (if not already)
-      if (!(S_MOT_RUNNING)) motor_control(true); //run_status & B00010000 
+      if (!(S_MOT_RUNNING)) motor_control(true);
       show_manual();
     }
-    return;
   }  
 
-  if( ! (ui_ctrl_flags & B01000000) ) {
+  else if( ! (ui_ctrl_flags & UI_SETUP_MENU ) ) {
     // we're on main screen, lt switches value we can
     // adjust
     main_screen_select(false);
-    return;
   }
 
-  // left button
-  if( ! (ui_ctrl_flags & B01000000 || ui_ctrl_flags & B00100000 ))
-    return;
-
-  if( ui_ctrl_flags & B00100000 ) {
+  else if( ui_ctrl_flags & UI_VALUE_ENTRY ) {
     // we're in a value entry mode.  Exit
     // entry without saving the value
 
     // clear in value setting flag
+    ui_ctrl_flags &= ~UI_VALUE_ENTRY 
     // and the flag indicating that
     // we've already displayed this value
-    ui_ctrl_flags &= B11001111;        
+    ui_ctrl_flags &= ~UI_DRAWN_INITAL_VALUE;        
     // reset the float tenths (vs 100ths) parameter
     ui_float_tenths = false;
 
     draw_menu(0,false);
-    return;
   }
 
-  // draw previous menu
-
-  if( cur_menu == 0 ) { 
+  else {
+    // draw previous menu
+    if( cur_menu == 0 ) { 
     // we're at the highest menu, back to main screen 
     cur_pos = 0;  
     // clear setup flag
+    ui_ctrl_flags &= ~UI_SETUP_MENU;
     // indicate display needs updating
-    ui_ctrl_flags &= B10111111;
-    ui_ctrl_flags |= B10000000;
+    ui_ctrl_flags |= UI_UPDATE_DISP;
     // clear out list of menus
     flush_menu();
   }
@@ -704,14 +698,12 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
     // must draw the whole display
     lcd.clear();
     // clear out lcd buffer
-
-      memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
-
+    memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
+    
     // draw first option
     lcd.noCursor();
     lcd.setCursor(0,0);
     cur_pos_sel = cur_pos;
-
     strcpy_P(lcd_buf, (char*) pgm_read_word(&(these[cur_pos])));
     lcd.print("> ");
     lcd.print(lcd_buf);
@@ -730,32 +722,23 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         lcd.print(lcd_buf);
       }
       // clear out in value entry setting, if set
-      ui_ctrl_flags &= B11011111;
+      ui_ctrl_flags &= ~UI_VALUE_ENTRY;
 
     }
     else {
-
       // display the value of the current entry
-      ui_ctrl_flags |= B00100000;
-
-
-      if(! ( ui_ctrl_flags & B00010000 ) ) {
+      ui_ctrl_flags |= UI_VALUE_ENTRY;
+      if(! ( ui_ctrl_flags & UI_DRAWN_INITAL_VALUE ) ) {
         // have just drawn this value
-
+        
         // place value from variable into
         // temporary buffer
         get_value(cur_menu, cur_pos, false);
-
-        ui_ctrl_flags |= B00010000;
+        ui_ctrl_flags |= UI_DRAWN_INITAL_VALUE;
       }
-
-
 
       // display the correct current
       // temporary input value
-
-
-
       switch(ui_type) {
       case INPUT_IO:
         // for alt i/o inputs
@@ -861,15 +844,10 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         lcd.print((unsigned long)cur_inp_int);
         return;
       }
-
-
-
     }
-
   } // end if( draw_all == true
 
   else {
-
     // do not need to re-draw the whole screen
 
     // move cursor down if we're not in
@@ -882,24 +860,6 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
     }
 
   }
-}
-
-
-void ui_set_backlight(byte value) {
-  /* //TODO
-   // make sure to not use pwm on lcd bkl pin
-   // if timer1 has been used at some point
-   if( ! timer_used ) {
-   analogWrite(LCD_BKL, cur_bkl);
-   }
-   else {
-   if( cur_bkl > 0 ) {
-   digitalWriteFast(LCD_BKL, HIGH);
-   }
-   else {
-   digitalWriteFast(LCD_BKL, LOW);
-   }
-   } */
 }
 
 /* 
