@@ -298,7 +298,7 @@ boolean ui_motor_display = true;
 //input type flags
 
  enum  __attribute__((packed)) INPUTS {
-     INPUT_FLOAT, INPUT_UINT, INPUT_ONOFF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS,INPUT_ANGLE,INPUT_IO,INPUT_OKCANCEL)
+     INPUT_FLOAT, INPUT_UINT, INPUT_ONOFF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS, INPUT_ANGLE,INPUT_IO, INPUT_OKCANCEL
  };
 
 
@@ -330,7 +330,7 @@ io_reg;
 #define S_SLOW_MODE_MON               ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit1
 #define S_SLOW_MODE                   ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit2
 #define S_MOT_RUNNING                 ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit3
-#define S_DELAY_DONE                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
+#define S_DELAYS_DONE                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit4
 #define S_TIMER1_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit5
 #define S_TIMER2_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit6
 #define S_TIMER3_SET                  ((volatile io_reg*)_SFR_MEM_ADDR(GPIOR0))->bit7
@@ -414,6 +414,9 @@ unsigned int m_speed = 0;
 
 // currently active speed
 unsigned int m_cur_speed=0;
+
+//current run time for sms in ms
+unsigned long m_sms_tm=0;
 
 //direction of motor
 byte m_dir = 0;
@@ -696,25 +699,25 @@ void main_loop_handler() {
         timer2_set(calc_delay,alt_ext_trigger_engage);
         S_EXT_TRIG_SETUP=true;
       }
-    //start delays for first exposue  
-    if (S_DELAYS_DONE==false) {
-      timer1_set(delay_preexp,focus_camera);
-      S_IN_DELAY=true;
+      //start delays for first exposue  
+      if (S_DELAYS_DONE==false) {
+        timer1_set(delay_preexp,focus_camera);
+        S_IN_DELAY=true;
+      }
     }
-  }
-  else{ 
-    //in repeat cycle
-    if (S_DELAYS_DONE==false){
-      timer1_set(delay_repeat,focus_camera);
-      S_IN_DELAY=true;
-    }
-    
-    if (S_IN_DELAY==false&&S_DELAYS_DONE==true){
-    //delays are done
+    else{ 
+      //in repeat cycle
+      if (S_DELAYS_DONE==false){
+        timer1_set(delay_repeat,focus_camera);
+        S_IN_DELAY=true;
+      }
+      
+      if (S_IN_DELAY==false&&S_DELAYS_DONE==true){
+        //delays are done
         fire_camera(exp_tm);
         
         // setup for next call 
-
+  
         // deal with camera repeat actions
         if( cam_repeat == 0 || (cam_repeat > 0  && cam_repeated >= cam_repeat) ) {
             //no more repeats
@@ -724,12 +727,12 @@ void main_loop_handler() {
         }
         else if( cam_repeat > 0 ) {
         cam_repeated++;
-        
+        }
+      }
+    }
+  }  
 }
 
-      }
- }
-}
 
 void start_executing() {
   // starts program execution
@@ -754,15 +757,8 @@ void stop_executing() {
 boolean gbtl_trigger() {
   if( Serial.available() > 0 ) {
     char thsChar = Serial.read();
-
-    if( thsChar == 'T' ) {
-      return true;
+    if( thsChar == 'T' ) return true;
     }
-    else {
-      return false;
-    }
-  }
-
   return false;
-}
+  }
 

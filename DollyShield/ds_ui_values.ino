@@ -107,25 +107,25 @@ void move_val(boolean dir) {
     
      // ceiling on certain special values values
     if (ui_type==INPUT_ANGLE ) {
-      cur_inp_int_max = 2
-      cur_int_int_min = 0
-      inp_val_mult    = 1
+      cur_inp_int_max = 2;
+      cur_inp_int_min = 0;
+      inp_val_mult    = 1;
     }
     else if (ui_type==INPUT_IO ) {
-      cur_inp_int_max = 8
-      cur_int_int_min = 0
-      inp_val_mult    = 1
+      cur_inp_int_max = 8;
+      cur_inp_int_min = 0;
+      inp_val_mult    = 1;
     }
     else if (ui_type==INPUT_SHUTTER ) {
-    cur_inp_int_max = 3
-    cur_int_int_min = 0
-    inp_val_mult    = 1
+    cur_inp_int_max = 3;
+    cur_inp_int_min = 0;
+    inp_val_mult    = 1;
     }
     
     
     
     
-    unsigned long mod = (1 * inp_val_mult);
+    unsigned int mod = (1 * inp_val_mult);
     // long input
     if( dir == true ) {
     // increase value till max
@@ -334,7 +334,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     // max shots
     ui_type=INPUT_UINT;
     cur_inp_int_max=UINT_MAX;
-    cur_inp_int_min=calc_min_cam_max;
+    cur_inp_int_min=calc_min_cam_max();
 
     if( read_save == true ) {
       cam_max = cur_inp_int;
@@ -346,7 +346,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
   case 2:
     // exposure time
     ui_type=INPUT_UINT;
-    cur_inp_int_min=0
+    cur_inp_int_min=0;
     cur_inp_int_max=UINT_MAX;  //TODO what about bulb?
     if( read_save == true ) { 
       exp_tm = cur_inp_int;
