@@ -78,8 +78,8 @@ byte EEMEM E_input_type0;
 byte EEMEM E_input_type1;
 byte EEMEM E_altio_dir;
 byte EEMEM E_eeprom_saved;
-byte EEMEM E_m_pulse_length;
 byte EEMEM E_eeprom_var;
+
 #define EEPROM_IS_SAVED 170
 
 
@@ -92,7 +92,7 @@ void eeprom_saved( boolean saved ) {
   if (saved!=(_eeprom_saved==EEPROM_IS_SAVED)){
     //saved status changed 
   _eeprom_saved=saved?EEPROM_IS_SAVED:false;
-  eeprom_save(E_eeprom_saved,eeprom_saved);
+  eeprom_save(E_eeprom_saved,_eeprom_saved);
   }
 }
 
@@ -106,8 +106,8 @@ void eeprom_saved( boolean saved ) {
 // flash and stack abuse 
 
 
-void eeprom_save (void * dst ,const void * src, dst, size_t n)  {
-  eeprom_write_block (src,dst,n);
+void eeprom_save (void * dst ,const void * src, size_t n)  {
+  eeprom_write_block (src, dst, n);
   eeprom_saved(true);  
 }
 
@@ -130,7 +130,7 @@ void eeprom_save( byte& pos, byte& val ) {
 }
 
 void eeprom_save( float& pos, float& val ) {
-  eeprom_write_float(&pos,val); 
+   eeprom_write_block((const void*)&pos,(void*)&val,  sizeof(float)); 
     // indicate that memory has been saved
   eeprom_saved(true);  
 }
@@ -148,7 +148,7 @@ void eeprom_save( unsigned long& pos, unsigned long& val ) {
 // read functions
 
 
-void eeprom_load( void * dst, const void * src, size_t  n)  {
+void eeprom_load(const void * src, void * dst, size_t  n)  {
   eeprom_read_block(dst, src, n); 
 }
 
@@ -170,7 +170,9 @@ void eeprom_load( uint8_t& pos, uint8_t& val ) {
 }
 
 void eeprom_load(float& pos, float& val ) {
-  val=eeprom_read_float(&pos);
+      eeprom_read_block((void*)&val, (const void*)&pos, sizeof(float)); 
+  
+  
 }
 
 void write_all_eeprom_memory() {
