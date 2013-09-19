@@ -346,7 +346,7 @@ void ui_button_center( boolean held ) {
   // if in manual control: center exits manual mode
   if( ui_ctrl_flags & UI_MANUAL_MODE ) {
     // clear out manual ctrl flag
-    ui_ctrl_flags &= ~UI_MANUAL_MODE
+    ui_ctrl_flags &= ~UI_MANUAL_MODE;
 
     // resume back to setup menu
     ui_ctrl_flags |= UI_SETUP_MENU;
@@ -396,7 +396,7 @@ void ui_button_center( boolean held ) {
       ui_ctrl_flags &= ~UI_VALUE_ENTRY ;
       // and the flag indicating that
       // we've already displayed this value
-      ui_ctrl_flags &= ~UI_DRAWN_INITAL_VALUE
+      ui_ctrl_flags &= ~UI_DRAWN_INITAL_VALUE;
       draw_menu(0,false);
     }
     else {
@@ -574,7 +574,7 @@ void ui_button_lt(boolean held) {
     // entry without saving the value
 
     // clear in value setting flag
-    ui_ctrl_flags &= ~UI_VALUE_ENTRY 
+    ui_ctrl_flags &= ~UI_VALUE_ENTRY; 
     // and the flag indicating that
     // we've already displayed this value
     ui_ctrl_flags &= ~UI_DRAWN_INITAL_VALUE;        
@@ -595,13 +595,13 @@ void ui_button_lt(boolean held) {
     ui_ctrl_flags |= UI_UPDATE_DISP;
     // clear out list of menus
     flush_menu();
-  }
-  else {
+    }
+    else {
     // a parent menu can be drawn
     cur_menu = pop_menu();
     draw_menu(0,false);
+    }
   }
-
 }
 
 
@@ -858,7 +858,6 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
       lcd.setCursor(0,1);
       lcd.print('>');
     }
-
   }
 }
 
