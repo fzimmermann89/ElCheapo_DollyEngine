@@ -79,7 +79,7 @@ byte EEMEM E_input_type0;
 byte EEMEM E_input_type1;
 byte EEMEM E_altio_dir;
 byte EEMEM E_eeprom_saved;
-byte EEMEM E_eeprom_var;
+uint16_t EEMEM E_eeprom_ver;
 
 //Magic Value
 #define EEPROM_IS_SAVED 170
