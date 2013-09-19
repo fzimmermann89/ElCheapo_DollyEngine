@@ -1,3 +1,153 @@
+errors
+
+
+
+
+
+
+
+
+
+
+C:\Program Files (x86)\Arduino\hardware\tools\avr\bin\avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=atmega328p -DF_CPU=16000000L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=105 -IC:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino -IC:\Program Files (x86)\Arduino\hardware\arduino\variants\standard -IC:\Program Files (x86)\Arduino\libraries\LiquidCrystal C:\Users\thunder\AppData\Local\Temp\build7473100832004324277.tmp\DollyShield.cpp -o C:\Users\thunder\AppData\Local\Temp\build7473100832004324277.tmp\DollyShield.cpp.o 
+DollyShield.ino:134: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:135: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:136: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:137: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:139: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:140: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:142: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:143: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:144: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:145: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:146: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:147: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:148: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:150: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:151: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:152: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:153: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:154: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:155: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:156: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:158: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:159: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:160: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:161: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:162: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:163: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:164: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:165: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:166: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:167: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:170: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:171: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:172: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:173: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:174: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:175: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:176: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:177: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:178: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:179: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:180: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:183: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:186: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:189: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:192: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:195: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:198: warning: only initialized variables can be placed into program memory area
+DollyShield.ino: In function 'void setup()':
+DollyShield.ino:594: warning: only initialized variables can be placed into program memory area
+DollyShield.ino:606: warning: only initialized variables can be placed into program memory area
+DollyShield.ino: In function 'void main_loop_handler()':
+DollyShield.ino:636: warning: only initialized variables can be placed into program memory area
+ds_eeprom.ino: At global scope:
+ds_eeprom:55: error: function definition does not declare parameters
+ds_eeprom:68: error: redefinition of 'uint8_t m_pulse_length'
+DollyShield:453: error: 'uint8_t m_pulse_length' previously defined here
+ds_eeprom.ino: In function 'void eeprom_saved(boolean)':
+ds_eeprom:89: error: expected initializer before 'eeprom_saved'
+ds_eeprom:90: error: invalid operands of types '<unresolved overloaded function type>' and 'int' to binary 'operator=='
+ds_eeprom:90: error: expected `)' before '{' token
+ds_eeprom:95: error: expected primary-expression before '}' token
+ds_eeprom:95: error: expected `;' before '}' token
+ds_eeprom.ino: In function 'void eeprom_save(void*, const void*, size_t)':
+ds_eeprom:108: error: invalid conversion from 'const void*' to 'void*'
+ds_eeprom:108: error: initializing argument 2 of 'void eeprom_write_block(const void*, void*, size_t)'
+ds_eeprom.ino: In function 'void eeprom_save(int, int&)':
+ds_eeprom:119: error: invalid conversion from 'int*' to 'uint16_t*'
+ds_eeprom:119: error: initializing argument 1 of 'void eeprom_write_word(uint16_t*, uint16_t)'
+ds_eeprom.ino: In function 'void eeprom_save(boolean&, boolean&)':
+ds_eeprom:130: error: redefinition of 'void eeprom_save(boolean&, boolean&)'
+ds_eeprom:124: error: 'void eeprom_save(byte&, byte&)' previously defined here
+ds_eeprom.ino: In function 'void eeprom_save(float&, float&)':
+ds_eeprom:137: error: 'eeprom_write_float' was not declared in this scope
+ds_eeprom.ino: In function 'void eeprom_load(int&, int&)':
+ds_eeprom:165: error: invalid conversion from 'int*' to 'const uint16_t*'
+ds_eeprom:165: error: initializing argument 1 of 'uint16_t eeprom_read_word(const uint16_t*)'
+ds_eeprom.ino: In function 'void eeprom_load(boolean&, boolean&)':
+ds_eeprom:175: error: redefinition of 'void eeprom_load(boolean&, boolean&)'
+ds_eeprom:172: error: 'void eeprom_load(uint8_t&, uint8_t&)' previously defined here
+ds_eeprom.ino: In function 'void eeprom_load(float&, float&)':
+ds_eeprom:179: error: 'eeprom_read_float' was not declared in this scope
+ds_eeprom.ino: In function 'boolean eeprom_versioning_ok()':
+ds_eeprom:314: error: 'eeprom_read' was not declared in this scope
+ds_motor.ino: In function 'void motor_update_dist(float, float)':
+ds_motor:156: error: 'eeprom_write' was not declared in this scope
+ds_motor.ino: In function 'float motor_cal_adjust(byte, byte, byte)':
+ds_motor.ino:235: warning: unused variable 'pos'
+ds_ui_screens.ino: In function 'void execute_calibrate()':
+ds_ui_screens.ino:238: warning: unused variable 'held'
+ds_ui_screens.ino:218: warning: unused variable 'runspd'
+ds_ui_screens.ino:272: warning: unused variable 'held'
+ds_ui_screens:289: error: 'eeprom_write' was not declared in this scope
+ds_ui_screens.ino:212: warning: unused variable 'was_cur_pos'
+ds_ui_values.ino: In function 'void get_m_axis_set(byte, boolean)':
+ds_ui_values:167: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:180: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:193: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:205: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:218: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:231: error: 'eeprom_write' was not declared in this scope
+ds_ui_values.ino: In function 'void get_m_adv_set(byte, boolean)':
+ds_ui_values:259: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:273: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:286: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:299: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:312: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:324: error: 'eeprom_write' was not declared in this scope
+ds_ui_values.ino: In function 'void get_m_cam_set(byte, boolean)':
+ds_ui_values:349: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:362: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:374: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:384: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:394: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:407: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:419: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:431: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:443: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:455: error: 'eeprom_write' was not declared in this scope
+ds_ui_values.ino: In function 'void get_global_set(byte, boolean)':
+ds_ui_values:476: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:488: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:499: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:510: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:520: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:532: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:544: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:556: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:567: error: 'eeprom_write' was not declared in this scope
+ds_ui_values:578: error: 'eeprom_write' was not declared in this scope
+ds_ui_values.ino: In function 'void get_mainscr_set(byte, boolean)':
+ds_ui_values:639: error: 'eeprom_write' was not declared in this scope
+
+
+
+
+
+
+
 TODO
 ======
  SMS mode: speed calculation, mainhandler, ramp bzw einmal in "set speed"
