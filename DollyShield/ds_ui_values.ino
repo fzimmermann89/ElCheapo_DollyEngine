@@ -164,7 +164,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     // set Movement Mode (SMS/CONT)
     if( read_save == true ) {
       m_mode = cur_inp_bool;
-      eeprom_write(EEPROM_TODO, m_mode);
+      eeprom_save(E_m_mode, m_mode);
     }
 
     cur_inp_bool = m_mode;
@@ -177,7 +177,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_int_min=0;
     if( read_save == true ) {
       m_ramp_in=cur_inp_int;         
-      eeprom_write(EEPROM_TODO, m_ramp_in);
+      eeprom_save(E_m_ramp_in, m_ramp_in);
     }
 
     cur_inp_int = m_ramp_in;
@@ -190,7 +190,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_int_min=0;
     if( read_save == true ) {
       m_ramp_out=cur_inp_int;         
-      eeprom_write(EEPROM_TODO, m_ramp_out);
+      eeprom_save(E_m_ramp_out, m_ramp_out);
     }
 
     cur_inp_int = m_ramp_out;
@@ -202,7 +202,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
 
     if( read_save == true ) {
       m_angle = cur_inp_int;
-      eeprom_write(EEPROM_TODO, m_angle);
+      eeprom_save(E_m_angle, m_angle);
     }
 
     cur_inp_int = m_angle;
@@ -215,7 +215,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_int_min=0;
     if( read_save == true ) {
       m_lead_in = cur_inp_int;
-      eeprom_write(EEPROM_TODO, m_lead_in);
+      eeprom_save(E_m_lead_in, m_lead_in);
     }
 
     cur_inp_int = m_lead_in;
@@ -228,7 +228,7 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_int_min=0;
     if( read_save == true ) {
       m_lead_out = cur_inp_int;
-      eeprom_write(EEPROM_TODO, m_lead_out);
+      eeprom_save(E_m_lead_out, m_lead_out);
     }
 
     cur_inp_int = m_lead_out;
@@ -256,7 +256,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     if( read_save == true ) {
       m_rpm = cur_inp_float;
       motor_update_dist(m_rpm, m_diarev);
-      eeprom_write(EEPROM_TODO, m_rpm);
+      eeprom_save(E_m_rpm, m_rpm);
     }
 
     cur_inp_float = m_rpm;
@@ -270,7 +270,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     if( read_save == true ) {
       m_diarev = cur_inp_float;
       motor_update_dist(m_rpm, m_diarev);
-      eeprom_write(EEPROM_TODO, m_diarev);
+      eeprom_save(E_m_diarev, m_diarev);
     }
     cur_inp_float = m_diarev;
     break;
@@ -283,8 +283,8 @@ void get_m_adv_set( byte pos, boolean read_save){
       min_cpm = cur_inp_float;
       min_spd = 255 * ( min_cpm / max_cpm ); //TODO
 
-      eeprom_write(EEPROM_TODO, min_cpm);
-      eeprom_write(EEPROM_TODO, min_spd);
+      eeprom_save(E_min_cpm, min_cpm);
+      eeprom_save(E_min_spd, min_spd);
     } 
     cur_inp_float = min_cpm;
     break;
@@ -296,7 +296,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     cur_inp_int_min=0;
     if( read_save == true ) {
       m_pulse_length = cur_inp_int;
-      eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
+      eeprom_save(E_m_pulse_length, m_pulse_length);
     }
     cur_inp_int = m_pulse_length;
     break;
@@ -309,7 +309,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     cur_inp_float_min=min_cpm;
     if( read_save == true ) {
       motor_spd_cal[0] = calc_speed(cur_inp_float);
-      eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
+      eeprom_save(E_motor_spd_cal0, motor_spd_cal[0]);
     }
     cur_inp_float = calc_cpm(motor_spd_cal[0]);
     break;
@@ -321,7 +321,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     cur_inp_float_min=min_cpm;
     if( read_save == true ) {
       motor_spd_cal[1] = calc_speed(cur_inp_float);
-      eeprom_write(EEPROM_TODO, motor_spd_cal[1]);
+      eeprom_save(E_motor_spd_cal1, motor_spd_cal[1]);
     }
     cur_inp_float = calc_cpm(motor_spd_cal[1]);
     break;
@@ -346,7 +346,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_float_max=UINT_MAX;
     if( read_save == true ) { 
       cam_interval = cur_inp_float;
-      eeprom_write(EEPROM_TODO, cam_interval);
+      eeprom_save(E_cam_interval, cam_interval);
     }
     cur_inp_float = cam_interval;
     break;
@@ -359,7 +359,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
 
     if( read_save == true ) {
       cam_max = cur_inp_int;
-      eeprom_write(EEPROM_TODO, cam_max);
+      eeprom_save(E_cam_max, cam_max);
     }
     cur_inp_int = cam_max;
     break;
@@ -371,7 +371,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_int_max=UINT_MAX;  //TODO what about bulb?
     if( read_save == true ) { 
       exp_tm = cur_inp_int;
-      eeprom_write(EEPROM_TODO, exp_tm);
+      eeprom_save(E_exp_tm, exp_tm);
     }
     cur_inp_int = exp_tm;
     break;    
@@ -381,7 +381,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     ui_type=INPUT_SHUTTER;
     if( read_save == true ) { 
       shutter_mode = cur_inp_int;
-      eeprom_write(EEPROM_TODO, shutter_mode);
+      eeprom_save(E_shutter_mode, shutter_mode);
     }
     cur_inp_int = shutter_mode;
     break;
@@ -391,7 +391,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       bulb_mode = cur_inp_bool;
-      eeprom_write(EEPROM_TODO, bulb_mode);
+      eeprom_save(E_bulb_mode, bulb_mode);
     }
 
     cur_inp_bool = bulb_mode;
@@ -404,7 +404,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_int_max=255;
     if( read_save == true ) {
       cam_repeat = cur_inp_int;
-      eeprom_write(EEPROM_TODO, cam_repeat);
+      eeprom_save(E_cam_repeat, cam_repeat);
     }
     cur_inp_int = cam_repeat;
     break;
@@ -416,7 +416,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_int_max=UINT_MAX;
     if( read_save == true) {
       delay_repeat = cur_inp_int;
-      eeprom_write(EEPROM_TODO, delay_repeat);
+      eeprom_save(E_delay_repeat, delay_repeat);
     }
     cur_inp_int = delay_repeat;
     break;
@@ -428,7 +428,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_int_max=UINT_MAX;
     if( read_save == true ) { 
       delay_postexp = cur_inp_int;
-      eeprom_write(EEPROM_TODO, delay_preexp);
+      eeprom_save(E_delay_preexp, delay_preexp);
     }
     cur_inp_int = delay_preexp;
     break;
@@ -440,7 +440,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_int_max=UINT_MAX;
     if( read_save == true ) { 
       delay_postexp = cur_inp_int;
-      eeprom_write(EEPROM_TODO, delay_postexp);
+      eeprom_save(E_delay_postexp, delay_postexp);
     }
     cur_inp_int = delay_postexp;
     break;
@@ -452,7 +452,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     cur_inp_int_max=UINT_MAX;
     if( read_save == true ) {
       delay_focus = cur_inp_int;
-      eeprom_write(EEPROM_TODO, delay_focus);
+      eeprom_save(E_delay_focus, delay_focus);
     }
     cur_inp_int = delay_focus;
     break;
@@ -473,7 +473,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_max=255;
     if(read_save == true) {
       alt_io_display_set(lcd_bkl);
-      eeprom_write(EEPROM_TODO, lcd_bkl);
+      eeprom_save(E_lcd_bkl, lcd_bkl);
     }
     cur_inp_int = lcd_bkl;
     break;
@@ -485,7 +485,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_max=255;
     if( read_save == true ) {
       lcd_dim_tm = cur_inp_int;
-      eeprom_write(EEPROM_TODO, lcd_dim_tm);
+      eeprom_save(E_lcd_dim_tm, lcd_dim_tm);
     }
 
     cur_inp_int = lcd_dim_tm;
@@ -496,7 +496,7 @@ void get_global_set(byte pos, boolean read_save) {
     ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       blank_lcd = cur_inp_bool;
-      eeprom_write(EEPROM_TODO, blank_lcd);
+      eeprom_save(E_blank_lcd, blank_lcd);
     }
 
     cur_inp_bool = blank_lcd;
@@ -507,7 +507,7 @@ void get_global_set(byte pos, boolean read_save) {
     ui_type=INPUT_IO;
     if( read_save == true ) {
       altio_connect(0, cur_inp_int);
-      eeprom_write(EEPROM_TODO,input_type[0]);
+      eeprom_save(E_input_type0,input_type[0]);
     }
     cur_inp_int = input_type[0];
     break;
@@ -517,7 +517,7 @@ void get_global_set(byte pos, boolean read_save) {
     ui_type=INPUT_IO;
     if( read_save == true ) {
       altio_connect(1, cur_inp_int);
-      eeprom_write(EEPROM_TODO,input_type[1]);
+      eeprom_save(E_input_type1,input_type[1]);
     }
     cur_inp_int = input_type[1];
     break;
@@ -529,7 +529,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_max=UINT_MAX;
     if( read_save == true ) {
       delay_ext_in = cur_inp_int;
-      eeprom_write(EEPROM_TODO, delay_ext_in);
+      eeprom_save(E_delay_ext_in, delay_ext_in);
     }
     cur_inp_int =  delay_ext_in;
     break;
@@ -541,9 +541,8 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_max=UINT_MAX;
     if( read_save == true ) {
       delay_ext_out = cur_inp_int;
-      eeprom_write(EEPROM_TODO, delay_ext_out);
+      eeprom_save(E_delay_ext_out, delay_ext_out);
     }
-
     cur_inp_int = delay_ext_out;
     break;
 
@@ -553,9 +552,8 @@ void get_global_set(byte pos, boolean read_save) {
     if( read_save == true ) {
       if (cur_inp_bool) external_io|=EXT_INTV_USB;
       else external_io&=!EXT_INTV_USB;
-      eeprom_write(EEPROM_TODO, external_io);
+      eeprom_save(E_external_io, external_io);
     }
-
     cur_inp_bool = ((external_io&&EXT_INTV_USB)!=0);
     break;
 
@@ -564,9 +562,8 @@ void get_global_set(byte pos, boolean read_save) {
     ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       ui_invdir = cur_inp_bool;
-      eeprom_write(EEPROM_TODO, ui_invdir);
+      eeprom_save(E_ui_invdir, ui_invdir);
     }
-
     cur_inp_bool = ui_invdir;
     break;
 
@@ -575,16 +572,14 @@ void get_global_set(byte pos, boolean read_save) {
     ui_type=INPUT_ONOFF;
     if( read_save == true ) {
       altio_dir = (cur_inp_bool == false) ? FALLING : RISING;
-      eeprom_write(EEPROM_TODO, altio_dir);
+      eeprom_save(E_altio_dir, altio_dir);
     }
-
     cur_inp_bool = (altio_dir == FALLING) ? false : true;
     break;
 
   case 10:
     // reset memory
     ui_type=INPUT_OKCANCEL;
-
     if( read_save == true ) {
       if( cur_inp_bool ){
         eeprom_saved(false);
@@ -597,9 +592,6 @@ void get_global_set(byte pos, boolean read_save) {
     }
     cur_inp_bool = false;
     break;
-
-
-
   }
 
 }
@@ -607,7 +599,6 @@ void get_global_set(byte pos, boolean read_save) {
 
 void get_mainscr_set(byte pos, boolean read_save) {
   ui_float_tenths = false;
-
 
 
   switch(pos) {
@@ -636,7 +627,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
     if( read_save ) {
       cam_interval = cur_inp_float;
-      eeprom_write(EEPROM_TODO, cam_interval);
+      eeprom_save(E_cam_interval, cam_interval);
     }
 
     cur_inp_float = cam_interval;

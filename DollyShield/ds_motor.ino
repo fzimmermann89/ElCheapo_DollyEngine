@@ -153,9 +153,9 @@ void motor_update_dist(float rpm, float diarev ) {
    min_spd = 255 * ( min_cpm / max_cpm );
    m_maxsms= max_cpm * 100; //TODO
    
-   eeprom_write(EEPROM_TODO, max_cpm);
-   eeprom_write(EEPROM_TODO, min_spd);
-   eeprom_write(EEPROM_TODO, m_maxsms);
+   eeprom_save(E_max_cpm, max_cpm);
+   eeprom_save(E_min_spd, min_spd);
+   eeprom_save(E_m_maxsms, m_maxsms);
    
 }
 void motor_calc_sms_tm()

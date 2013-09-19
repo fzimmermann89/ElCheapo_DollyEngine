@@ -284,9 +284,9 @@ void execute_calibrate() {
   // handle m_cal_array in a sane manner
   // float m_cal_array[3][4][2] 
   // 3 * 4 * 2 * 4 = 96
-
-  byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
+//TODO
+ // byte* p = (byte*)(void*)&m_cal_array;
+ // eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
 
 }
 

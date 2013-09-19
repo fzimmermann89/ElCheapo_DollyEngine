@@ -52,7 +52,7 @@ uint16_t EEMEM E_delay_focus;
 uint16_t EEMEM E_delay_repeat;
 byte EEMEM E_shutter_mode;
 boolean EEMEM E_bulb_mode;
-float EEMEM E_cam_interval:
+float EEMEM E_cam_interval;
 uint16_t EEMEM E_cam_max;
 byte EEMEM E_cam_repeat;
 uint16_t EEMEM E_m_speed;
@@ -62,10 +62,11 @@ float EEMEM E_m_rpm;
 float EEMEM E_max_cpm;
 float EEMEM E_min_cpm;
 byte EEMEM E_min_spd;
-byte EEMEM E_motor_spd_cal[2];
+byte EEMEM E_motor_spd_cal0;
+byte EEMEM E_motor_spd_cal1;
 uint16_t EEMEM E_m_maxsms;
 boolean EEMEM E_m_mode=MODE_SMS;
-uint8_t EEMEM m_pulse_length;
+uint8_t EEMEM E_m_pulse_length;
 float EEMEM E_m_cal_array[3][4][2];
 byte EEMEM E_m_angle;
 boolean EEMEM E_m_cal_done;
@@ -73,11 +74,12 @@ byte EEMEM E_m_ramp_in;
 byte EEMEM E_m_ramp_out;
 byte EEMEM E_m_lead_in;
 byte EEMEM E_m_lead_out;
-byte EEMEM E_input_type[2];
+byte EEMEM E_input_type0;
+byte EEMEM E_input_type1;
 byte EEMEM E_altio_dir;
 byte EEMEM E_eeprom_saved;
-
-
+byte EEMEM E_m_pulse_length;
+byte EEMEM E_eeprom_var;
 #define EEPROM_IS_SAVED 170
 
 
@@ -86,10 +88,10 @@ boolean eeprom_saved() {
 }
 
 void eeprom_saved( boolean saved ) {
-  static byte byte eeprom_saved=false;
-  if (saved!=(eeprom_saved==EEPROM_IS_SAVED){
+  static byte _eeprom_saved=false;
+  if (saved!=(_eeprom_saved==EEPROM_IS_SAVED)){
     //saved status changed 
-  eeprom_saved=saved?EEPROM_IS_SAVED:0 ;
+  _eeprom_saved=saved?EEPROM_IS_SAVED:false;
   eeprom_save(E_eeprom_saved,eeprom_saved);
   }
 }
@@ -104,8 +106,8 @@ void eeprom_saved( boolean saved ) {
 // flash and stack abuse 
 
 
-void eeprom_save( void * dst, const void * src, size_t  n)  {
-  eeprom_write_block(dst, src, n);
+void eeprom_save (void * dst ,const void * src, dst, size_t n)  {
+  eeprom_write_block (src,dst,n);
   eeprom_saved(true);  
 }
 
@@ -115,20 +117,14 @@ void eeprom_save( uint16_t& pos, uint16_t& val ) {
   eeprom_saved(true); 
 }
 
-void eeprom_save( int pos,  int& val ) {
-  eeprom_write_word(&pos,(uint16_t)val); 
+void eeprom_save( int& pos,  int& val ) {
+  eeprom_write_word((uint16_t*) (void*) &pos,(uint16_t)val); 
     // indicate that memory has been saved
   eeprom_saved(true);    
 }
 
 void eeprom_save( byte& pos, byte& val ) {
   eeprom_write_byte(&pos,val); 
-    // indicate that memory has been saved
-  eeprom_saved(true);   
-}
-
-void eeprom_save( boolean& pos, boolean& val ) {
-  eeprom_write_byte(&pos,(byte)val); 
     // indicate that memory has been saved
   eeprom_saved(true);   
 }
@@ -162,7 +158,7 @@ void eeprom_load( uint16_t& pos, uint16_t& val ) {
 
 
 void eeprom_load( int& pos, int& val ) {
-  val=(int)eeprom_read_word(&pos);
+  val=(int)eeprom_read_word((uint16_t*) (void*) &pos);
 }
 
 void eeprom_load( unsigned long& pos, unsigned long& val ) {
@@ -172,9 +168,7 @@ void eeprom_load( unsigned long& pos, unsigned long& val ) {
 void eeprom_load( uint8_t& pos, uint8_t& val ) {
   val=eeprom_read_byte(&pos);
 }
-void eeprom_load( boolean& pos, boolean& val ) {
-  val=(boolean) eeprom_read_byte(&pos);
-}
+
 void eeprom_load(float& pos, float& val ) {
   val=eeprom_read_float(&pos);
 }
@@ -309,9 +303,8 @@ boolean eeprom_versioning_ok() {
   // determine if eeprom version is correct 
   // so we can automatically flush saved memory 
   // when a new firmware is loaded 
-  //TODO
   unsigned int eeprom_ver = 0;
-  eeprom_read(247, eeprom_ver);
+  eeprom_load(E_eeprom_ver, eeprom_ver);
 
   // wipe out any saved eeprom settings
   return( eeprom_ver == FIRMWARE_VERSION );
