@@ -96,7 +96,7 @@ void check_user_interface() {
     ui_ctrl_flags |= UI_LCD_BKL_ON;
     //enable display and backlight
     lcd.display();
-    alt_io_display_set (cur_bkl);
+    alt_io_display_set (lcd_bkl);
   }
 
   // if we're set to update the display

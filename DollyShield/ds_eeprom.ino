@@ -32,91 +32,68 @@
 /* 
  
  *******************************
- Mapping of Data Positions in EEPROM memory
+ Compiler does Mapping of Data Positions in EEPROM memory
  *******************************
- 
- (position count starts at zero)
- //TODO
- flash enabled   = 0
- (was exp_tm)    = 1-2*
- delay_focus    = 3-4
- delay_postexp   = 5-6
- focus_shutter   = 7
- = 8-9
- cam_max         = 10-11
- m_speeds	     = 12-13
-				 = 14-15
- m_diarev	     = 16-19
-				 = 20-23
- max_cpm	     = 24-27
-				 = 28-31
- m_rpm        	 = 32-35
-				 = 36-39
- min_cpm	     = 40-43
-				 = 44-47
- min_spd      	 = 48
-				 = 49
- m_min_pulse[0]  = 50
- m_min_pulse[0]  = 51
- altio_dir       = 52
-				 = 53
-				 = 54
-				 = 55 
- ui_motor_display= 56
- motor_sl_mod    = 57
- lcd_dim_tm      = 58-59
- blank_lcd       = 60
- m_ramp_set[0]   = 61
- m_ramp_set[0]   = 62
- m_maxsms[0]     = 63-64
- m_maxsms[1]     = 65-66
- cam_interval    = 67-70
- m_cal_array[]   = 71-214
- m_angle[0]      = 215
- m_angle[1]      = 216 
- input_type[0]   = 217
- input_type[1]   = 218
- ui_is_metric    = 219
- merlin_enable   = 220
- merlin_man_spd[0] = 221-224
- merlin_man_spd[1] = 225-228
- m_lead_in[0]    = 229-230
- m_lead_in[1]    = 231-232
- m_lead_out[0]   = 233-234
- m_lead_out[1]   = 235-236
- motor_spd_cal[0] = 237
- motor_spd_cal[1] = 238
- m_cal_constant[0] = 239-242
- m_cal_constant[1] = 243-246
- firmware_version  = 247-248
- cam_repeat     = 249
- delay_repeat    = 250-251
- ext_trig_pre_dly = 252-255
- ext_trig_pst_dly = 256-259
- exp_tm         = 260-263
- gb_enabled     = 264
- ui_invdir      = 265
- cur_bkl        = 266
- use_ir         = 267
- */
+*/ //TODO
+
+byte EEMEM E_lcd_bkl;
+boolean EEMEM E_blank_lcd;
+byte EEMEM E_lcd_dim_tm;
+boolean EEMEM E_ui_invdir;;
+boolean EEMEM E_ui_motor_display;
+byte EEMEM E_external_io;
+uint32_t EEMEM E_exp_tm;
+uint16_t EEMEM E_delay_postexp;
+uint16_t EEMEM E_delay_preexp;
+uint16_t EEMEM E_delay_ext_in ;
+uint16_t EEMEM E_delay_ext_out;
+uint16_t EEMEM E_length_ext_out;
+uint16_t EEMEM E_delay_focus;
+uint16_t EEMEM E_delay_repeat;
+byte EEMEM E_shutter_mode;
+boolean EEMEM E_bulb_mode;
+float EEMEM E_cam_interval:
+uint16_t EEMEM E_cam_max;
+byte EEMEM E_cam_repeat;
+uint16_t EEMEM E_m_speed;
+byte EEMEM E_m_dir;
+float EEMEM E_m_diarev;
+float EEMEM E_m_rpm;
+float EEMEM E_max_cpm;
+float EEMEM E_min_cpm;
+byte EEMEM E_min_spd;
+byte EEMEM E_motor_spd_cal[2];
+uint16_t EEMEM E_m_maxsms;
+boolean EEMEM E_m_mode=MODE_SMS;
+uint8_t m_pulse_length;
+float EEMEM E_m_cal_array[3][4][2];
+byte EEMEM E_m_angle;
+boolean EEMEM E_m_cal_done;
+byte EEMEM E_m_ramp_in;
+byte EEMEM E_m_ramp_out;
+byte EEMEM E_m_lead_in;
+byte EEMEM E_m_lead_out;
+byte EEMEM E_input_type[2];
+byte EEMEM E_altio_dir;
+
+
 
 #define EEPROM_IS_SAVED 170
 
 
 boolean eeprom_saved() {
 
-  // read eeprom saved status
-  // is Magic Value in position 0?
-  byte saved = EEPROM.read(0);
-  return(saved==EEPROM_IS_SAVED );
+ return (eeprom_read_byte(&E_eeprom_saved)==EEPROM_IS_SAVED)
 }
 
 void eeprom_saved( boolean saved ) {
-  // set eeprom saved status
-  // write Magic Value to position 0
-  EEPROM.write(0, EEPROM_IS_SAVED);
-}
+  if (saved!=(eeprom_saved==EEPROM_IS_SAVED){
+    //saved status changed 
+  eeprom_saved=saved?EEPROM_IS_SAVED:0 ;
+  eeprom_save(E_eeprom_saved,eeprom_saved);
+  }
 
+}
 
 
 
@@ -128,33 +105,43 @@ void eeprom_saved( boolean saved ) {
 // flash and stack abuse 
 
 
-void eeprom_write( int pos, byte& val, byte len ) {
-  byte* p = (byte*)(void*)&val;
-  for( byte i = 0; i < len; i++ )
-    EEPROM.write(pos++, *p++);    
-
-  // indicate that memory has been saved
-  eeprom_saved(true);
-
+void eeprom_save( void * dst, const void * src, size_t  n)  {
+  eeprom_write_block(dst, src, n);
+  eeprom_saved(true);  
 }
 
-void eeprom_write( int pos, unsigned int& val ) {
-  byte* p = (byte*)(void*)&val;   
-  eeprom_write(pos, *p, sizeof(int));  
+void eeprom_save( uint16_t& pos, uint16_t& val ) {
+  eeprom_write_word(&pos,val); 
+    // indicate that memory has been saved
+  eeprom_saved(true); 
 }
 
-void eeprom_write( int pos, unsigned long& val ) {
-  byte* p = (byte*)(void*)&val;   
-  eeprom_write(pos, *p, sizeof(long));    
+void eeprom_save( int pos,  int& val ) {
+  eeprom_write_word(&pos,(uint16_t)val); 
+    // indicate that memory has been saved
+  eeprom_saved(true);    
 }
 
-void eeprom_write( int pos, float& val ) {
-  byte* p = (byte*)(void*)&val;   
-  eeprom_write(pos, *p, sizeof(float));    
+void eeprom_save( byte& pos, byte& val ) {
+  eeprom_write_byte(&pos,val); 
+    // indicate that memory has been saved
+  eeprom_saved(true);   
 }
 
-void eeprom_write( int pos, byte& val ) {  
-  EEPROM.write(pos, val);
+void eeprom_save( boolean& pos, boolean& val ) {
+  eeprom_write_byte(&pos,(byte)val); 
+    // indicate that memory has been saved
+  eeprom_saved(true);   
+}
+
+void eeprom_save( float& pos, float& val ) {
+  eeprom_write_float(&pos,val); 
+    // indicate that memory has been saved
+  eeprom_saved(true);  
+}
+
+void eeprom_save( unsigned long& pos, unsigned long& val ) {  
+  eeprom_write_dword(&pos,val); 
   // indicate that memory has been saved
   eeprom_saved(true);
 }
@@ -165,41 +152,32 @@ void eeprom_write( int pos, byte& val ) {
 
 // read functions
 
-void eeprom_read( int pos, byte& val, byte len ) {
-  byte* p = (byte*)(void*)&val;
-  for(byte i = 0; i < len; i++) 
-    *p++ = EEPROM.read(pos++);
+
+void eeprom_load( void * dst, const void * src, size_t  n)  {
+  eeprom_read_block(dst, src, n); 
 }
 
-void eeprom_read( int pos, byte& val ) {
-  val = EEPROM.read(pos);
+void eeprom_load( uint16_t& pos, uint16_t& val ) {
+  val=eeprom_read_word(&pos);
 }
 
 
-void eeprom_read( int pos, int& val ) {
-  byte* p = (byte*)(void*)&val;
-  eeprom_read(pos, *p, sizeof(int));
+void eeprom_load( int& pos, int& val ) {
+  val=(int)eeprom_read_word(&pos);
 }
 
-void eeprom_read( int pos, unsigned int& val ) {
-
-  byte* p = (byte*)(void*)&val;
-  eeprom_read(pos, *p, sizeof(int));
-
+void eeprom_load( unsigned long& pos, unsigned long& val ) {
+  val=eeprom_read_dword(&pos);
 }
 
-void eeprom_read( int pos, unsigned long& val ) {
-
-  byte* p = (byte*)(void*)&val;
-  eeprom_read(pos, *p, sizeof(long));
-
+void eeprom_load( uint8_t& pos, uint8_t& val ) {
+  val=eeprom_read_byte(&pos);
 }
-
-void eeprom_read( int pos, float& val ) {
-
-  byte* p = (byte*)(void*)&val;
-  eeprom_read(pos, *p, sizeof(float));
-
+void eeprom_load( boolean& pos, boolean& val ) {
+  val=(boolean) eeprom_read_byte(&pos);
+}
+void eeprom_load(float& pos, float& val ) {
+  val=eeprom_read_float(&pos);
 }
 
 void write_all_eeprom_memory() {
@@ -207,6 +185,7 @@ void write_all_eeprom_memory() {
   // write default values into eeprom
   eeprom_write(EEPROM_TODO, delay_focus);
   eeprom_write(EEPROM_TODO, delay_postexp);
+  * 
   eeprom_write(EEPROM_TODO, focus_shutter);
 
   eeprom_write(EEPROM_TODO, cam_max);
@@ -247,7 +226,7 @@ void write_all_eeprom_memory() {
   eeprom_write(EEPROM_TODO, exp_tm);
   eeprom_write(EEPROM_TODO, gb_enabled);
   eeprom_write(EEPROM_TODO, ui_invdir);
-  eeprom_write(EEPROM_TODO, cur_bkl);
+  eeprom_write(EEPROM_TODO, lcd_bkl);
   eeprom_write(EEPROM_TODO, ir_remote);
   */
 }
@@ -310,7 +289,7 @@ void restore_eeprom_memory() {
 
   eeprom_read(264, gb_enabled);
   eeprom_read(265, ui_invdir);
-  eeprom_read(266, cur_bkl);
+  eeprom_read(266, lcd_bkl);
   eeprom_read(267, ir_remote);
   // handle restoring alt input states
 
@@ -321,7 +300,7 @@ void restore_eeprom_memory() {
     altio_connect(1,input_type[1]);
 
   // set lcd backlight to saved value
-  ui_set_backlight(cur_bkl);
+  ui_set_backlight(lcd_bkl);
 */
 }
 
@@ -331,7 +310,7 @@ boolean eeprom_versioning_ok() {
   // determine if eeprom version is correct 
   // so we can automatically flush saved memory 
   // when a new firmware is loaded 
-
+  //TODO
   unsigned int eeprom_ver = 0;
   eeprom_read(247, eeprom_ver);
 

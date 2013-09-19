@@ -95,7 +95,7 @@ boolean motor_sl_mod = true;
   #define 260 EEPROM_POS_exp_tm
   #define 264 EEPROM_POS_gb_enabled
   #define 265 EEPROM_POS_ui_invdir
-  #define 266 EEPROM_POS_cur_bkl
+  #define 266 EEPROM_POS_lcd_bkl
   #define 267 EEPROM_POS_ir_remote
   
   

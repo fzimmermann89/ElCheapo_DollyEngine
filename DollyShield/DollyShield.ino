@@ -259,7 +259,7 @@ unsigned long hold_but_tm = 0;
 unsigned long ui_update_tm = 0;
 
 // lcd dim control
-byte cur_bkl     = 255;
+byte lcd_bkl     = 255;
 boolean blank_lcd   = false;
 
 // for dimming lcd
@@ -365,7 +365,7 @@ io_reg;
 #define EXT_TRIG_2_AFTER  (1 << 7) //B3 = I/O 2 external enabled (after)
 byte external_io = 0;
 
-
+byte eeprom_saved
 // camera exposure time
 unsigned long exp_tm      = 100;
 
@@ -591,7 +591,7 @@ void setup() {
     }
     Serial.println("");
   }
-#endif  
+
 DEBUG("start");
 digitalWriteFast(11,HIGH);
 delay(200);
@@ -605,6 +605,7 @@ alt_io_motor_set(128);
 S_RUNNING=true;
 S_MOT_RUNNING=true;
 DEBUG("set");
+#endif  
 }
 
 void loop() {

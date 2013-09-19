@@ -472,10 +472,10 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_min=0;
     cur_inp_int_max=255;
     if(read_save == true) {
-      alt_io_display_set(cur_bkl);
-      eeprom_write(EEPROM_TODO, cur_bkl);
+      alt_io_display_set(lcd_bkl);
+      eeprom_write(EEPROM_TODO, lcd_bkl);
     }
-    cur_inp_int = cur_bkl;
+    cur_inp_int = lcd_bkl;
     break;
 
   case 1:
