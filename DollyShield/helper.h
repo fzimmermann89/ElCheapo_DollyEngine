@@ -8,8 +8,10 @@ typedef void (*Callback) ();
 #ifdef DEBUG_ON
 #define DEBUG(msg,var) Serial.print(F(msg));\
 Serial.println(var)
+#define DEBUG(msg) Serial.println(F(msg));
 #else 
 #define DEBUG(msg,var) ((void)0)
+#define DEBUG(msg) ((void)0)
 #endif
 
 

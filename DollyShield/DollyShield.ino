@@ -52,12 +52,12 @@ NOTES:
 #define FIRMWARE_VERSION  92
 
 // motor pins
-#define MOTOR0_P 3
+#define MOTOR0_P 15
 #define MOTOR0_DIR 13
 
 // camera pins
 #define CAMERA_PIN 12
-#define FOCUS_PIN 15
+#define FOCUS_PIN 12
 #define IR_PIN 12
 
 // lcd pins
@@ -590,16 +590,27 @@ void setup() {
       Serial.print(":");
     }
     Serial.println("");
-  } 
+  }
 #endif  
+DEBUG("start");
+digitalWriteFast(11,HIGH);
+delay(200);
+digitalWriteFast(11,LOW);
+delay(200);
+digitalWriteFast(11,HIGH);
 
+m_speed=128;
+m_cur_speed=128;
+alt_io_motor_set(128);
+S_RUNNING=true;
+S_MOT_RUNNING=true;
+DEBUG("set");
 }
 
 void loop() {
 
   // check for signal from gbtimelapse serial command.
   // we check here to prevent queuing commands when stopped
-
   if( (external_io&EXT_INTV_USB) && gbtl_trigger() == true ) {
     external_io |= EXT_INTV_OK;
   }
@@ -622,6 +633,7 @@ void main_loop_handler() {
   if( cam_max > 0 && shots >= cam_max) {
     // stop program if max shots exceeded
     stop_executing();
+    DEBUG("stop");
     // interrupt further processing      
   }
 
