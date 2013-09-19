@@ -33,8 +33,9 @@
  
  *******************************
  Compiler does Mapping of Data Positions in EEPROM memory
+ (E_varname is the position of varname)
  *******************************
-*/ //TODO
+*/
 
 byte EEMEM E_lcd_bkl;
 boolean EEMEM E_blank_lcd;
@@ -80,8 +81,12 @@ byte EEMEM E_altio_dir;
 byte EEMEM E_eeprom_saved;
 byte EEMEM E_eeprom_var;
 
+//Magic Value
 #define EEPROM_IS_SAVED 170
 
+
+
+//Functions for keeping track of changes and version
 
 boolean eeprom_saved() {
  return (eeprom_read_byte(&E_eeprom_saved)==EEPROM_IS_SAVED);
@@ -96,17 +101,23 @@ void eeprom_saved( boolean saved ) {
   }
 }
 
+boolean eeprom_versioning_ok() {
+  // determine if eeprom version is correct 
+  // so we can automatically flush saved memory 
+  // when a new firmware is loaded 
+  unsigned int eeprom_ver = 0;
+  eeprom_load(E_eeprom_ver, eeprom_ver);
+
+  // wipe out any saved eeprom settings
+  return( eeprom_ver == FIRMWARE_VERSION );
+}
 
 
 
-// One can ask why I didn't use the templates from http://www.arduino.cc/playground/Code/EEPROMWriteAnything
-// The primary reason here is that we're going to be calling these functions OFTEN, and I _really_ don't 
-// want the templates getting inlined _everywhere_, what a mess!  So, rather than be slick, let's just declare
-// what we mean, and do it once - forget about the overhead of the function call, and worry more about
-// flash and stack abuse 
-
+//Save functions that check before writing and set the eeprom_saved flag.
 
 void eeprom_save (void * dst ,const void * src, size_t n)  {
+  //this one doesn't check...
   eeprom_write_block (src, dst, n);
   eeprom_saved(true);  
 }
@@ -130,6 +141,7 @@ void eeprom_save( byte& pos, byte& val ) {
 }
 
 void eeprom_save( float& pos, float& val ) {
+  //eeprom_write_float() not in avrlibc version used by Arduino!
   float oldvalue;
    eeprom_read_block((void*)&oldvalue, (const void*)&pos, sizeof(float));
    if (oldvalue!=val) eeprom_write_block((const void*)&pos,(void*)&val,  sizeof(float)); 
@@ -146,10 +158,7 @@ void eeprom_save( unsigned long& pos, unsigned long& val ) {
 
 
 
-
-
-// read functions
-
+// Read Functions
 
 void eeprom_load(const void * src, void * dst, size_t  n)  {
   eeprom_read_block(dst, src, n); 
@@ -159,8 +168,7 @@ void eeprom_load( uint16_t& pos, uint16_t& val ) {
   val=eeprom_read_word(&pos);
 }
 
-
-void eeprom_load( int& pos, int& val ) {
+void eeprom_load( int& pos, int& val ) 
   val=(int)eeprom_read_word((uint16_t*) (void*) &pos);
 }
 
@@ -173,10 +181,14 @@ void eeprom_load( uint8_t& pos, uint8_t& val ) {
 }
 
 void eeprom_load(float& pos, float& val ) {
-      eeprom_read_block((void*)&val, (const void*)&pos, sizeof(float)); 
-  
-  
+  //eeprom_read_float not in avrlibc version used by Arduino!
+  eeprom_read_block((void*)&val, (const void*)&pos, sizeof(float));   
 }
+
+
+//Write and Read all Values
+
+
 
 void write_all_eeprom_memory() {
 /*
@@ -304,17 +316,6 @@ void restore_eeprom_memory() {
 
 
 
-boolean eeprom_versioning_ok() {
-  // determine if eeprom version is correct 
-  // so we can automatically flush saved memory 
-  // when a new firmware is loaded 
-  unsigned int eeprom_ver = 0;
-  eeprom_load(E_eeprom_ver, eeprom_ver);
 
-  // wipe out any saved eeprom settings
-  return( eeprom_ver == FIRMWARE_VERSION );
-
-
-}
 
 
