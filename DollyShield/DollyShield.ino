@@ -42,7 +42,7 @@ NOTES:
  */
 
 #include <avr/pgmspace.h>
-#include <EEPROM.h>
+#include <avr/eeprom.h>
 #include <LiquidCrystal.h>
 #include "digitalWriteFastMod.h"
 #include "helper.h"

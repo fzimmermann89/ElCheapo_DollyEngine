@@ -65,7 +65,7 @@ byte EEMEM E_min_spd;
 byte EEMEM E_motor_spd_cal[2];
 uint16_t EEMEM E_m_maxsms;
 boolean EEMEM E_m_mode=MODE_SMS;
-uint8_t m_pulse_length;
+uint8_t EEMEM m_pulse_length;
 float EEMEM E_m_cal_array[3][4][2];
 byte EEMEM E_m_angle;
 boolean EEMEM E_m_cal_done;
@@ -75,15 +75,14 @@ byte EEMEM E_m_lead_in;
 byte EEMEM E_m_lead_out;
 byte EEMEM E_input_type[2];
 byte EEMEM E_altio_dir;
-
+byte EEMEM E_eeprom_saved;
 
 
 #define EEPROM_IS_SAVED 170
 
 
 boolean eeprom_saved() {
-
- return (eeprom_read_byte(&E_eeprom_saved)==EEPROM_IS_SAVED)
+ return (eeprom_read_byte(&E_eeprom_saved)==EEPROM_IS_SAVED);
 }
 
 void eeprom_saved( boolean saved ) {
@@ -93,7 +92,6 @@ void eeprom_saved( boolean saved ) {
   eeprom_saved=saved?EEPROM_IS_SAVED:0 ;
   eeprom_save(E_eeprom_saved,eeprom_saved);
   }
-
 }
 
 
