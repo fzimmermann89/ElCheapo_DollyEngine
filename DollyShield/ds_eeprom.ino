@@ -112,31 +112,34 @@ void eeprom_save (void * dst ,const void * src, size_t n)  {
 }
 
 void eeprom_save( uint16_t& pos, uint16_t& val ) {
-  eeprom_write_word(&pos,val); 
+  if (eeprom_read_word(&pos)!=val) eeprom_write_word(&pos,val); 
     // indicate that memory has been saved
   eeprom_saved(true); 
 }
 
 void eeprom_save( int& pos,  int& val ) {
-  eeprom_write_word((uint16_t*) (void*) &pos,(uint16_t)val); 
+    if (eeprom_read_word(&pos)!=(uint16_t)val) eeprom_write_word((uint16_t*) (void*) &pos,(uint16_t)val); 
     // indicate that memory has been saved
   eeprom_saved(true);    
 }
 
 void eeprom_save( byte& pos, byte& val ) {
-  eeprom_write_byte(&pos,val); 
+    if (eeprom_read_byte(&pos)!=val) eeprom_write_byte(&pos,val); 
     // indicate that memory has been saved
   eeprom_saved(true);   
 }
 
 void eeprom_save( float& pos, float& val ) {
-   eeprom_write_block((const void*)&pos,(void*)&val,  sizeof(float)); 
+  float oldvalue;
+   eeprom_read_block((void*)&oldvalue, (const void*)&pos, sizeof(float));
+   if (oldvalue!=val) eeprom_write_block((const void*)&pos,(void*)&val,  sizeof(float)); 
     // indicate that memory has been saved
   eeprom_saved(true);  
 }
 
 void eeprom_save( unsigned long& pos, unsigned long& val ) {  
-  eeprom_write_dword(&pos,val); 
+  
+   if (eeprom_read_dword(&pos)!=val)  eeprom_write_dword(&pos,val); 
   // indicate that memory has been saved
   eeprom_saved(true);
 }
