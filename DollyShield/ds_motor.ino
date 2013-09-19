@@ -327,7 +327,13 @@ void motor_run_calibrate(byte which, unsigned int mspd, byte dir) {
 }
 
 
+uint8_t calc_speed(float cpm){
+  return 128;
+}
 
+float calc_cpm(uint8_t speed){
+  return 1.0;
+}
 
 
 

@@ -292,8 +292,8 @@ void get_m_adv_set( byte pos, boolean read_save){
   case 4:
     // pulse power
     ui_type=INPUT_UINT;
-    cur inp_int_max=255;
-    cur inp_int_min=0;
+    cur_inp_int_max=255;
+    cur_inp_int_min=0;
     if( read_save == true ) {
       m_pulse_length = cur_inp_int;
       eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
@@ -308,7 +308,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     cur_inp_float_max=max_cpm;
     cur_inp_float_min=min_cpm;
     if( read_save == true ) {
-      motor_spd_cal[0] = calc_speed(cur_inp_float)
+      motor_spd_cal[0] = calc_speed(cur_inp_float);
       eeprom_write(EEPROM_TODO, motor_spd_cal[0]);
     }
     cur_inp_float = calc_cpm(motor_spd_cal[0]);
@@ -320,7 +320,7 @@ void get_m_adv_set( byte pos, boolean read_save){
     cur_inp_float_max=max_cpm;
     cur_inp_float_min=min_cpm;
     if( read_save == true ) {
-      motor_spd_cal[1] = calc_speed(cur_inp_float)
+      motor_spd_cal[1] = calc_speed(cur_inp_float);
       eeprom_write(EEPROM_TODO, motor_spd_cal[1]);
     }
     cur_inp_float = calc_cpm(motor_spd_cal[1]);
@@ -343,7 +343,7 @@ void get_m_cam_set( byte pos, boolean read_save ) {
     ui_type=INPUT_FLOAT;
     ui_float_tenths = true;
     cur_inp_float_min=calc_total_cam_tm()/1000;
-    cur_inp_float_max=UINT_MAX
+    cur_inp_float_max=UINT_MAX;
     if( read_save == true ) { 
       cam_interval = cur_inp_float;
       eeprom_write(EEPROM_TODO, cam_interval);
@@ -472,7 +472,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_min=0;
     cur_inp_int_max=255;
     if(read_save == true) {
-      ui_set_backlight(cur_bkl);
+      alt_io_display_set(cur_bkl);
       eeprom_write(EEPROM_TODO, cur_bkl);
     }
     cur_inp_int = cur_bkl;
