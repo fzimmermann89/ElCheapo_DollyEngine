@@ -87,6 +87,7 @@ boolean eeprom_saved() {
 }
 
 void eeprom_saved( boolean saved ) {
+  static byte byte eeprom_saved=false;
   if (saved!=(eeprom_saved==EEPROM_IS_SAVED){
     //saved status changed 
   eeprom_saved=saved?EEPROM_IS_SAVED:0 ;

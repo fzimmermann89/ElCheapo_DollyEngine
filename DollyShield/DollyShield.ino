@@ -365,7 +365,6 @@ io_reg;
 #define EXT_TRIG_2_AFTER  (1 << 7) //B3 = I/O 2 external enabled (after)
 byte external_io = 0;
 
-byte eeprom_saved
 // camera exposure time
 unsigned long exp_tm      = 100;
 
@@ -592,7 +591,7 @@ void setup() {
     Serial.println("");
   }
 
-DEBUG("start");
+DEBUG_msg("start");
 digitalWriteFast(11,HIGH);
 delay(200);
 digitalWriteFast(11,LOW);
@@ -604,7 +603,7 @@ m_cur_speed=128;
 alt_io_motor_set(128);
 S_RUNNING=true;
 S_MOT_RUNNING=true;
-DEBUG("set");
+DEBUG_msg("set");
 #endif  
 }
 
@@ -634,7 +633,7 @@ void main_loop_handler() {
   if( cam_max > 0 && shots >= cam_max) {
     // stop program if max shots exceeded
     stop_executing();
-    DEBUG("stop");
+    DEBUG_msg("stop");
     // interrupt further processing      
   }
 

@@ -6,12 +6,12 @@ typedef void (*Callback) ();
 //Debugstuff
 #define DEBUG_ON
 #ifdef DEBUG_ON
-#define DEBUG(msg,var) Serial.print(F(msg));\
+#define DEBUG_var(msg,var) Serial.print(F(msg));\
 Serial.println(var)
-#define DEBUG(msg) Serial.println(F(msg));
+#define DEBUG_msg(msg) Serial.println(F(msg));
 #else 
-#define DEBUG(msg,var) ((void)0)
-#define DEBUG(msg) ((void)0)
+#define DEBUG_var(msg,var) ((void)0)
+#define DEBUG_msg(msg) ((void)0)
 #endif
 
 
