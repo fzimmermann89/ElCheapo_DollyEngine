@@ -472,6 +472,7 @@ void get_global_set(byte pos, boolean read_save) {
     cur_inp_int_min=0;
     cur_inp_int_max=255;
     if(read_save == true) {
+      lcd_bkl=cur_inp_int;
       alt_io_display_set(lcd_bkl);
       eeprom_save(E_lcd_bkl, lcd_bkl);
     }
@@ -584,9 +585,9 @@ void get_global_set(byte pos, boolean read_save) {
       if( cur_inp_bool ){
         eeprom_saved(false);
         lcd.setCursor(0,0);
-        lcd.print("Reset");
+        lcd.print("Reset..");
         motor_set_speed(0);
-        delay(500);
+        delay(1000);
         restart();
        }
     }
@@ -673,7 +674,6 @@ void get_manual_select(byte pos) {
   switch (pos) {
   case 0:  
     // set in manual mode
-    ui_ctrl_flags |= B00000100;
     show_manual();
     break;
 

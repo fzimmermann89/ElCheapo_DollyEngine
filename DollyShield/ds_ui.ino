@@ -81,7 +81,7 @@ void check_user_interface() {
 
 
   // turn off/on lcd backlight if needed
-  if( (ui_ctrl_flags & UI_LCD_BKL_ON) && (input_last_tm < (millis() - (lcd_dim_tm * 1000))) ) {
+  if( (ui_ctrl_flags & UI_LCD_BKL_ON) && (lcd_dim_tm>0) && (input_last_tm < (millis() - (lcd_dim_tm * 1000))) ) {
 		//unset flag
     ui_ctrl_flags &= ~UI_LCD_BKL_ON;
     //disable display if blank lcd is enabled
@@ -553,7 +553,9 @@ void ui_button_rt( boolean held ) {
 
 void ui_button_lt(boolean held) {
   // if in manual control
+  DEBUG_var("lt, uiflags",ui_ctrl_flags);
   if( ui_ctrl_flags & UI_MANUAL_MODE ) {
+    DEBUG_msg("manmov lt");
     if( held == true ) {        
       // change motor direction
       motor_dir(true);
@@ -567,6 +569,7 @@ void ui_button_lt(boolean held) {
     // we're on main screen, lt switches value we can
     // adjust
     main_screen_select(false);
+    DEBUG_msg("lt mainscreen");
   }
 
   else if( ui_ctrl_flags & UI_VALUE_ENTRY ) {

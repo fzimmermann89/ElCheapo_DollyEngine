@@ -133,11 +133,12 @@ void main_screen_select(boolean dir) {
     main_scr_input++;
   }
   else {
-    main_scr_input+=max_inputs;
+    main_scr_input+=max_inputs-1;
+    DEBUG_var("+=, input=",main_scr_input);
   }
 
   if (main_scr_input>max_inputs) main_scr_input-=max_inputs;
-
+   DEBUG_var("if, input=",main_scr_input);
   if(main_scr_input == 0 ) {
     // exit main scr setup
     lcd.noBlink();
@@ -150,8 +151,8 @@ void main_screen_select(boolean dir) {
 
 void show_manual() {
 
-  ui_ctrl_flags |= B00000100;
-
+  ui_ctrl_flags |= UI_MANUAL_MODE;
+  DEBUG_var("uiflags",ui_ctrl_flags);
   lcd.clear();
   lcd.noBlink();
 
@@ -218,7 +219,7 @@ void execute_calibrate() {
     unsigned int runspd = 0.01 * m_maxsms;
     cur_inp_float = traveled;
     completed++;
-    
+
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Running ");  
@@ -228,12 +229,12 @@ void execute_calibrate() {
 
     // sms moving in i dir
     // at 6% of total distance
-   // motor_run_calibrate(1, runspd, i);
+    // motor_run_calibrate(1, runspd, i);
 
     update_cal_screen();
 
     m_cal_done = false;
-//where is cal_done set??
+    //where is cal_done set??
     while( m_cal_done == false ) {
       byte held = ui_button_check();
     }
@@ -242,10 +243,10 @@ void execute_calibrate() {
 
   }
   //pulse calibration
-    //TODO
+  //TODO
   // cont. calibration  
   for( byte c = 1; c <= 2; c++ ) {
-		//get speed for calibration
+    //get speed for calibration
     byte ths_spd = c == 1 ? motor_spd_cal[0] : motor_spd_cal[1];
     for( byte i = 0; i <= 1; i++ ) {
       float des_ipm = motor_calc_cpm(ths_spd, true);
@@ -284,9 +285,9 @@ void execute_calibrate() {
   // handle m_cal_array in a sane manner
   // float m_cal_array[3][4][2] 
   // 3 * 4 * 2 * 4 = 96
-//TODO
- // byte* p = (byte*)(void*)&m_cal_array;
- // eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
+  //TODO
+  // byte* p = (byte*)(void*)&m_cal_array;
+  // eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
 
 }
 
@@ -300,5 +301,6 @@ void update_cal_screen() {
 
   lcd.print(cur_inp_float, 2);
 }
+
 
 

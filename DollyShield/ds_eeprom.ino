@@ -129,7 +129,7 @@ void eeprom_save( uint16_t& pos, uint16_t& val ) {
 }
 
 void eeprom_save( int& pos,  int& val ) {
-    if (eeprom_read_word(&pos)!=(uint16_t)val) eeprom_write_word((uint16_t*) (void*) &pos,(uint16_t)val); 
+    if (eeprom_read_word((uint16_t*)&pos)!=(uint16_t)val) eeprom_write_word((uint16_t*)&pos,(uint16_t)val); 
     // indicate that memory has been saved
   eeprom_saved(true);    
 }
@@ -168,7 +168,7 @@ void eeprom_load( uint16_t& pos, uint16_t& val ) {
   val=eeprom_read_word(&pos);
 }
 
-void eeprom_load( int& pos, int& val ) 
+void eeprom_load( int& pos, int& val ){ 
   val=(int)eeprom_read_word((uint16_t*) (void*) &pos);
 }
 
