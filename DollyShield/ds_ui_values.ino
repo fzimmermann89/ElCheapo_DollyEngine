@@ -616,7 +616,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
         stop_executing();
       }
     }
-    cur_inp_bool =S_RUNNING ; //run_status >> 7
+    cur_inp_bool = S_RUNNING ; 
     break;
 
   case 2:
@@ -624,6 +624,8 @@ void get_mainscr_set(byte pos, boolean read_save) {
     lcd.setCursor(4, 0);
 
     ui_type=INPUT_FLOAT;
+    cur_inp_float_min=calc_total_cam_tm();
+    cur_inp_float_max=UINT_MAX
     ui_float_tenths = true;
 
     if( read_save ) {
@@ -639,10 +641,10 @@ void get_mainscr_set(byte pos, boolean read_save) {
     lcd.setCursor(0,1);
     ui_type=INPUT_LTRT;
 
-    if( read_save )
+    if( read_save ){
       motor_dir(cur_inp_bool);
-
-
+      eeprom_save(E_m_dir,m_dir);
+    }
     cur_inp_bool = m_dir;
     break;
 
@@ -650,20 +652,21 @@ void get_mainscr_set(byte pos, boolean read_save) {
     // speed for motor
     lcd.setCursor(1,1);
     ui_type=INPUT_UINT;
+    cur_inp_int_min=0;
+    cur_inp_int_max=255;
     if( m_mode==MODE_SMS) {
       // shoot-move-shoot?
-      cur_inp_int = cur_inp_int > m_maxsms ? m_maxsms: cur_inp_int;
+      cur_inp_int_max = m_maxsms;
     } 
     else {       
-      cur_inp_int = cur_inp_int > 255 ? 255 : cur_inp_int;
+      cur_inp_int_max=255;
     }
 
     if( read_save ) {
-      motor_set_speed((unsigned int) cur_inp_int); 
-      // calculate speed change per shot for ramping
-      // if needed - use function to update values
-      //  motor_set_ramp(m_ramp_set);  //TODO
+      motor_set_speed( cur_inp_int); 
+      eeprom_save(E_m_speed,m_speed);
     }
+    
     cur_inp_int = m_speed;
     break; 
   }

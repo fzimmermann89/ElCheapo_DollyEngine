@@ -150,7 +150,7 @@ const char axis_menu_6[] PROGMEM = "Advanced";
 const char axis_adv_menu_0[] PROGMEM = "Calibrate";
 const char axis_adv_menu_1[] PROGMEM = "max RPM";
 const char axis_adv_menu_2[] PROGMEM = "Dist per Rev";
-const char axis_adv_menu_3[] PROGMEM = "Min Cont. Speed";
+const char axis_adv_menu_3[] PROGMEM = "Min Cont.Speed";
 const char axis_adv_menu_4[] PROGMEM = "Pulse Power";
 const char axis_adv_menu_5[] PROGMEM = "Cal. Spd Low";
 const char axis_adv_menu_6[] PROGMEM = "Cal. Spd Hi";
@@ -161,10 +161,10 @@ const char camera_menu_2[] PROGMEM = "Exp. Time ms";
 const char camera_menu_3[] PROGMEM = "Shutter Type";
 const char camera_menu_4[] PROGMEM = "Bulb Mode";
 const char camera_menu_5[] PROGMEM = "Repeat";
-const char camera_menu_6[] PROGMEM = "Repeat Delay ms";
-const char camera_menu_7[] PROGMEM = "PreExp Delay ms";
-const char camera_menu_8[] PROGMEM = "PstExp Delay ms";
-const char camera_menu_9[] PROGMEM = "Focus Delay ms";
+const char camera_menu_6[] PROGMEM = "Repeat Dely ms";
+const char camera_menu_7[] PROGMEM = "PreExp Dely ms";
+const char camera_menu_8[] PROGMEM = "PstExp Dely ms";
+const char camera_menu_9[] PROGMEM = "Focus  Dely ms";
 
 
 const char set_menu_0[] PROGMEM = "Backlight";
@@ -172,12 +172,12 @@ const char set_menu_1[] PROGMEM = "AutoDim (sec)";
 const char set_menu_2[] PROGMEM = "Blank LCD";
 const char set_menu_3[] PROGMEM = "I/O 1";
 const char set_menu_4[] PROGMEM = "I/O 2";
-const char set_menu_5[] PROGMEM = "In Delay ms";
+const char set_menu_5[] PROGMEM = "In  Delay ms";
 const char set_menu_6[] PROGMEM = "Out Delay ms";
 const char set_menu_7[] PROGMEM = "USB Trigger";
 const char set_menu_8[] PROGMEM = "Invert Dir";
 const char set_menu_9[] PROGMEM = "Invert I/O";
-const char set_menu_10[] PROGMEM = "Reset Mem";
+const char set_menu_10[] PROGMEM = "Reset Memory";
 
 // menu organization
 const char * const menu_str[] PROGMEM = { 
