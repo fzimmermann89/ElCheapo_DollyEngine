@@ -198,8 +198,8 @@ void initialize_alt_timers() {
   //timer 2
   TCCR2A = 0x00;        //Timer2 Control Reg A: Wave Gen Mode normal
   TCCR2B = 0x04;        //set Prescaler to 64
-  //TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
-  //TIMSK2 |= (1<<OCIE2B);  
+  TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
+  TIMSK2 |= (1<<OCIE2B);  
   TIMSK2 |= (1<<TOIE2); //enable timer  
   //timer1
   TCCR1A = 0x00;        //Timer1 Control Reg A: Wave Gen Mode normal
