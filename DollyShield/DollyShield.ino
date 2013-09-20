@@ -187,7 +187,7 @@ const char * const man_str[] PROGMEM = {
   manual_menu_0,  manual_menu_1 };
 
 const char * const axis0_str[] PROGMEM = { 
-  axis_menu_0,axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5};
+  axis_menu_0,axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6};
 
 const char * const cam_str[] PROGMEM = { 
   camera_menu_0, camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
@@ -263,7 +263,7 @@ byte lcd_bkl     = 255;
 boolean blank_lcd   = false;
 
 // for dimming lcd
-byte lcd_dim_tm     = 5;
+byte lcd_dim_tm     = 0;
 unsigned long input_last_tm = 0;
 
 // invert L/R displays?
@@ -538,11 +538,12 @@ unsigned long input_trig_last = 0;
 byte altio_dir = FALLING;
 
 //timer globals
-unsigned int volatile timer3_ms;
 void (*timer1_func)();
 void (*timer2_func)();
 void (*timer3_func)();
- 
+volatile byte timer1_s;
+volatile byte timer2_s;
+unsigned int volatile timer3_ms;
 // initialize LCD object
 LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
@@ -592,19 +593,17 @@ void setup() {
   }
 
 DEBUG_msg("start");
-digitalWriteFast(11,HIGH);
-delay(200);
-digitalWriteFast(11,LOW);
-delay(200);
-digitalWriteFast(11,HIGH);
-
-m_speed=128;
-m_cur_speed=128;
-alt_io_motor_set(128);
-S_RUNNING=true;
-S_MOT_RUNNING=true;
-DEBUG_msg("set");
+digitalWriteFast(13,HIGH);
+delay(500);
+digitalWriteFast(13,LOW);
+delay(500);
+digitalWriteFast(13,HIGH);
 #endif  
+
+initialize_alt_timers();
+alt_io_display_set(lcd_bkl);
+alt_io_motor_set(0);
+
 }
 
 void loop() {

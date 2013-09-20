@@ -198,10 +198,9 @@ void initialize_alt_timers() {
   //timer 2
   TCCR2A = 0x00;        //Timer2 Control Reg A: Wave Gen Mode normal
   TCCR2B = 0x04;        //set Prescaler to 64
-  TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
-  TIMSK2 |= (1<<OCIE2B);  
+  //TIMSK2 |= (1<<OCIE2A);//enable Compare Interrupts
+  //TIMSK2 |= (1<<OCIE2B);  
   TIMSK2 |= (1<<TOIE2); //enable timer  
-  
   //timer1
   TCCR1A = 0x00;        //Timer1 Control Reg A: Wave Gen Mode normal
   TCCR1B = 0x04;        //set Prescaler to 256
@@ -247,7 +246,7 @@ ISR(TIMER2_COMPA_vect) {
 
 ISR(TIMER2_COMPB_vect) {
   //display off
- digitalWriteFast(LCD_BKL, LOW);  
+ digitalWriteFast(LCD_BKL, LOW);
 }
 
 ISR(TIMER2_OVF_vect){
@@ -280,49 +279,71 @@ ISR(TIMER2_OVF_vect){
   }
   else timer3_ms--;
  }
- 
+  digitalToggleFast(13); 
   if (OCR2A>0) digitalWriteFast(MOTOR0_P, HIGH); //motor on
   if (OCR2B>0) digitalWriteFast(LCD_BKL, HIGH);  //display on
 
 }
 
 void timer1_set(uint16_t ms, Callback f){
+  timer1_s=0;
   if (ms==0){
     //no delay given, do it instanly  
     f();
   }
   else{
+
+    //how many times are we going to overflow? overflow happens every 1048ms
+    while (ms>1048){
+      timer1_s++;
+      ms-=1048;
+    }
     timer1_func=f;
     S_TIMER1_SET=true;
     TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
-    //multiply ms by 63 (should be 62.5 ticks per ms) and add it to the current timer
+    //multiply ms by 62 (should be 62.5 ticks per ms) and add it to the current timer
     //value to set new interrupt compare value
-    OCR1A=TCNT1+(ms*63);
-    TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
-    TIMSK1 |= (1<<TOIE1); //re-enable timer
+    OCR1A=TCNT1+(ms*62);
+    if (OCR1A<=TCNT1) timer1_s++; //we have an overflow for the ms part if counter is greater than compare value
+    if (timer1_s==0) {       //no overflow
+      TIFR1  |= (1<<OCF1A);  //clear flag in case it is already set
+      TIMSK1 |= (1<<OCIE1A); //enable Compare Interrupt
+    }  
+    TIMSK1 |= (1<<TOIE1);  //re-enable timer
   }
 }
-
 void timer2_set(uint16_t ms, Callback f){
+  timer2_s=0;
   if (ms==0){
     //no delay given, do it instanly  
-    (*f)();
+    f();
   }
   else{
+
+    //how many times are we going to overflow? overflow happens every 1048ms
+    while (ms>1048){
+      timer2_s++;
+      ms-=1048;
+    }
     timer2_func=f;
     S_TIMER2_SET=true;
     TIMSK1 &= ~(1<<TOIE1); //disable timer while calculating compare value
-    //multiplay ms by 63 (should be 62.5 ticks per ms) and add it to the current timer
+    //multiply ms by 62 (should be 62.5 ticks per ms) and add it to the current timer
     //value to set new interrupt compare value
-    OCR1B=TCNT1+(ms*63);
-    TIMSK1 |= (1<<TOIE1); //re-enable timer
-    TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
+    OCR1B=TCNT1+(ms*62);
+    if (OCR1B<=TCNT1) timer2_s++; //we have an overflow for the ms part if counter is greater than compare value
+    if (timer2_s==0) {       //no overflow
+      TIFR1  |= (1<<OCF1B);  //clear flag in case it is already set
+      TIMSK1 |= (1<<OCIE1B); //enable Compare Interrupt
+    }
+    TIMSK1 |= (1<<TOIE1);  //re-enable timer
   }
-}
+}  
+
 void timer3_set(uint16_t ms, Callback f){
    if (ms==0){
     //no delay given, do it instanly  
-    (*f)();
+    f();
   }
   else{
     timer3_ms=ms;
@@ -343,6 +364,23 @@ ISR(TIMER1_COMPB_vect) {
   (*timer2_func)();
   S_TIMER2_SET=false;
    
+}
+
+ISR(TIMER1_OVF_vect){
+  if (S_TIMER1_SET){
+    timer1_s--;
+    if (timer1_s==0) {
+      TIFR1  |= (1<<OCF1A); //clear flag if compare match happend while interrupt disabled
+      TIMSK1 |= (1<<OCIE1A);//enable compare interrupt
+    }
+  }
+  if (S_TIMER2_SET){
+    timer2_s--;
+    if (timer2_s==0) {
+      TIFR1  |= (1<<OCF1B); //clear flag if compare match happend while interrupt disabled
+      TIMSK1 |= (1<<OCIE1B);//enable compare interrupt
+    }
+  }
 }
 void clear_delay(){
   S_IN_DELAY=false;
