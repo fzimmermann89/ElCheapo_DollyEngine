@@ -66,7 +66,7 @@ byte EEMEM E_min_spd;
 byte EEMEM E_motor_spd_cal0;
 byte EEMEM E_motor_spd_cal1;
 uint16_t EEMEM E_m_maxsms;
-boolean EEMEM E_m_mode=MODE_SMS;
+boolean EEMEM E_m_mode;
 uint8_t EEMEM E_m_pulse_length;
 float EEMEM E_m_cal_array[3][4][2];
 byte EEMEM E_m_angle;
@@ -186,132 +186,95 @@ void eeprom_load(float& pos, float& val ) {
 }
 
 
-//Write and Read all Values
 
-
+//Write all Values to EEPROM
 
 void write_all_eeprom_memory() {
-/*
-  // write default values into eeprom
-  eeprom_write(EEPROM_TODO, delay_focus);
-  eeprom_write(EEPROM_TODO, delay_postexp);
-  * 
-  eeprom_write(EEPROM_TODO, focus_shutter);
-
-  eeprom_write(EEPROM_TODO, cam_max);
-  eeprom_write(EEPROM_TODO, m_diarev);
-  eeprom_write(EEPROM_TODO, max_cpm);
-  eeprom_write(EEPROM_TODO, m_rpm);
-  eeprom_write(EEPROM_TODO, min_cpm);
-  eeprom_write(EEPROM_TODO, min_spd);
-  eeprom_write(EEPROM_TODO, m_min_pulse);
-  eeprom_write(EEPROM_TODO, altio_dir);
-  eeprom_write(EEPROM_TODO, ui_motor_display);
-  eeprom_write(EEPROM_TODO, motor_sl_mod);
-  eeprom_write(EEPROM_TODO, lcd_dim_tm);
-  eeprom_write(EEPROM_TODO, blank_lcd);
-  eeprom_write(EEPROM_TODO, m_ramp_set);
-  eeprom_write(EEPROM_TODO, m_maxsms);
-  eeprom_write(EEPROM_TODO, cam_interval);
-
-  // handle m_cal_array in a sane manner
-  // float m_cal_array[3][4][2] 
-  // 3 * 4 * 2 * 4 = 96
-
-  byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_write(EEPROM_TODO, *p, (3*4*2*4));
-
-  eeprom_write(EEPROM_TODO, input_type[0]);
-  eeprom_write(EEPROM_TODO, input_type[1]);
-  eeprom_write(EEPROM_TODO, ui_is_metric);
-  eeprom_write(EEPROM_TODO, m_lead_in);
-  eeprom_write(EEPROM_TODO, m_lead_out);
-  eeprom_write(EEPROM_TODO, motor_spd_cal);
-  eeprom_write(EEPROM_TODO, m_cal_constant);
-  eeprom_write(EEPROM_TODO, cam_repeat);
-  eeprom_write(EEPROM_TODO, delay_repeat);
-
-  eeprom_write(EEPROM_TODO, ext_trig_pre_delay);
-  eeprom_write(EEPROM_TODO, ext_trig_pst_delay);
-  eeprom_write(EEPROM_TODO, exp_tm);
-  eeprom_write(EEPROM_TODO, gb_enabled);
-  eeprom_write(EEPROM_TODO, ui_invdir);
-  eeprom_write(EEPROM_TODO, lcd_bkl);
-  eeprom_write(EEPROM_TODO, ir_remote);
-  */
+  eeprom_save(E_delay_focus, delay_focus);
+  eeprom_save(E_delay_postexp, delay_postexp);
+  eeprom_save(E_delay_preexp, delay_postexp);
+  eeprom_save(E_delay_repeat, delay_repeat);
+  eeprom_save(E_delay_ext_in, delay_ext_in);
+  eeprom_save(E_delay_ext_out, delay_ext_out);
+  eeprom_save(E_length_ext_out,length_ext_out);
+  eeprom_save(E_altio_dir, altio_dir);
+  eeprom_save(E_m_diarev, m_diarev);
+  eeprom_save(E_m_rpm, m_rpm);
+  eeprom_save(E_max_cpm, max_cpm);
+  eeprom_save(E_min_cpm, min_cpm);
+  eeprom_save(E_min_spd, min_spd);
+  eeprom_save(E_m_pulse_length, m_pulse_length);
+  eeprom_save(E_m_ramp_in, m_ramp_in);
+  eeprom_save(E_m_ramp_out, m_ramp_out);
+  eeprom_save(E_m_lead_in, m_lead_out);
+  eeprom_save(E_m_lead_out, m_lead_out);
+  eeprom_save(E_shutter_mode,shutter_mode );
+  eeprom_save(E_bulb_mode, bulb_mode);
+  eeprom_save(E_m_speed,m_speed );
+  eeprom_save(E_m_mode,m_mode );
+  eeprom_save(E_ui_invdir, ui_invdir);
+  eeprom_save(E_ui_motor_display, ui_motor_display);
+  eeprom_save(E_lcd_dim_tm, lcd_dim_tm);
+  eeprom_save(E_blank_lcd, blank_lcd);
+  eeprom_save(E_lcd_bkl,lcd_bkl);  
+  eeprom_save(E_m_ramp_in, m_ramp_in);
+  eeprom_save(E_m_ramp_out, m_ramp_out);
+  eeprom_save(E_m_lead_in, m_lead_out);
+  eeprom_save(E_cam_interval, cam_interval);
+  eeprom_save(E_cam_max, cam_max);
+  eeprom_save(E_exp_tm, exp_tm);
+  eeprom_save(E_cam_repeat, cam_repeat);
+  eeprom_save(E_input_type0, input_type[0]);
+  eeprom_save(E_input_type1, input_type[1]);
+  eeprom_save(E_motor_spd_cal0, motor_spd_cal[0]);
+  eeprom_save(E_motor_spd_cal1, motor_spd_cal[1]);
+  eeprom_save(E_m_cal_array, m_cal_array, sizeof(m_cal_array)); //TODO
 }
 
 
-// restore memory
+
+// Restore memory from EEPROM
 
 void restore_eeprom_memory() {
-/*
-  // read eeprom stored values back into RAM
-
-  eeprom_read(3, delay_focus);
-  eeprom_read(5, delay_postexp);
-  eeprom_read(7, focus_shutter);
-
-  eeprom_read(10, cam_max);
-  eeprom_read(16, m_diarev[0]);
-  eeprom_read(24, max_cpm);
-  eeprom_read(32, m_rpm[0]);
-  eeprom_read(40, min_cpm[0]);
-  eeprom_read(48, min_spd[0]);
-  eeprom_read(50, m_min_pulse[0]);
-  eeprom_read(52, altio_dir);
-
-  eeprom_read(56, ui_motor_display);
-  eeprom_read(57, motor_sl_mod);
-  eeprom_read(58, lcd_dim_tm);
-  eeprom_read(60, blank_lcd);
-  eeprom_read(61, m_ramp_set[0]);
-  eeprom_read(63, m_maxsms[0]);
-  eeprom_read(67, cam_interval);
-
-  
-  // handle m_cal_array in a sane manner
-  // float m_cal_array[3][4][2] 
-  // 3 * 4 * 2 * 4 = 96
-
-  byte* p = (byte*)(void*)&m_cal_array;
-  eeprom_read(71, *p, (3*4*2*4));
-
-  eeprom_read(217, input_type[0]);
-  eeprom_read(218, input_type[1]);
-
-  eeprom_read(219, ui_is_metric);
-
-  eeprom_read(229, m_lead_in[0]);
-  eeprom_read(233, m_lead_out[0]);
-
-  eeprom_read(237, motor_spd_cal[0]);
-
-  eeprom_read(239, m_cal_constant[0]);
-
-  eeprom_read(249, cam_repeat);
-  eeprom_read(250, delay_repeat);
-
-  eeprom_read(252, ext_trig_pre_delay);
-  eeprom_read(256, ext_trig_pst_delay);
-
-  eeprom_read(260, exp_tm); // moved from position 1
-
-  eeprom_read(264, gb_enabled);
-  eeprom_read(265, ui_invdir);
-  eeprom_read(266, lcd_bkl);
-  eeprom_read(267, ir_remote);
-  // handle restoring alt input states
-
-  if( input_type[0] != 0 )
-    altio_connect(0,input_type[0]);
-
-  if( input_type[1] != 0 )
-    altio_connect(1,input_type[1]);
-
-  // set lcd backlight to saved value
-  ui_set_backlight(lcd_bkl);
-*/
+  eeprom_load(E_delay_focus, delay_focus);
+  eeprom_load(E_delay_postexp, delay_postexp);
+  eeprom_load(E_delay_preexp, delay_postexp);
+  eeprom_load(E_delay_repeat, delay_repeat);
+  eeprom_load(E_delay_ext_in, delay_ext_in);
+  eeprom_load(E_delay_ext_out, delay_ext_out);
+  eeprom_load(E_length_ext_out,length_ext_out);
+  eeprom_load(E_altio_dir, altio_dir);
+  eeprom_load(E_m_diarev, m_diarev);
+  eeprom_load(E_m_rpm, m_rpm);
+  eeprom_load(E_max_cpm, max_cpm);
+  eeprom_load(E_min_cpm, min_cpm);
+  eeprom_load(E_min_spd, min_spd);
+  eeprom_load(E_m_pulse_length, m_pulse_length);
+  eeprom_load(E_m_ramp_in, m_ramp_in);
+  eeprom_load(E_m_ramp_out, m_ramp_out);
+  eeprom_load(E_m_lead_in, m_lead_out);
+  eeprom_load(E_m_lead_out, m_lead_out);
+  eeprom_load(E_shutter_mode,shutter_mode );
+  eeprom_load(E_bulb_mode, bulb_mode);
+  eeprom_load(E_m_speed,m_speed );
+  eeprom_load(E_m_mode,m_mode );
+  eeprom_load(E_ui_invdir, ui_invdir);
+  eeprom_load(E_ui_motor_display, ui_motor_display);
+  eeprom_load(E_lcd_dim_tm, lcd_dim_tm);
+  eeprom_load(E_blank_lcd, blank_lcd);
+  eeprom_load(E_lcd_bkl,lcd_bkl);  
+  eeprom_load(E_m_ramp_in, m_ramp_in);
+  eeprom_load(E_m_ramp_out, m_ramp_out);
+  eeprom_load(E_m_lead_in, m_lead_out);
+  eeprom_load(E_cam_interval, cam_interval);
+  eeprom_load(E_cam_max, cam_max);
+  eeprom_load(E_exp_tm, exp_tm);
+  eeprom_load(E_cam_repeat, cam_repeat);
+  eeprom_load(E_input_type0, input_type[0]);
+  eeprom_load(E_input_type1, input_type[1]);
+  eeprom_load(E_motor_spd_cal0, motor_spd_cal[0]);
+  eeprom_load(E_motor_spd_cal1, motor_spd_cal[1]);
+  eeprom_load(E_m_cal_array, m_cal_array, sizeof(m_cal_array)); //TODO
 }
 
 
