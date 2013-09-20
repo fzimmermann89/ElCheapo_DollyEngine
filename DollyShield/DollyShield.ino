@@ -21,26 +21,6 @@
  
  */
 
-/*
-NOTES:
- -use timer2 for lcd and motor "soft pwm" to use any pin. in slow pulse mode use counter in isr. less overhead than timer1
- -user timer1 in ctc mode with couter for general purpose ms-timer, instead of mstimer2 OR as compare..
-
- -check bulb mode/stop camera using ir
- 
- timer1 thoughts:
- 16bit timer, dh bis 65535.
- bei 16mhz:
- prescaler    zeit pro tick   max zeit    ticks pro ms
- 1        0,0625us    4ms       16000
- 8        0,5us       32ms      2000
- 64       4us         262ms     250
- 256      16us        1s        62.5        ~63   wert=wert<<6-wert
- 1024     64us        4s        15.625      ~16   wert=wert<<4
- 
- 
- */
-
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <LiquidCrystal.h>
