@@ -149,7 +149,7 @@ else {
 void altio_flip_runstat() {
   // if currently running, stop; if not, start
 
-    if(S_RUNNING) { // run_status & B10000000
+    if(S_RUNNING) {
     // running
     stop_executing();
   }

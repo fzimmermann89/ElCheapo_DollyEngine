@@ -34,7 +34,7 @@ void prep_home_screen() {
   lcd.clear();
   lcd.setCursor(0,0);
 
-  if(S_RUNNING) {//run_status & B10000000
+  if(S_RUNNING) {
     // in 'external intervalometer' mode, show 'ext' instead of 'on'
     if (external_io & (EXT_INTV_1|EXT_INTV_2|EXT_INTV_USB) ) {
       lcd.print("Ext");

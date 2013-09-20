@@ -136,9 +136,9 @@ float motor_calc_cpm(unsigned int spd, boolean ths_mode) {
   if( ui_ctrl_flags & B00000100 )
     maxspd = 255.0;
 
-  float cur_ipm = (float) max_cpm * ( (float) spd / (float) maxspd );
+  float cur_cpm = (float) max_cpm * ( (float) spd / (float) maxspd );
 
-  return(cur_ipm);
+  return(cur_cpm);
   */
 return (0.0);
 }

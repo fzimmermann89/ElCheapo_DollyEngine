@@ -693,8 +693,8 @@ void get_calibrate_select(byte pos) {
 
 void display_spd_cpm(unsigned int spd) {
 
-  float cur_ipm = motor_calc_cpm(spd, m_mode);
-  lcd.print(cur_ipm, 2);
+  float cur_cpm = motor_calc_cpm(spd, m_mode);
+  lcd.print(cur_cpm, 2);
   lcd.print("cm/min");
 
 }
