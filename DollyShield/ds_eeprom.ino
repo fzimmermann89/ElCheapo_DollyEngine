@@ -70,7 +70,6 @@ boolean EEMEM E_m_mode;
 uint8_t EEMEM E_m_pulse_length;
 float EEMEM E_m_cal_array[3][4][2];
 byte EEMEM E_m_angle;
-boolean EEMEM E_m_cal_done;
 byte EEMEM E_m_ramp_in;
 byte EEMEM E_m_ramp_out;
 byte EEMEM E_m_lead_in;

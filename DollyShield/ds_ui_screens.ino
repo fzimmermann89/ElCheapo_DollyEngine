@@ -203,7 +203,7 @@ void show_calibrate() {
 void execute_calibrate() {
 
   // in calibration  
-  ui_cal_scrn_flags |= UI_CAL_CALIBRATING;
+  cal_flags |= CAL_CALIBRATING;
   // floating point input
   ui_type = INPUT_FLOAT;
 
@@ -215,11 +215,13 @@ void execute_calibrate() {
 
   // sms calibration
   for( byte i = 0; i <= 1; i++ ) {
-    float traveled = 0.01 * (max_cpm);
-    unsigned int runspd = 0.01 * m_maxsms;
-    cur_inp_float = traveled;
+		//sms runs with 50% motor power for 5s.
+		//what distance should we travel?
+    float shouldtravel = (max_cpm) * (5/60) * 0.5;
+    cur_inp_float = shouldtravel;
+    
+    //printing status
     completed++;
-
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Running ");  
@@ -227,30 +229,63 @@ void execute_calibrate() {
     lcd.print(completed, DEC);
     lcd.print(" of 8]");
 
-    // sms moving in i dir
-    // at 6% of total distance
-    // motor_run_calibrate(1, runspd, i);
+    // sms moving in i dir for 5s
+    motor_run_calibrate(MODE_SMS, 5, i);
 
     update_cal_screen();
 
-    m_cal_done = false;
-    //where is cal_done set??
-    while( m_cal_done == false ) {
-      byte held = ui_button_check();
+    cal_flags&=~CAL_STEP_DONE;
+    while( !(cal_flags&CAL_STEP_DONE) {
+			//wait until input is done
+      ui_button_check();
     }
-    //TODO
-    //  m_cal_array[m_cur_cal][0][i] = traveled / cur_inp_float;
-
+     //we save the ratio in array
+     //example: if we traveld twice as far as supposed to, an 0.5 is saved.
+      m_cal_array[m_cur_cal][CALPOINT_SMS][i] = shouldtravel/cur_inp_float;
   }
+  
   //pulse calibration
   //TODO
+  for( byte i = 0; i <= 1; i++ ) {
+		//run motor in slow pulse mode at 50% of min speed
+		byte ths_speed=min_spd/2
+    float shouldtavel = motor_calc_cpm(ths_speed, true);
+    cur_inp_float = shouldtravel;
+
+    
+    //printing status
+    completed++;
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Running ");  
+    lcd.print('[');
+    lcd.print(completed, DEC);
+    lcd.print(" of 8]");
+
+    // Running pulse mode
+    motor_run_calibrate(MODE_CONT, ths_speed, i);
+
+    update_cal_screen();
+
+    cal_flags&=~CAL_STEP_DONE;
+    while( !(cal_flags&CAL_STEP_DONE) {
+			//wait until input is done
+      ui_button_check();
+    }
+     //we save the ratio in array
+     //example: if we traveld twice as far as supposed to, an 0.5 is saved.
+      m_cal_array[m_cur_cal][CALPOINT_PULSE][i] = cur_inp_float;
+
+  }
+  
   // cont. calibration  
   for( byte c = 1; c <= 2; c++ ) {
     //get speed for calibration
     byte ths_spd = c == 1 ? motor_spd_cal[0] : motor_spd_cal[1];
     for( byte i = 0; i <= 1; i++ ) {
-      float des_ipm = motor_calc_cpm(ths_spd, true);
-      cur_inp_float = des_ipm;
+			//distance we should travel in 60s
+      float shouldtavel = motor_calc_cpm(ths_spd, true);
+      cur_inp_float = shouldtravel;
 
       completed++;
       Serial.print("comp:");
@@ -262,24 +297,25 @@ void execute_calibrate() {
       lcd.print(completed, DEC);
       lcd.print(" of 8]");
 
-      // cont moving in i dir
-      motor_run_calibrate(2, ths_spd, i);
+      // cont moving in i dir for 60s
+      motor_run_calibrate(MODE_CONT, ths_spd, i);
 
       update_cal_screen();
 
-      m_cal_done = false;
+      cal_flags&=~CAL_STEP_DONE;
 
-      while(  m_cal_done == false ) {
-        byte held = ui_button_check();
+      while(!(cal_flags&CAL_STEP_DONE)) {
+				//wait until input is done
+        ui_button_check();
       }
-      //TODO
-      //   m_cal_array[m_cur_cal][c][i] = ( cur_inp_float / des_ipm );
+      byte point = c == 1 ? CALPOINT_LOW : CALPOINT_HIGH;
+      m_cal_array[m_cur_cal][point][i] = ( shouldtravel/cur_inp_float );
     }
   }
 
 
-  ui_cal_scrn_flags &= ~UI_CAL_CALIBRATING;
-  ui_cal_scrn_flags |= UI_CAL_DONE;
+  cal_flags &= ~CAL_CALIBRATING;
+  cal_flags |= CAL_DONE;
 
   // save values to memory
   // handle m_cal_array in a sane manner

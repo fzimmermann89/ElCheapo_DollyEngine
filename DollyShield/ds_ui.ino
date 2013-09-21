@@ -315,20 +315,23 @@ void ui_button_center( boolean held ) {
   if( ui_ctrl_flags & UI_CALIBRATE_MODE  ) {
 	// on calibration screen 
 	//TODO
-    if( ui_cal_scrn_flags & UI_CAL_DONE ) {
+    if( cal_flags & CAL_DONE ) {
       // completed calibrating
-      ui_cal_scrn_flags &= ~UI_CAL_DONE;
-      ui_cal_scrn_flags &= ~UI_CAL_CALIBRATING;
+      cal_flags &= ~CAL_DONE;
+      cal_flags &= ~CAL_CALIBRATING;
       show_calibrate();
       return;
     }  
-    else if( ui_cal_scrn_flags & UI_CALIBRATE_MODE ) {
+    else if( cal_flags & UI_CALIBRATE_MODE ) {
       // in calibrating input
 
       if( held == true )
+      {
+        //abort calibrating //TODO
         return;
+        }
 
-      m_cal_done = true;
+      cal_flags|=CAL_STEP_DONE
       return;
     }
 
@@ -426,7 +429,7 @@ void ui_button_down( boolean held ) {
 
   if( ui_ctrl_flags & UI_CALIBRATE_MODE  ) {
 
-    if( ui_cal_scrn_flags & UI_CAL_CALIBRATING ) {
+    if( cal_flags & CAL_CALIBRATING ) {
       // in calibrating settings
       move_val(false);
       update_cal_screen();
@@ -476,7 +479,7 @@ void ui_button_up( boolean held ) {
 
   // on calibration screen //TODO
   if( ui_ctrl_flags &  UI_CALIBRATE_MODE ) {
-    if( ui_cal_scrn_flags & UI_CAL_CALIBRATING ) {
+    if( cal_flags & CAL_CALIBRATING ) {
       // in calibrating settings
       move_val(true);
       update_cal_screen();

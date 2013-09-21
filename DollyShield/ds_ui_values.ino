@@ -691,15 +691,20 @@ void get_calibrate_select(byte pos) {
   show_calibrate();
 }
 
-void display_spd_cpm(unsigned int spd) {
-
-  float cur_cpm = motor_calc_cpm(spd, m_mode);
+void display_spd_cpm(uint8_t spd) {
+  if m_mode==MODE_CONT){ 
+  float cur_cpm = motor_calc_cpm(spd);
   lcd.print(cur_cpm, 2);
   lcd.print("cm/min");
-
+  }
+  else{
+    float cur_cm = motor_calc_cm(spd);
+    lcd.print(cur_cm, 2);
+    lcd.print("cm");
+    }
 }
 
-void display_spd_pct(byte spd) {
+void display_spd_pct(uint8_t spd) {
   float cur_pct =  (float) spd / (float) 255;
   cur_pct *= 100;
 

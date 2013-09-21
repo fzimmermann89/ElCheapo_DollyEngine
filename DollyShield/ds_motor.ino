@@ -94,6 +94,7 @@ void motor_set_speed( uint8_t speed ) {
   }
   else{
     //manual mode //TODO
+    alt_io_motor_set(m_cur_speed);
   }
   return;
 }
@@ -158,9 +159,9 @@ void motor_update_dist(float rpm, float diarev ) {
    eeprom_save(E_m_maxsms, m_maxsms);
    
 }
-void motor_calc_sms_tm()
+uint16_t motor_calc_sms_tm(uint8_t speed)
 {
-    m_sms_tm=m_cur_speed*m_cal_array[m_angle][CALPOINT_SMS][0];
+    return speed*motor_cal_adjust(MODE_SMS,speed,m_dir);
 }
 
 

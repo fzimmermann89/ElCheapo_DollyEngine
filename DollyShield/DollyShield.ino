@@ -263,9 +263,10 @@ boolean ui_float_tenths = false;
 byte ui_ctrl_flags = B00000000;
 
 //calibration screen flags
-#define UI_CAL_CALIBRATING (1<<0)     //B0 = Currently calibrating
-#define UI_CAL_DONE        (1<<1)     //B1 = Done Calibrating
-byte ui_cal_scrn_flags = 0;
+#define CAL_CALIBRATING (1<<0)     //B0 = Currently calibrating
+#define CAL_DONE        (1<<1)     //B1 = Done Calibrating
+#define CAL_STEP_DONE   (1<<2)     //B2 = Current Calibration Step finished
+byte cal_flags = 0;
 
 // whether to show cpm (true) or % (false)
 boolean ui_motor_display = true;
@@ -479,7 +480,6 @@ float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen.
 
 byte m_angle = 0;
 
-boolean m_cal_done = false;
 
 
 // ramping data
