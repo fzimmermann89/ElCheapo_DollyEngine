@@ -625,7 +625,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
 
     ui_type=INPUT_FLOAT;
     cur_inp_float_min=calc_total_cam_tm();
-    cur_inp_float_max=UINT_MAX
+    cur_inp_float_max=UINT_MAX;
     ui_float_tenths = true;
 
     if( read_save ) {

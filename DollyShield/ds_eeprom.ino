@@ -142,10 +142,11 @@ void eeprom_save( byte& pos, byte& val ) {
 
 void eeprom_save( float& pos, float& val ) {
   //eeprom_write_float() not in avrlibc version used by Arduino!
+  //check, write only if changed
   float oldvalue;
-   eeprom_read_block((void*)&oldvalue, (const void*)&pos, sizeof(float));
-   if (oldvalue!=val) eeprom_write_block((const void*)&pos,(void*)&val,  sizeof(float)); 
-    // indicate that memory has been saved
+  eeprom_read_block((void*)&oldvalue, (const void*)&pos, sizeof(float));
+  if (oldvalue!=val) eeprom_write_block(&val,&pos,  sizeof(float)); 
+  // indicate that memory has been saved
   eeprom_saved(true);  
 }
 
@@ -155,6 +156,7 @@ void eeprom_save( unsigned long& pos, unsigned long& val ) {
   // indicate that memory has been saved
   eeprom_saved(true);
 }
+
 
 
 
@@ -182,7 +184,7 @@ void eeprom_load( uint8_t& pos, uint8_t& val ) {
 
 void eeprom_load(float& pos, float& val ) {
   //eeprom_read_float not in avrlibc version used by Arduino!
-  eeprom_read_block((void*)&val, (const void*)&pos, sizeof(float));   
+  eeprom_read_block(&val, &pos, sizeof(float));   
 }
 
 

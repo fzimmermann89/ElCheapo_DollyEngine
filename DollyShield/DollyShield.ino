@@ -28,8 +28,7 @@
 #include "helper.h"
 #include <limits.h>
 
-
-#define FIRMWARE_VERSION  92
+#define FIRMWARE_VERSION  01
 
 // motor pins
 #define MOTOR0_P 15
@@ -583,7 +582,6 @@ digitalWriteFast(13,HIGH);
 initialize_alt_timers();
 alt_io_display_set(lcd_bkl);
 alt_io_motor_set(0);
-
 }
 
 void loop() {
