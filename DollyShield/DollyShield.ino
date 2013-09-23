@@ -27,78 +27,17 @@
 #include "digitalWriteFastMod.h"
 #include "helper.h"
 #include <limits.h>
+#include "pinout.h"
+#include "strings.h"
 
-const uint8_t FIRMWARE_VERSION=01;
-
-// motor pins
-#define MOTOR0_P 15
-#define MOTOR0_DIR 13
-
-// camera pins
-#define CAMERA_PIN 12
-#define FOCUS_PIN 12
-#define IR_PIN 12
-
-// lcd pins
-#define LCD_RS  8
-#define LCD_EN  9
-#define LCD_D4  4
-#define LCD_D5  5
-#define LCD_D6  6
-#define LCD_D7  7
-#define LCD_BKL 10
-
-// button pin
-#define BUT_PIN A0
-
+const uint8_t FIRMWARE_VERSION = 01;
 
 // max # of LCD characters (including newline)
-#define MAX_LCD_STR 17
-
-// how many buttons dow we have?
-#define NUM_BUTTONS 5
-
-// button return values
-#define BUT0  1
-#define BUT1  2
-#define BUT2  3
-#define BUT3  4
-#define BUT4  5
-
-// which buttons?
-#define BUT_UP BUT1
-#define BUT_DN BUT2
-#define BUT_CT BUT4
-#define BUT_LT BUT3
-#define BUT_RT BUT0
-
-// analog button read values
-#define BUT0_VAL  0
-#define BUT1_VAL  100
-#define BUT2_VAL  255
-#define BUT3_VAL  405
-#define BUT4_VAL  640
-
-// button variance range
-#define BUT_THRESH  40
-
-
-// how many ms does a button have
-// to be held before triggering another
-// action? (for scrolling, etc.)
-
-#define HOLD_BUT_MS 200
-
-// how much to increment for each cycle the button is held?
-
-#define HOLD_BUT_VALINC 10
-
-// ALT input debouncing time
-#define ALT_TRIG_THRESH 250
+const uint8_t MAX_LCD_STR = 17;
 
 //IR Settings
-#define FREQ 38400
-#define oscd 16 //TODO
+const uint8_t FREQ = 38400;
+const uint8_t OSCD = 16; //TODO
 
 //IR sequences
 //NIKON
@@ -106,81 +45,8 @@ unsigned int const seq_nikon[]={14,77,1069,15,61,16,137,15,2427,77,1069,15,61,16
 //CANON
 unsigned int const seq_canon[]={3,16,458,16};
 unsigned int const *seqs[] = {seq_nikon,seq_canon};
-#define IR_NIKON 0
-#define IR_CANON 1
-
-// menu strings
-const char menu_0[] PROGMEM = "Movements";
-const char menu_1[] PROGMEM = "Motor  Setup";
-const char menu_2[] PROGMEM = "Camera Setup";
-const char menu_3[] PROGMEM = "General Setup";
-
-const char manual_menu_0[] PROGMEM = "Manual Move";
-const char manual_menu_1[] PROGMEM = "Fast Simulat.";
-
-const char motor_menu_0[] PROGMEM = "Movement Mode";
-const char motor_menu_1[] PROGMEM = "Display Mode";
-const char motor_menu_2[] PROGMEM = "Ramp In Shots";
-const char motor_menu_3[] PROGMEM = "Ramp Out Shots";
-const char motor_menu_4[] PROGMEM = "Lead In";
-const char motor_menu_5[] PROGMEM = "Lead Out";
-const char motor_menu_6[] PROGMEM = "Cal. Slot";
-const char motor_menu_7[] PROGMEM = "Advanced";
-
-const char motor_adv_menu_0[] PROGMEM = "Calibrate";
-const char motor_adv_menu_1[] PROGMEM = "max RPM";
-const char motor_adv_menu_2[] PROGMEM = "Dist per Rev";
-const char motor_adv_menu_3[] PROGMEM = "Min Cont.Speed";
-const char motor_adv_menu_4[] PROGMEM = "Pulse Power";
-const char motor_adv_menu_5[] PROGMEM = "Cal. Spd Low";
-const char motor_adv_menu_6[] PROGMEM = "Cal. Spd Hi";
-
-const char camera_menu_0[] PROGMEM = "Interval sec";
-const char camera_menu_1[] PROGMEM = "Max Shots";
-const char camera_menu_2[] PROGMEM = "Exp. Time ms";
-const char camera_menu_3[] PROGMEM = "Shutter Type";
-const char camera_menu_4[] PROGMEM = "Bulb Mode";
-const char camera_menu_5[] PROGMEM = "Repeat";
-const char camera_menu_6[] PROGMEM = "Repeat Dely ms";
-const char camera_menu_7[] PROGMEM = "PreExp Dely ms";
-const char camera_menu_8[] PROGMEM = "PstExp Dely ms";
-const char camera_menu_9[] PROGMEM = "Focus  Dely ms";
-
-
-const char set_menu_0[] PROGMEM = "Backlight";
-const char set_menu_1[] PROGMEM = "AutoDim (sec)";
-const char set_menu_2[] PROGMEM = "Blank LCD";
-const char set_menu_3[] PROGMEM = "I/O 1";
-const char set_menu_4[] PROGMEM = "I/O 2";
-const char set_menu_5[] PROGMEM = "In  Delay ms";
-const char set_menu_6[] PROGMEM = "Out Delay ms";
-const char set_menu_7[] PROGMEM = "USB Trigger";
-const char set_menu_8[] PROGMEM = "Invert Dir";
-const char set_menu_9[] PROGMEM = "Invert I/O";
-const char set_menu_10[] PROGMEM = "Reset Memory";
-
-// menu organization
-const char * const menu_str[] PROGMEM = { 
-  menu_0,menu_1, menu_2, menu_3};
-
-const char * const man_str[] PROGMEM = { 
-  manual_menu_0,  manual_menu_1 };
-
-const char * const motor_str[] PROGMEM = { 
-  motor_menu_0,motor_menu_1, motor_menu_2, motor_menu_3, motor_menu_4, motor_menu_5, motor_menu_6,motor_menu_7};
-
-const char * const cam_str[] PROGMEM = { 
-  camera_menu_0, camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
-
-const char * const set_str[] PROGMEM = { 
-  set_menu_0, set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_10};
-
-const char * const motor_adv_str[] PROGMEM = { 
-  motor_adv_menu_0, motor_adv_menu_1,  motor_adv_menu_2,motor_adv_menu_3,motor_adv_menu_4,motor_adv_menu_5,motor_adv_menu_6};
-
-// max number of inputs for each menu (in order listed above, starting w/ 0)
-byte max_menu[7]  = {
-  3,1,7,9,10,6};
+const uint8_t IR_NIKON = 0;
+const uint8_t IR_CANON = 1;
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -191,11 +57,9 @@ char lcd_buf[MAX_LCD_STR];
 
 
 //Special Return Codes used / Magic Values
-#define EEPROM_TODO 123
-#define TODO 123
-#define MENU_MANUAL 254
-#define MENU_CALIBRATION 253
-#define MENU_INPUT 255
+uint8_t const MENU_MANUAL = 254;
+uint8_t const MENU_CALIBRATION = 253;
+uint8_t const MENU_INPUT = 255;
 
 // what is our currently selected menu?
 // what is our current position?
@@ -358,7 +222,7 @@ unsigned int delay_ext_out   = 200;      //Time ext_trigger is enabled before or
 unsigned int length_ext_out  = 100;    //Time for which the trigger is enabled
 unsigned int delay_focus     = 0;      //Time to wait after focus signal has been sent
 unsigned int delay_repeat    = 250;    // delay between camera repeat cycles
-
+/*
 // TODO delay status flags
 #define DELAY_IN     (1 << 0) //B0 = currently in any delay
 #define DELAY_DONE_FOCUS
@@ -366,13 +230,13 @@ unsigned int delay_repeat    = 250;    // delay between camera repeat cycles
 #define DELAY_DONE_POSTEXP (1 << 2) //B2 = In post exposure delay
 #define DELAY_DONE_REPEAT  (1 << 2) //B2 = In delay between repeats
 byte delay_status = 0;
+*/
 
-
+// shutter mode
  enum  __attribute__((packed)) SHUTTER_MODE {
      SHUTTER_MODE_IR_NIKON=0, SHUTTER_MODE_IR_CANON=1, SHUTTER_MODE_CABLE_NO_FOCUS=2, SHUTTER_MODE_CABLE_FOCUS=3};
-
-// shutter mode (0:NikonIR/1:CanonIR/2:Shutter Cab/3:Shut+Foc Cab)
 byte shutter_mode   = 0;
+
 boolean bulb_mode=false;
 
 // intervalometer time (seconds)
@@ -479,9 +343,8 @@ float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen.
   }
 };
 
+//used calibration slot
 byte m_slot = 0;
-
-
 
 // ramping data
 byte m_ramp_in=0;
@@ -492,24 +355,13 @@ byte m_lead_in  = 0;
 byte m_lead_out = 0;
 
 
-
 // shots fired
 unsigned int shots = 0;
 
-// function types for alt inputs...
-/* 
- 0 = disabled
- 1 = start
- 2 = stop
- 3 = toggle on/off
- 4 = ext intv.
- 5 = out before
- 6 = out after
- 7 = out booth
- 8 = toggle motor direction
- */
-byte input_type[2]            = {
-  0,0};
+// function types for alt inputs
+ enum  __attribute__((packed)) IO_TYPE {
+     IO_DISABLED=0, IO_START=1, IO_STOP=2, IO_TOGGLEONOFF=3,IO_TOGGLEDIR=4,IO_EXTINTV=5,IO_OUT_BEFORE=6,IO_OUT_AFTER=7,IO_OUT_BOTH=8};
+byte input_type[2] = {IO_DISABLED,IO_DISABLED};
   
 unsigned long input_trig_last = 0;
 

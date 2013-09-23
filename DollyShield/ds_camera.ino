@@ -110,7 +110,7 @@ void stop_cam_focus() {
 }
 
 void clear_cam_focus() {
-  delay_status=false; //TODO: welches delay_status bit wann wo wie setzen?
+   //TODO: welches delay_status bit wann wo wie setzen?
   }
 
 uint16_t calc_total_cam_tm() {
@@ -147,7 +147,7 @@ void send_ir(uint8_t brand){
     digitalWriteFast(IR_PIN,LOW);
     while(n>0){
       n--;
-      delayMicroseconds(oscd);
+      delayMicroseconds(OSCD);
       //toggle if in "on" cycle
       if (i%2)
       {digitalToggleFast(IR_PIN); 
