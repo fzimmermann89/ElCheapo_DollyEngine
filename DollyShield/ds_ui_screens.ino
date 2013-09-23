@@ -54,21 +54,12 @@ void prep_home_screen() {
 void show_home() {
 
   prep_home_screen();  
-
-  // deal with interval times that are less than total time
-  // required between shots
-  float i_total = calc_total_cam_tm();
-
-  if( cam_interval < i_total ) {
-    lcd.print(i_total, 1);
-  }
-  else {
-    lcd.print((float) cam_interval, 1);
-  }
-
+  
+  //interval time
+  lcd.print((float) cam_interval, 1);
   lcd.print("s ");
 
-
+  //shots done
   if( shots > 999 ) {
     lcd.setCursor(10,0);
   }
@@ -81,14 +72,12 @@ void show_home() {
   else {
     lcd.setCursor(13,0);
   }
-
   lcd.print('[');
   lcd.print(shots, DEC);
   lcd.print(']');
-
+  
+  // dir displays 
   lcd.setCursor(0,1);
-
-  // dir displays
   char lt = ui_invdir == true ? 'R' : 'L';
   char rt = ui_invdir == true ? 'L' : 'R';
 
@@ -100,7 +89,7 @@ void show_home() {
   }
 
 
-  if( ui_motor_display ) {
+  if( ui_motor_display==CPM ) {//TODO xxx
     // display pct 
     display_spd_cpm(m_speed);
   }
@@ -109,8 +98,13 @@ void show_home() {
   }
 
 
-  lcd.setCursor(8,1);
-
+  lcd.setCursor(13,1);
+  if (m_mode==MODE_SMS){
+    lcd.print("SMS");
+  }
+  else{
+    lcd.print("Con");
+  }
 
 
   // we call this here mainly to reset the
@@ -122,7 +116,7 @@ void show_home() {
 
 void main_screen_select(boolean dir) {
 
-  byte max_inputs = 4;
+  byte max_inputs = 5;
 
   if( main_scr_input == 0) {
     //enter main scr setup
@@ -133,11 +127,11 @@ void main_screen_select(boolean dir) {
     main_scr_input++;
   }
   else {
-    main_scr_input+=max_inputs-1;
+    main_scr_input+=max_inputs;
     DEBUG_var("+=, input=",main_scr_input);
   }
 
-  if (main_scr_input>max_inputs) main_scr_input-=max_inputs;
+  if (main_scr_input>max_inputs) main_scr_input-=(max_inputs+1);
    DEBUG_var("if, input=",main_scr_input);
   if(main_scr_input == 0 ) {
     // exit main scr setup
@@ -181,7 +175,7 @@ void show_calibrate() {
 
   // show the motor calibrate screen
 
-  ui_ctrl_flags |= B00000001;
+  ui_ctrl_flags |= UI_CALIBRATE_MODE;
 
   lcd.clear();
   lcd.noBlink();
@@ -189,12 +183,18 @@ void show_calibrate() {
   lcd.setCursor(0,0);
 
   lcd.print("Cal M");
-  lcd.print(" [");
-
-  byte angle = 45;//m_cur_cal * 45;//TODO
-
-  lcd.print(angle, DEC);
-  lcd.print(" Deg]");
+  lcd.print(" [ Slot");
+  switch (m_slot){
+    case 0:
+      lcd.print ("A");
+      break;
+    case 1:
+      lcd.print("B");
+      break;
+    default:
+    lcd.print("C");
+  }
+  lcd.print(" ]");
 
 }
 
@@ -241,7 +241,7 @@ void execute_calibrate() {
     }
      //we save the ratio in array
      //example: if we traveld twice as far as supposed to, an 0.5 is saved.
-      m_cal_array[m_angle][CALPOINT_SMS][i] = shouldtravel/cur_inp_float;
+      m_cal_array[m_slot][CALPOINT_SMS][i] = shouldtravel/cur_inp_float;
   }
   
   //pulse calibration
@@ -274,7 +274,7 @@ void execute_calibrate() {
     }
      //we save the ratio in array
      //example: if we traveld twice as far as supposed to, an 0.5 is saved.
-      m_cal_array[m_angle][CALPOINT_PULSE][i] = cur_inp_float;
+      m_cal_array[m_slot][CALPOINT_PULSE][i] = cur_inp_float;
 
   }
   
@@ -309,7 +309,7 @@ void execute_calibrate() {
         ui_button_check();
       }
       byte point = c == 1 ? CALPOINT_LOW : CALPOINT_HIGH;
-      m_cal_array[m_angle][point][i] = ( shouldtravel/cur_inp_float );
+      m_cal_array[m_slot][point][i] = ( shouldtravel/cur_inp_float );
     }
   }
 

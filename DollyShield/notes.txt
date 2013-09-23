@@ -1,6 +1,22 @@
+
+
+
 errors
+======
 
 
+
+bugs
+======
+UI:   -kein neuer menü aufbau wenn nur noch ein item. 
+      -endlos scrollen in menü
+      -in io und shutter eingabe
+      -mainscr: position 0 geht nicht
+      - SMS/Cont anzeige
+      -min. interval anscheinend falsch (200s)
+      -eeprom laden oder speichern geht nicht.
+      -cm/min und cm vertauscht bei SMS und Cont
+      wo prozent anzeige
 
 
 

@@ -261,7 +261,7 @@ byte get_menu( byte mnu, byte pos ) {
   //Special return codes for calibration, manual move and input.
 
   if (mnu == 0) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
-  else if (mnu == 2 && pos == 6) return 5; //Advanced Motor Menu
+  else if (mnu == 2 && pos == 7) return 5; //Advanced Motor Menu
   else if (mnu == 5 && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
   else if (mnu == 1) return MENU_MANUAL; 
   else return(MENU_INPUT); //No Submenu, Input Menu.
@@ -674,7 +674,7 @@ void draw_menu(byte dir, boolean value_only) {
 
   case 2:
 
-    draw_values(axis0_str, draw_all, value_only);
+    draw_values(motor_str, draw_all, value_only);
     break;
 
   case 3:
@@ -688,7 +688,7 @@ void draw_menu(byte dir, boolean value_only) {
     break;
 
   case 5:
-    draw_values(axis_adv_str, draw_all, value_only);
+    draw_values(motor_adv_str, draw_all, value_only);
 
   default: 
     return;  
@@ -814,22 +814,22 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         }
         break;
       case INPUT_CONTSMS:
-        if (cur_inp_bool == true) {
+        if (cur_inp_bool == MODE_CONT) {
           lcd.print("Cont.");
         } 
         else {
           lcd.print("S-M-S");
         }
         break;
-      case INPUT_ANGLE:
+      case INPUT_SLOT:
         if( cur_inp_int == 0 ) {
-          lcd.print(0,DEC);
+          lcd.print("Slot A");
         }
         else if( cur_inp_int == 1 ) {
-          lcd.print(45,DEC);
+          lcd.print("Slot B");
         }
         else {
-          lcd.print(90,DEC);
+          lcd.print("Slot C");
         }
         break;
       case INPUT_SHUTTER:
@@ -859,7 +859,7 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
 
     // move cursor down if we're not in
     // a value input screen
-    if( ! (ui_ctrl_flags & B00100000) ) {
+    if( ! (ui_ctrl_flags & UI_VALUE_ENTRY) ) {
       lcd.setCursor(0,0);
       lcd.print(' ');
       lcd.setCursor(0,1);

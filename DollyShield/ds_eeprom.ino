@@ -69,7 +69,7 @@ uint16_t EEMEM E_m_maxsms;
 boolean EEMEM E_m_mode;
 uint8_t EEMEM E_m_pulse_length;
 float EEMEM E_m_cal_array[3][4][2];
-byte EEMEM E_m_angle;
+byte EEMEM E_m_slot;
 byte EEMEM E_m_ramp_in;
 byte EEMEM E_m_ramp_out;
 byte EEMEM E_m_lead_in;
@@ -78,7 +78,7 @@ byte EEMEM E_input_type0;
 byte EEMEM E_input_type1;
 byte EEMEM E_altio_dir;
 byte EEMEM E_eeprom_saved;
-uint16_t EEMEM E_eeprom_ver;
+uint8_t EEMEM E_eeprom_ver;
 
 //Magic Value
 #define EEPROM_IS_SAVED 170
@@ -88,13 +88,16 @@ uint16_t EEMEM E_eeprom_ver;
 //Functions for keeping track of changes and version
 
 boolean eeprom_saved() {
- return (eeprom_read_byte(&E_eeprom_saved)==EEPROM_IS_SAVED);
+  byte test=eeprom_read_byte(&E_eeprom_saved);
+  DEBUG_var("issaved:",test);
+ return (test==EEPROM_IS_SAVED);
 }
 
 void eeprom_saved( boolean saved ) {
   static byte _eeprom_saved=false;
+  DEBUG_var("_saved:",_eeprom_saved);
   if (saved!=(_eeprom_saved==EEPROM_IS_SAVED)){
-    //saved status changed 
+   DEBUG_msg("status changed");
   _eeprom_saved=saved?EEPROM_IS_SAVED:false;
   eeprom_save(E_eeprom_saved,_eeprom_saved);
   }
@@ -104,10 +107,11 @@ boolean eeprom_versioning_ok() {
   // determine if eeprom version is correct 
   // so we can automatically flush saved memory 
   // when a new firmware is loaded 
-  unsigned int eeprom_ver = 0;
+  byte eeprom_ver = 0;
   eeprom_load(E_eeprom_ver, eeprom_ver);
-
-  // wipe out any saved eeprom settings
+DEBUG_var("ever:",eeprom_ver);
+byte test=FIRMWARE_VERSION;
+DEBUG_var("sver:",test);
   return( eeprom_ver == FIRMWARE_VERSION );
 }
 
@@ -229,7 +233,8 @@ void write_all_eeprom_memory() {
   eeprom_save(E_input_type1, input_type[1]);
   eeprom_save(E_motor_spd_cal0, motor_spd_cal[0]);
   eeprom_save(E_motor_spd_cal1, motor_spd_cal[1]);
-  eeprom_save(E_m_cal_array, m_cal_array, sizeof(m_cal_array)); //TODO
+  eeprom_save(E_m_cal_array, m_cal_array, sizeof(m_cal_array));
+  eeprom_save(E_eeprom_ver,const_cast<uint8_t&>(FIRMWARE_VERSION));//
 }
 
 

@@ -226,10 +226,10 @@ float motor_cal_adjust(byte type, byte speed, byte dir) {
  
   if( type == MODE_SMS )
     //sms mode
-    return(m_cal_array[m_angle][CALPOINT_SMS][dir]);
+    return(m_cal_array[m_slot][CALPOINT_SMS][dir]);
   if (speed<min_spd) {
     //pulse
-    return (m_cal_array[m_angle][CALPOINT_PULSE][dir]);
+    return (m_cal_array[m_slot][CALPOINT_PULSE][dir]);
     }
   else{
     //cont mode
@@ -248,24 +248,24 @@ float motor_cal_adjust(byte type, byte speed, byte dir) {
       unsigned int diff = speed - motor_spd_cal[0];
       float diff_pct = (float) diff / (float) cal_diff;
     
-      float ret = ( m_cal_array[m_angle][CALPOINT_HIGH][dir] * diff_pct ) + ( m_cal_array[m_angle][CALPOINT_LOW][dir] * ( 1.0 - diff_pct ) );
+      float ret = ( m_cal_array[m_slot][CALPOINT_HIGH][dir] * diff_pct ) + ( m_cal_array[m_slot][CALPOINT_LOW][dir] * ( 1.0 - diff_pct ) );
       return(ret);
     }
     else if( speed> motor_spd_cal[1] ) {
       // between high cal point and max speed
       unsigned int diff = speed - motor_spd_cal[1];
       float diff_pct = (float) diff / (float) hi_diff;
-      // float ret = m_cal_array[0][m_angle[0]][2][dir] - (m_cal_array[0][m_angle[0]][2][dir] * diff_pct); //TODO
-      float ret = m_cal_array[m_angle][CALPOINT_HIGH][dir] - (m_cal_array[m_angle][CALPOINT_HIGH][dir] * diff_pct);
+      // float ret = m_cal_array[0][m_slot[0]][2][dir] - (m_cal_array[0][m_slot[0]][2][dir] * diff_pct); //TODO
+      float ret = m_cal_array[m_slot][CALPOINT_HIGH][dir] - (m_cal_array[m_slot][CALPOINT_HIGH][dir] * diff_pct);
       return(ret);
     }
     else if( speed <= motor_spd_cal[0] ) {
       //below or at low point
-      return(m_cal_array[m_angle][CALPOINT_LOW][dir]);
+      return(m_cal_array[m_slot][CALPOINT_LOW][dir]);
     }
     else if( speed == motor_spd_cal[1] ) {
       //at high point
-      return(m_cal_array[m_angle][CALPOINT_HIGH][dir]);
+      return(m_cal_array[m_slot][CALPOINT_HIGH][dir]);
    }
    else {
      //where are we now? //TODO

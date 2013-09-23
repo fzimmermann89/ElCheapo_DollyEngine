@@ -28,7 +28,7 @@
 #include "helper.h"
 #include <limits.h>
 
-#define FIRMWARE_VERSION  01
+const uint8_t FIRMWARE_VERSION=01;
 
 // motor pins
 #define MOTOR0_P 15
@@ -118,21 +118,22 @@ const char menu_3[] PROGMEM = "General Setup";
 const char manual_menu_0[] PROGMEM = "Manual Move";
 const char manual_menu_1[] PROGMEM = "Fast Simulat.";
 
-const char axis_menu_0[] PROGMEM = "Movement Mode";
-const char axis_menu_1[] PROGMEM = "Ramp In Shots";
-const char axis_menu_2[] PROGMEM = "Ramp Out Shots";
-const char axis_menu_3[] PROGMEM = "Angle";
-const char axis_menu_4[] PROGMEM = "Lead In";
-const char axis_menu_5[] PROGMEM = "Lead Out";
-const char axis_menu_6[] PROGMEM = "Advanced";
+const char motor_menu_0[] PROGMEM = "Movement Mode";
+const char motor_menu_1[] PROGMEM = "Display Mode";
+const char motor_menu_2[] PROGMEM = "Ramp In Shots";
+const char motor_menu_3[] PROGMEM = "Ramp Out Shots";
+const char motor_menu_4[] PROGMEM = "Lead In";
+const char motor_menu_5[] PROGMEM = "Lead Out";
+const char motor_menu_6[] PROGMEM = "Cal. Slot";
+const char motor_menu_7[] PROGMEM = "Advanced";
 
-const char axis_adv_menu_0[] PROGMEM = "Calibrate";
-const char axis_adv_menu_1[] PROGMEM = "max RPM";
-const char axis_adv_menu_2[] PROGMEM = "Dist per Rev";
-const char axis_adv_menu_3[] PROGMEM = "Min Cont.Speed";
-const char axis_adv_menu_4[] PROGMEM = "Pulse Power";
-const char axis_adv_menu_5[] PROGMEM = "Cal. Spd Low";
-const char axis_adv_menu_6[] PROGMEM = "Cal. Spd Hi";
+const char motor_adv_menu_0[] PROGMEM = "Calibrate";
+const char motor_adv_menu_1[] PROGMEM = "max RPM";
+const char motor_adv_menu_2[] PROGMEM = "Dist per Rev";
+const char motor_adv_menu_3[] PROGMEM = "Min Cont.Speed";
+const char motor_adv_menu_4[] PROGMEM = "Pulse Power";
+const char motor_adv_menu_5[] PROGMEM = "Cal. Spd Low";
+const char motor_adv_menu_6[] PROGMEM = "Cal. Spd Hi";
 
 const char camera_menu_0[] PROGMEM = "Interval sec";
 const char camera_menu_1[] PROGMEM = "Max Shots";
@@ -165,8 +166,8 @@ const char * const menu_str[] PROGMEM = {
 const char * const man_str[] PROGMEM = { 
   manual_menu_0,  manual_menu_1 };
 
-const char * const axis0_str[] PROGMEM = { 
-  axis_menu_0,axis_menu_1, axis_menu_2, axis_menu_3, axis_menu_4, axis_menu_5, axis_menu_6};
+const char * const motor_str[] PROGMEM = { 
+  motor_menu_0,motor_menu_1, motor_menu_2, motor_menu_3, motor_menu_4, motor_menu_5, motor_menu_6,motor_menu_7};
 
 const char * const cam_str[] PROGMEM = { 
   camera_menu_0, camera_menu_1, camera_menu_2, camera_menu_3, camera_menu_4, camera_menu_5, camera_menu_6, camera_menu_7, camera_menu_8,camera_menu_9 };
@@ -174,12 +175,12 @@ const char * const cam_str[] PROGMEM = {
 const char * const set_str[] PROGMEM = { 
   set_menu_0, set_menu_1, set_menu_2, set_menu_3, set_menu_4, set_menu_5, set_menu_6,set_menu_7, set_menu_8, set_menu_9, set_menu_10};
 
-const char * const axis_adv_str[] PROGMEM = { 
-  axis_adv_menu_0, axis_adv_menu_1,  axis_adv_menu_2,axis_adv_menu_3,axis_adv_menu_4,axis_adv_menu_5,axis_adv_menu_6};
+const char * const motor_adv_str[] PROGMEM = { 
+  motor_adv_menu_0, motor_adv_menu_1,  motor_adv_menu_2,motor_adv_menu_3,motor_adv_menu_4,motor_adv_menu_5,motor_adv_menu_6};
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 byte max_menu[7]  = {
-  3,1,6,9,10,6};
+  3,1,7,9,10,6};
 
 // support a history of menus visited up to 5 levels deep
 byte hist_menu[5] = {
@@ -276,7 +277,7 @@ boolean ui_motor_display = true;
 //input type flags
 
  enum  __attribute__((packed)) INPUTS {
-     INPUT_FLOAT, INPUT_UINT, INPUT_ONOFF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS, INPUT_ANGLE,INPUT_IO, INPUT_OKCANCEL
+     INPUT_FLOAT, INPUT_UINT, INPUT_ONOFF, INPUT_SHUTTER, INPUT_LTRT, INPUT_CMPCT,INPUT_CONTSMS, INPUT_SLOT,INPUT_IO, INPUT_OKCANCEL
  };
 
 
@@ -436,7 +437,7 @@ uint8_t m_pulse_length = 255; //TODO: sinnvollen wert voreintragen
 volatile bool motor_ran = 0;  //TODO
 
 // motor calibration
-//m_cal_array[angle][point][dir]
+//m_cal_array[slot][point][dir]
 #define CALPOINT_SMS   0  //Shoot move shoot
 #define CALPOINT_PULSE 1  //slow speed pulsing
 #define CALPOINT_LOW   2  //cont. speed low
@@ -478,7 +479,7 @@ float m_cal_array[3][4][2] = //TODO sinnvolle Werte voreintragen.
   }
 };
 
-byte m_angle = 0;
+byte m_slot = 0;
 
 
 
@@ -547,11 +548,13 @@ void setup() {
   // did we previously save settings to eeprom?
   if( eeprom_versioning_ok()&& eeprom_saved() ) {
     // restore saved memory
+    DEBUG_msg("restore eeprom");
     restore_eeprom_memory();
   }
   else {
     // when wrong version of nothing has been
     // saved, make sure eeprom contains default values
+    DEBUG_msg("reset eeprom");
     write_all_eeprom_memory();
   }
 

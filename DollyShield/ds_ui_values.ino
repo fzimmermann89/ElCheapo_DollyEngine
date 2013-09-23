@@ -45,10 +45,10 @@ void get_value( byte menu, byte pos, boolean read_save ) {
     get_manual_select(pos);
     break;
   case 2:    
-    get_m_axis_set(pos, read_save);
+    get_m_set(pos, read_save);
     break;
   case 3:    
-    get_m_cam_set(pos, read_save);
+    get_cam_set(pos, read_save);
     break;
   case 4:
     get_global_set(pos, read_save);
@@ -106,7 +106,7 @@ void move_val(boolean dir) {
     // unsigned int type
     
      // ceiling on certain special values values
-    if (ui_type==INPUT_ANGLE ) {
+    if (ui_type==INPUT_SLOT ) {
       cur_inp_int_max = 2;
       cur_inp_int_min = 0;
       inp_val_mult    = 1;
@@ -155,22 +155,29 @@ void move_val(boolean dir) {
 
 
 
-void get_m_axis_set( byte pos, boolean read_save) {
-  // set axis configurable values
+void get_m_set( byte pos, boolean read_save) {
+  // set motor configurable values
 
   switch(pos) { 
   case 0:
+     // set Movement Mode (SMS/CONT)
     ui_type=INPUT_CONTSMS;
-    // set Movement Mode (SMS/CONT)
     if( read_save == true ) {
       m_mode = cur_inp_bool;
       eeprom_save(E_m_mode, m_mode);
     }
-
     cur_inp_bool = m_mode;
     break;
-
   case 1:
+    //display mode
+     ui_type=INPUT_CMPCT;
+    if( read_save == true ) {
+      ui_motor_display = cur_inp_bool;
+      eeprom_save(E_ui_motor_display, ui_motor_display);
+    }
+    cur_inp_bool = ui_motor_display;
+    break;
+  case 2:
     // set ramp in value
     ui_type = INPUT_UINT;
     cur_inp_int_max=255;
@@ -179,11 +186,10 @@ void get_m_axis_set( byte pos, boolean read_save) {
       m_ramp_in=cur_inp_int;         
       eeprom_save(E_m_ramp_in, m_ramp_in);
     }
-
     cur_inp_int = m_ramp_in;
     break;
 
-  case 2:
+  case 3:
     // set ramp out value
     ui_type = INPUT_UINT;
     cur_inp_int_max=255;
@@ -194,18 +200,6 @@ void get_m_axis_set( byte pos, boolean read_save) {
     }
 
     cur_inp_int = m_ramp_out;
-    break;
-
-  case 3: 
-    // doly angle (for calibration)
-    ui_type=INPUT_ANGLE;
-
-    if( read_save == true ) {
-      m_angle = cur_inp_int;
-      eeprom_save(E_m_angle, m_angle);
-    }
-
-    cur_inp_int = m_angle;
     break;
 
   case 4:
@@ -234,8 +228,17 @@ void get_m_axis_set( byte pos, boolean read_save) {
     cur_inp_int = m_lead_out;
     break;
 
+  case 6: 
+    // cal setting
+    ui_type=INPUT_SLOT;
 
+    if( read_save == true ) {
+      m_slot = cur_inp_int;
+      eeprom_save(E_m_slot, m_slot);
+    }
 
+    cur_inp_int = m_slot;
+    break;
   }
 
 }
@@ -331,7 +334,7 @@ void get_m_adv_set( byte pos, boolean read_save){
 }
 
 
-void get_m_cam_set( byte pos, boolean read_save ) {
+void get_cam_set( byte pos, boolean read_save ) {
 
   // reset this flag
   ui_float_tenths = false;
@@ -624,7 +627,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
     lcd.setCursor(4, 0);
 
     ui_type=INPUT_FLOAT;
-    cur_inp_float_min=calc_total_cam_tm();
+    cur_inp_float_min=calc_total_cam_tm()/1000;
     cur_inp_float_max=UINT_MAX;
     ui_float_tenths = true;
 
@@ -642,6 +645,7 @@ void get_mainscr_set(byte pos, boolean read_save) {
     ui_type=INPUT_LTRT;
 
     if( read_save ){
+      m_dir=cur_inp_bool;
       motor_dir(cur_inp_bool);
       eeprom_save(E_m_dir,m_dir);
     }
@@ -663,12 +667,25 @@ void get_mainscr_set(byte pos, boolean read_save) {
     }
 
     if( read_save ) {
+      m_speed=cur_inp_int;
       motor_set_speed( cur_inp_int); 
       eeprom_save(E_m_speed,m_speed);
     }
     
     cur_inp_int = m_speed;
     break; 
+  case 5:
+   //mode SMS/Cont
+   lcd.setCursor(13,1);
+   ui_type=INPUT_ONOFF;
+  
+    if( read_save ){
+      m_mode=cur_inp_bool;
+      eeprom_save(E_m_mode,m_mode);
+    }
+    cur_inp_bool = m_mode;
+    break;
+    
   }
 }
 
