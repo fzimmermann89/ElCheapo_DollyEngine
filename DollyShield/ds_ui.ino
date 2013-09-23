@@ -748,35 +748,8 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
       // temporary input value
       switch(ui_type) {
       case INPUT_IO:
-        // for alt i/o inputs
-
-        if( cur_inp_int == 0 ) {
-          lcd.print("Disabled");
-        }
-        else if( cur_inp_int == 1 ) {
-          lcd.print("Start");
-        }
-        else if( cur_inp_int == 2 ) {
-          lcd.print("Stop");
-        }
-        else if( cur_inp_int == 3 ) {
-          lcd.print("Toggle");
-        }
-        else if( cur_inp_int == 4 ) {
-          lcd.print("Ext. Interval.");
-        }
-        else if( cur_inp_int == 5 ) {
-          lcd.print("Out Before");
-        }
-        else if( cur_inp_int == 6 ){
-          lcd.print("Out After");
-        }
-        else if(cur_inp_int == 7 ) {
-          lcd.print("Out Both");
-        }
-        else {
-          lcd.print("Change Dir");
-        }
+        strcpy_P(lcd_buf, (char*) pgm_read_word(&(io_strings[cur_inp_int])));
+        lcd.print(lcd_buf);
         break;
       case INPUT_FLOAT:
         lcd.print(cur_inp_float, (byte) 2);
@@ -818,37 +791,22 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
           lcd.print("Cont.");
         } 
         else {
-          lcd.print("S-M-S");
+          lcd.print("SMS");
         }
         break;
       case INPUT_SLOT:
-        if( cur_inp_int == 0 ) {
-          lcd.print("Slot A");
-        }
-        else if( cur_inp_int == 1 ) {
-          lcd.print("Slot B");
-        }
-        else {
-          lcd.print("Slot C");
-        }
+        lcd.print("Slot ");
+        if( cur_inp_int == 0 )      lcd.print("A");
+        else if( cur_inp_int == 1 ) lcd.print("B");
+        else                        lcd.print("C");
+        
         break;
       case INPUT_SHUTTER:
-        // for shutter type
-        if( cur_inp_int == SHUTTER_MODE_CABLE_FOCUS ) {
-          lcd.print("Cable+Focus");
-        }
-        else if( cur_inp_int == SHUTTER_MODE_CABLE_NO_FOCUS ) {
-          lcd.print("Cable");
-        }
-        else if( cur_inp_int == SHUTTER_MODE_IR_CANON ) {
-          lcd.print("IR Canon");
-        }
-        else if ( cur_inp_int == SHUTTER_MODE_IR_NIKON ) {
-          lcd.print("IR NIKON");
-        }
+        strcpy_P(lcd_buf, (char*) pgm_read_word(&(shutter_strings[cur_inp_int])));
+        lcd.print(lcd_buf);
         break;  
       default:
-        lcd.print((unsigned long)cur_inp_int);
+        lcd.print(cur_inp_int);
         return;
       }
     }
