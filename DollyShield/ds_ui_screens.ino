@@ -37,7 +37,7 @@ void prep_home_screen() {
   if(S_RUNNING) {
     // in 'external intervalometer' mode, show 'ext' instead of 'on'
     if (external_io & (EXT_INTV_1|EXT_INTV_2|EXT_INTV_USB) ) {
-      lcd.print("Ext");
+      lcd.print(F("Ext"));
     }
     else {
       lcd.print("On");
@@ -100,10 +100,10 @@ void show_home() {
 
   lcd.setCursor(13,1);
   if (m_mode==MODE_SMS){
-    lcd.print("SMS");
+    lcd.print(F("SMS"));
   }
   else{
-    lcd.print("Con");
+    lcd.print(F("Con"));
   }
 
 
@@ -153,11 +153,11 @@ void show_manual() {
   lcd.setCursor(0, 0);
 
 
-  lcd.print("[Sel] to exit");
+  lcd.print(F("[Sel] to exit"));
 
 
   lcd.setCursor(0, 1);
-  lcd.print("Speed: ");
+  lcd.print(F("Speed: "));
 
   if( ui_motor_display ) {
     // display ipm 
@@ -182,8 +182,9 @@ void show_calibrate() {
 
   lcd.setCursor(0,0);
 
-  lcd.print("Cal M");
-  lcd.print(" [ Slot");
+  lcd.print(F("Cal M"));
+  lcd.print(" [ ");
+  lcd.print("Slot ");
   switch (m_slot){
     case 0:
       lcd.print ("A");
@@ -332,7 +333,7 @@ void update_cal_screen() {
 
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Dist Moved:");
+  lcd.print(F("Dist Moved:"));
   lcd.setCursor(0,1);
 
   lcd.print(cur_inp_float, 2);

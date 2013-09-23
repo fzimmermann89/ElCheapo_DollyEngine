@@ -587,8 +587,9 @@ void get_global_set(byte pos, boolean read_save) {
     if( read_save == true ) {
       if( cur_inp_bool ){
         eeprom_saved(false);
+        lcd.clear();
         lcd.setCursor(0,0);
-        lcd.print("Reset..");
+        lcd.print(F("Reseting.."));
         motor_set_speed(0);
         delay(1000);
         restart();

@@ -47,19 +47,19 @@ void init_user_interface() {
 
   // banner
 
-  lcd.print("(c) DP / FZ");
+  lcd.print(F("(c) DP / FZ"));
 
   lcd.setCursor(5,1);
-  lcd.print("GPLv3");
+  lcd.print(F("GPLv3"));
 
   delay(750);
 
   lcd.clear(); 
 
   lcd.setCursor(0,0); 
-  lcd.print("El Cheapo");
+  lcd.print(F("El Cheapo"));
   lcd.setCursor(3,1);
-  lcd.print("Ver 0.92.01");
+  lcd.print(F("Ver 0.92.01"));
 
   // setup button input
 
@@ -764,31 +764,31 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         break;
        case INPUT_OKCANCEL:
         if (cur_inp_bool == true) {
-          lcd.print("OK");
+          lcd.print(F("OK"));
         } 
         else {
-          lcd.print("Cancel");
+          lcd.print(F("Cancel"));
         }
         break;  
       case INPUT_LTRT:
         if (cur_inp_bool == true) {
-          lcd.print("Rt");
+          lcd.print(F("Rt"));
         } 
         else {
-          lcd.print("Lt");
+          lcd.print(F("Lt"));
         }
         break;
       case INPUT_CMPCT:
         if (cur_inp_bool == true) {
-          lcd.print("CPM");
+          lcd.print(F("CPM"));
         } 
         else {
-          lcd.print("PCT");
+          lcd.print(F("PCT"));
         }
         break;
       case INPUT_CONTSMS:
         if (cur_inp_bool == MODE_CONT) {
-          lcd.print("Cont.");
+          lcd.print(F("Cont."));
         } 
         else {
           lcd.print("SMS");
