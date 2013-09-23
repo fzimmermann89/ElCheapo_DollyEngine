@@ -235,21 +235,21 @@ void execute_calibrate() {
     update_cal_screen();
 
     cal_flags&=~CAL_STEP_DONE;
-    while( !(cal_flags&CAL_STEP_DONE) {
+    while( !(cal_flags&CAL_STEP_DONE)) {
 			//wait until input is done
       ui_button_check();
     }
      //we save the ratio in array
      //example: if we traveld twice as far as supposed to, an 0.5 is saved.
-      m_cal_array[m_cur_cal][CALPOINT_SMS][i] = shouldtravel/cur_inp_float;
+      m_cal_array[m_angle][CALPOINT_SMS][i] = shouldtravel/cur_inp_float;
   }
   
   //pulse calibration
   //TODO
   for( byte i = 0; i <= 1; i++ ) {
 		//run motor in slow pulse mode at 50% of min speed
-		byte ths_speed=min_spd/2
-    float shouldtavel = motor_calc_cpm(ths_speed, true);
+		byte ths_speed=min_spd/2;
+    float shouldtravel = motor_calc_cpm(ths_speed);
     cur_inp_float = shouldtravel;
 
     
@@ -268,13 +268,13 @@ void execute_calibrate() {
     update_cal_screen();
 
     cal_flags&=~CAL_STEP_DONE;
-    while( !(cal_flags&CAL_STEP_DONE) {
+    while( !(cal_flags&CAL_STEP_DONE)) {
 			//wait until input is done
       ui_button_check();
     }
      //we save the ratio in array
      //example: if we traveld twice as far as supposed to, an 0.5 is saved.
-      m_cal_array[m_cur_cal][CALPOINT_PULSE][i] = cur_inp_float;
+      m_cal_array[m_angle][CALPOINT_PULSE][i] = cur_inp_float;
 
   }
   
@@ -284,7 +284,7 @@ void execute_calibrate() {
     byte ths_spd = c == 1 ? motor_spd_cal[0] : motor_spd_cal[1];
     for( byte i = 0; i <= 1; i++ ) {
 			//distance we should travel in 60s
-      float shouldtavel = motor_calc_cpm(ths_spd, true);
+      float shouldtravel = motor_calc_cpm(ths_spd);
       cur_inp_float = shouldtravel;
 
       completed++;
@@ -309,7 +309,7 @@ void execute_calibrate() {
         ui_button_check();
       }
       byte point = c == 1 ? CALPOINT_LOW : CALPOINT_HIGH;
-      m_cal_array[m_cur_cal][point][i] = ( shouldtravel/cur_inp_float );
+      m_cal_array[m_angle][point][i] = ( shouldtravel/cur_inp_float );
     }
   }
 

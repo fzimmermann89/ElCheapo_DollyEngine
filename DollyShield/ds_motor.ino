@@ -124,7 +124,7 @@ void motor_dir(byte dir ) {
 }
 
 
-float motor_calc_cpm(unsigned int spd, boolean ths_mode) {
+float motor_calc_cpm(uint8_t spd) {
 /*
  // calculate ipm for a given speed and mode
 
@@ -144,6 +144,9 @@ float motor_calc_cpm(unsigned int spd, boolean ths_mode) {
 return (0.0);
 }
 
+float motor_calc_cm(uint8_t spd)
+{
+}
 
 
 void motor_update_dist(float rpm, float diarev ) {

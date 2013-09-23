@@ -692,7 +692,7 @@ void get_calibrate_select(byte pos) {
 }
 
 void display_spd_cpm(uint8_t spd) {
-  if m_mode==MODE_CONT){ 
+  if (m_mode==MODE_CONT){ 
   float cur_cpm = motor_calc_cpm(spd);
   lcd.print(cur_cpm, 2);
   lcd.print("cm/min");

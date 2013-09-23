@@ -331,7 +331,7 @@ void ui_button_center( boolean held ) {
         return;
         }
 
-      cal_flags|=CAL_STEP_DONE
+      cal_flags|=CAL_STEP_DONE;
       return;
     }
 
