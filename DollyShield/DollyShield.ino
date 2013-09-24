@@ -414,29 +414,28 @@ void setup() {
 
   show_home();
   
-#ifdef DEBUG_ON
-  //Output Calibration Data
-  for( byte i = 0; i <= 3; i++) {
-    Serial.print(i, DEC);
-    Serial.print(":");
-    for ( byte x = 0; x < 2; x++ ) {
-      Serial.print(m_cal_array[0][i][x], 8);
+  #ifdef DEBUG_ON
+    //Output Calibration Data
+    for( byte i = 0; i <= 3; i++) {
+      Serial.print(i, DEC);
       Serial.print(":");
+      for ( byte x = 0; x < 2; x++ ) {
+        Serial.print(m_cal_array[0][i][x], 8);
+        Serial.print(":");
+      }
+      Serial.println("");
     }
-    Serial.println("");
-  }
-
-DEBUG_msg("start");
-digitalWriteFast(13,HIGH);
-delay(500);
-digitalWriteFast(13,LOW);
-delay(500);
-digitalWriteFast(13,HIGH);
-#endif  
-
-initialize_alt_timers();
-alt_io_display_set(lcd_bkl);
-alt_io_motor_set(0);
+  DEBUG_msg("start");
+  digitalWriteFast(13,HIGH);
+  delay(500);
+  digitalWriteFast(13,LOW);
+  delay(500);
+  digitalWriteFast(13,HIGH);
+  #endif  
+  
+  initialize_alt_timers();
+  alt_io_display_set(lcd_bkl);
+  alt_io_motor_set(0);
 }
 
 void loop() {

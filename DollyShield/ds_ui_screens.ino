@@ -289,8 +289,6 @@ void execute_calibrate() {
       cur_inp_float = shouldtravel;
 
       completed++;
-      Serial.print("comp:");
-      Serial.println(completed);
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Running ");  
