@@ -20,11 +20,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
  */
-
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <LiquidCrystal.h>
 #include "digitalWriteFastMod.h"
+
 #include "helper.h"
 #include <limits.h>
 #include "pinout.h"
@@ -65,7 +65,7 @@ uint8_t const MENU_INPUT = 255;
 // what is our current position?
 byte cur_menu      = 0;
 byte cur_pos       = 0;
-byte cur_pos_sel   = 0;
+byte cur_first_item   = 0;
 
 // which input value position are we in?
 byte cur_inp_pos   = 0;
@@ -380,14 +380,26 @@ unsigned int volatile timer3_ms;
 LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 void setup() { 
-
+  // setup Pins
   pinModeFast(CAMERA_PIN, OUTPUT);
   pinModeFast(FOCUS_PIN, OUTPUT);
   pinModeFast(IR_PIN, OUTPUT);
   pinModeFast(MOTOR0_P, OUTPUT);
   pinModeFast(MOTOR0_DIR, OUTPUT);
+  pinModeFast(BUT_PIN, INPUT);   
+  // enable internal pull-up
+  digitalWriteFast(BUT_PIN, HIGH);
 
-  Serial.begin(115200);
+
+  //sending custom characters to lcd
+   for(byte i=0;i<8;i++){
+   memcpy_P(lcd_buf, (uint8_t*) pgm_read_word(&(characters[i])),8);
+   delay(50);
+   lcd.createChar(i,(uint8_t*)lcd_buf);
+   delay(50);
+ }
+   Serial.begin(115200);
+
   init_user_interface();
 
   // check firmware version stored in eeprom
@@ -426,16 +438,20 @@ void setup() {
       Serial.println("");
     }
   DEBUG_msg("start");
-  digitalWriteFast(13,HIGH);
-  delay(500);
-  digitalWriteFast(13,LOW);
-  delay(500);
-  digitalWriteFast(13,HIGH);
   #endif  
   
   initialize_alt_timers();
   alt_io_display_set(lcd_bkl);
   alt_io_motor_set(0);
+ 
+  //XXXX TEST AREA XXXX//
+  #ifdef DEBUG_ON
+ // memcpy_P(lcd_buf,char_ir,8);
+
+// while(1){}
+ 
+ //XXXX END OF TEST AREA XXXX//
+  #endif
 }
 
 void loop() {

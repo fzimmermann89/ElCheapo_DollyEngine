@@ -157,8 +157,9 @@ void show_manual() {
 
 
   lcd.setCursor(0, 1);
-  lcd.print(F("Speed: "));
-
+  lcd.print(F("Speed"));
+  lcd.write(CHAR_UPDOWN);
+  lcd.print(' ');
   if( ui_motor_display ) {
     // display ipm 
     display_spd_cpm(m_speed);
@@ -166,6 +167,9 @@ void show_manual() {
   else {
     display_spd_pct(m_speed);
   }
+  lcd.setCursor(15,1);
+  if (m_dir==ui_invdir) lcd.print('>');
+  else lcd.print('<');  //TODO: richtige richtung
 
 
 }

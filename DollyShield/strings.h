@@ -90,3 +90,19 @@ const char shutter_cable[] PROGMEM = "Cable";
 const char shutter_ircanon[] PROGMEM = "IR Canon";
 const char shutter_irnikon[] PROGMEM = "IR Nikon";
 const char * const shutter_strings[] PROGMEM = {shutter_cablefocus,shutter_cable,shutter_ircanon,shutter_irnikon};
+
+//custom characters
+const byte char_ir[8]     PROGMEM = {16,16,16,23,21,7,6,5};      //IR 
+const byte char_fz[8]     PROGMEM = {28,16,24,23,17,2,4,7};      //Logo  
+const byte char_f1[8]     PROGMEM = {28,16,24,17,19,1,1,1};      //F1  
+const byte char_f2[8]     PROGMEM = {28,16,24,23,17,7,4,7};      //F2  
+const byte char_f3[8]     PROGMEM = {28,16,24,23,17,3,1,7};      //F3 
+const byte char_up[8]     PROGMEM = {4,14,31,0,0,0,0,0};         //arrow up  
+const byte char_down[8]   PROGMEM = {0,0,0,0,0,31,14,4};         //arrow down
+const byte char_updown[8] PROGMEM = {4,14,31,0,0,31,14,4};       //arrow up+down 
+const byte * const characters[] PROGMEM = {char_ir, char_fz, char_f1, char_f2, char_f3, char_up, char_down, char_updown};
+ enum  __attribute__((packed)) CHAR {
+     CHAR_IR, CHAR_FZ, CHAR_F1, CHAR_F2, CHAR_F3, CHAR_UP, CHAR_DOWN,CHAR_UPDOWN
+ };
+
+const char cursor[]={'>',' '};

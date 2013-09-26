@@ -46,33 +46,26 @@ void init_user_interface() {
   //lcd.autoscroll();
 
   // banner
-
-  lcd.print(F("(c) DP / FZ"));
-
-  lcd.setCursor(5,1);
-  lcd.print(F("GPLv3"));
-
-  delay(750);
+  lcd.setCursor(15,0); 
+  lcd.write(CHAR_FZ);
+  lcd.setCursor(3,0); 
+  lcd.print(F("EasyDolly"));
+  lcd.setCursor(1,1);
+  lcd.print(F("Version 0.01A"));
+  delay(3000);
 
   lcd.clear(); 
-
   lcd.setCursor(0,0); 
-  lcd.print(F("El Cheapo"));
-  lcd.setCursor(3,1);
-  lcd.print(F("Ver 0.92.01"));
-
-  // setup button input
-
-    pinMode(BUT_PIN, INPUT);   
-  // enable internal pull-up
-  digitalWriteFast(BUT_PIN, HIGH);
-
+  lcd.print(F("Licensed under "));
+  lcd.write(CHAR_FZ);
+  lcd.setCursor(5,1);
+  lcd.print(F("GPLv3"));
 
   // set the update screen flag (draw main
   // screen)
   ui_ctrl_flags |= UI_UPDATE_DISP;
 
-  delay(3000);
+  delay(1500);
 
 }
 
@@ -592,10 +585,12 @@ void ui_button_lt(boolean held) {
   }
 
   else {
+    //TEST ZZZ
+    cur_pos = 0; 
     // draw previous menu
     if( cur_menu == 0 ) { 
     // we're at the highest menu, back to main screen 
-    cur_pos = 0;  
+    
     // clear setup flag
     ui_ctrl_flags &= ~UI_SETUP_MENU;
     // indicate display needs updating
@@ -617,8 +612,7 @@ void ui_button_lt(boolean held) {
  */
 
 
-void draw_menu(byte dir, boolean value_only) {
-
+void draw_menu(byte dir, boolean value_entry) {
 
   // turn off blinking, if on...
   lcd.noBlink();
@@ -629,66 +623,52 @@ void draw_menu(byte dir, boolean value_only) {
   // draw all (but don't move position) (3), and draw
   // new menu from top (0)
 
-  if( dir == 2 ) {
-    // down
-    cur_pos++;
-    if( cur_pos > cur_pos_sel ) {
-      lcd.clear();
-      draw_all = true;
-    }
-  }    
+ if( dir == 2 ) {
+     cur_pos= cur_pos<max_menu[cur_menu]?cur_pos+1:0;
+ }  
   else if( dir == 1 ) {
-    // up
-    cur_pos = cur_pos == 0 ? 0 : cur_pos - 1;
+    DEBUG("maxmen",max_menu[cur_menu]);
+    DEBUG("oldcurpos",cur_pos);
+    cur_pos= cur_pos==0?max_menu[cur_menu]:cur_pos-1;
+    DEBUG("newcurpos",cur_pos);
 
-    if( cur_pos < cur_pos_sel ) {
-      lcd.clear();
-      draw_all = true;
-    }
-  }
-  else if( dir == 3 ) {
-    // draw all (no move)
-    draw_all = true;
   }
   else {
     // draw new menu (from top)
-    cur_pos = 0;
     draw_all = true;
+    cur_pos  = 0;
   }
 
-  // don't overrun the memory locations for this menu
-
-  cur_pos = cur_pos > max_menu[cur_menu] ? max_menu[cur_menu] : cur_pos;
-
+  
   switch( cur_menu ) {
     //draw the menu
   case 0:
 
-    draw_values(menu_str, draw_all, value_only);
+    draw_values(menu_str, draw_all, value_entry);
     break;
 
   case 1:
 
-    draw_values(man_str, draw_all, value_only);
+    draw_values(man_str, draw_all, value_entry);
     break;
 
   case 2:
 
-    draw_values(motor_str, draw_all, value_only);
+    draw_values(motor_str, draw_all, value_entry);
     break;
 
   case 3:
 
-    draw_values(cam_str, draw_all, value_only);
+    draw_values(cam_str, draw_all, value_entry);
     break;
 
   case 4:
 
-    draw_values(set_str, draw_all, value_only);
+    draw_values(set_str, draw_all, value_entry);
     break;
 
   case 5:
-    draw_values(motor_adv_str, draw_all, value_only);
+    draw_values(motor_adv_str, draw_all, value_entry);
 
   default: 
     return;  
@@ -698,42 +678,62 @@ void draw_menu(byte dir, boolean value_only) {
 }
 
 
-void draw_values(const char* const these[], boolean draw_all, boolean value_only) {
-
-  if( draw_all == true ) {
-
-    // must draw the whole display
-    lcd.clear();
-    // clear out lcd buffer
+void draw_values(const char* const these[], boolean draw_all, boolean value_entry) {
+    bool updown=cur_pos%2;
+    uint8_t first_item=(cur_pos&0xFE); //abrunden
+  if (!value_entry) {
+          // clear out in value entry setting, if set
+      ui_ctrl_flags &= ~UI_VALUE_ENTRY;
+  
+   if (cur_first_item!=first_item||draw_all){
+     //draw new screen
+    cur_first_item=first_item;  
+    lcd.clear();    
+    // clear out lcd buffer and copy menu entry to be displayed
     memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
+    strcpy_P(lcd_buf, (char*) pgm_read_word(&(these[cur_first_item])));
     
-    // draw first option
-    lcd.noCursor();
-    lcd.setCursor(0,0);
-    cur_pos_sel = cur_pos;
-    strcpy_P(lcd_buf, (char*) pgm_read_word(&(these[cur_pos])));
-    lcd.print("> ");
+    //draw arrows
+    if (cur_first_item>0){
+      //there is one screen up
+      lcd.setCursor(0,0);
+      lcd.write(CHAR_UP);
+    }
+    if(  cur_first_item+ 2 <= max_menu[cur_menu] ){
+      //there is one screen down,
+      lcd.setCursor(0,1);
+      lcd.write(CHAR_DOWN);
+    }
+    lcd.setCursor(2,0);
     lcd.print(lcd_buf);
-    lcd.setCursor(0,1);
-
-    // if we're not displaying only a value, and there's
-    // another menu entry to display -- display it on the 
-    // second line..
-
-    if( ! value_only ) {
-      if( cur_pos + 1 <= max_menu[cur_menu] ) {
-        cur_pos_sel = cur_pos + 1;
+    
+      if( cur_first_item + 1 <= max_menu[cur_menu] ) {
         memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
-        strcpy_P(lcd_buf, (char*)pgm_read_word(&(these[cur_pos + 1])));
-        lcd.print("  ");
+        strcpy_P(lcd_buf, (char*)pgm_read_word(&(these[cur_first_item + 1])));
+        lcd.setCursor(2,1);
         lcd.print(lcd_buf);
       }
-      // clear out in value entry setting, if set
-      ui_ctrl_flags &= ~UI_VALUE_ENTRY;
 
     }
+   
+   
+  //draw/delete cursor
+  lcd.setCursor(1,0);
+  lcd.print(cursor[updown]);
+  lcd.setCursor(1,1);
+  lcd.print(cursor[!updown]);
+  }
     else {
-      // display the value of the current entry
+      //value entry
+      lcd.clear();
+      memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
+      strcpy_P(lcd_buf, (char*)pgm_read_word(&(these[cur_pos])));      
+      lcd.setCursor(1,0);
+      lcd.print(lcd_buf);
+      lcd.print('?');
+      lcd.setCursor(0,1);
+      lcd.write(CHAR_UPDOWN);
+      lcd.print(' ');
       ui_ctrl_flags |= UI_VALUE_ENTRY;
       if(! ( ui_ctrl_flags & UI_DRAWN_INITAL_VALUE ) ) {
         // have just drawn this value
@@ -810,21 +810,9 @@ void draw_values(const char* const these[], boolean draw_all, boolean value_only
         return;
       }
     }
-  } // end if( draw_all == true
+  } 
+ 
 
-  else {
-    // do not need to re-draw the whole screen
-
-    // move cursor down if we're not in
-    // a value input screen
-    if( ! (ui_ctrl_flags & UI_VALUE_ENTRY) ) {
-      lcd.setCursor(0,0);
-      lcd.print(' ');
-      lcd.setCursor(0,1);
-      lcd.print('>');
-    }
-  }
-}
 
 /* 
  
