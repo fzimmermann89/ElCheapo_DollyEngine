@@ -94,12 +94,15 @@ boolean eeprom_saved() {
 }
 
 void eeprom_saved( boolean saved ) {
-  static byte _eeprom_saved=false;
+  static byte _eeprom_saved=eeprom_read_byte(&E_eeprom_saved);
   DEBUG_var("_saved:",_eeprom_saved);
+    DEBUG_var("saved:",saved);
+
   if (saved!=(_eeprom_saved==EEPROM_IS_SAVED)){
    DEBUG_msg("status changed");
-  _eeprom_saved=saved?EEPROM_IS_SAVED:false;
-  eeprom_save(E_eeprom_saved,_eeprom_saved);
+  _eeprom_saved=(saved==true?EEPROM_IS_SAVED:false);
+    DEBUG_var("new_saved:",_eeprom_saved);
+  eeprom_write_byte(&E_eeprom_saved,_eeprom_saved);
   }
 }
 
