@@ -118,6 +118,7 @@ void motor_dir(byte dir ) {
 
 
   digitalWriteFast(MOTOR0_DIR, dir);
+  DEBUG("written_dir:",dir);
   m_dir = dir;
   //writing back saved speed
   motor_set_speed( ths_speed );

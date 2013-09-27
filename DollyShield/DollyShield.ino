@@ -427,6 +427,7 @@ void setup() {
   show_home();
   
   #ifdef DEBUG_ON
+  /*
     //Output Calibration Data
     for( byte i = 0; i <= 3; i++) {
       Serial.print(i, DEC);
@@ -437,6 +438,7 @@ void setup() {
       }
       Serial.println("");
     }
+    */
   DEBUG_msg("start");
   #endif  
   
