@@ -361,7 +361,6 @@ void ui_button_center( boolean held ) {
   else {
     // in a setup menu, find
     // the next menu to go to
-
     byte new_menu = get_menu(cur_menu, cur_pos);
     if( new_menu == MENU_CALIBRATION || new_menu==MENU_MANUAL ) {
       // if drawing motor manual screen or in calibration screen...
@@ -405,8 +404,7 @@ void ui_button_center( boolean held ) {
 
       // clear in value setting flag
       ui_ctrl_flags &= ~UI_VALUE_ENTRY;
-
-      // set menu to new menu
+      cur_pos=0;
       cur_menu = new_menu;
       draw_menu(0,false);
     }
@@ -549,11 +547,11 @@ void ui_button_rt( boolean held ) {
 
 
 void ui_button_lt(boolean held) {
-  // if in manual control
-  DEBUG_var("lt, uiflags",ui_ctrl_flags);
   if( ui_ctrl_flags & UI_MANUAL_MODE ) {
-    DEBUG_msg("manmov lt");
-    if( held == true ) {        
+    //in manual motor control
+    DEBUG("manmov lt");
+    if( held == true ) { 
+      DEBUG("held");       
       // change motor direction
       motor_dir(true);
       // get motor moving (if not already)
@@ -566,7 +564,6 @@ void ui_button_lt(boolean held) {
     // we're on main screen, lt switches value we can
     // adjust
     main_screen_select(false);
-    DEBUG_msg("lt mainscreen");
   }
 
   else if( ui_ctrl_flags & UI_VALUE_ENTRY ) {
@@ -585,8 +582,6 @@ void ui_button_lt(boolean held) {
   }
 
   else {
-    //TEST ZZZ
-    cur_pos = 0; 
     // draw previous menu
     if( cur_menu == 0 ) { 
     // we're at the highest menu, back to main screen 
@@ -601,6 +596,7 @@ void ui_button_lt(boolean held) {
     else {
     // a parent menu can be drawn
     cur_menu = pop_menu();
+    cur_pos = 0; 
     draw_menu(0,false);
     }
   }
@@ -620,23 +616,20 @@ void draw_menu(byte dir, boolean value_entry) {
   boolean draw_all = false;
 
   // determine the direction we are going, up/down (1/2),
-  // draw all (but don't move position) (3), and draw
-  // new menu from top (0)
+  // draw all/new menu (but don't move position) (else)
 
  if( dir == 2 ) {
-     cur_pos= cur_pos<max_menu[cur_menu]?cur_pos+1:0;
- }  
+    // down
+    cur_pos= cur_pos<max_menu[cur_menu]?cur_pos+1:0;
+  }  
   else if( dir == 1 ) {
-    DEBUG("maxmen",max_menu[cur_menu]);
-    DEBUG("oldcurpos",cur_pos);
+    // up
     cur_pos= cur_pos==0?max_menu[cur_menu]:cur_pos-1;
-    DEBUG("newcurpos",cur_pos);
-
+   
   }
   else {
     // draw new menu (from top)
     draw_all = true;
-    cur_pos  = 0;
   }
 
   
@@ -679,138 +672,138 @@ void draw_menu(byte dir, boolean value_entry) {
 
 
 void draw_values(const char* const these[], boolean draw_all, boolean value_entry) {
-    bool updown=cur_pos%2;
-    uint8_t first_item=(cur_pos&0xFE); //abrunden
+    bool updown=cur_pos%2;             //even->up, odd->down
+    uint8_t first_item=(cur_pos&0xFE); //first item to be drawn, round down to even number
   if (!value_entry) {
-          // clear out in value entry setting, if set
-      ui_ctrl_flags &= ~UI_VALUE_ENTRY;
+    // clear out in value entry setting, if set
+    ui_ctrl_flags &= ~UI_VALUE_ENTRY;
   
-   if (cur_first_item!=first_item||draw_all){
-     //draw new screen
-    cur_first_item=first_item;  
-    lcd.clear();    
-    // clear out lcd buffer and copy menu entry to be displayed
-    memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
-    strcpy_P(lcd_buf, (char*) pgm_read_word(&(these[cur_first_item])));
-    
-    //draw arrows
-    if (cur_first_item>0){
-      //there is one screen up
-      lcd.setCursor(0,0);
-      lcd.write(CHAR_UP);
-    }
-    if(  cur_first_item+ 2 <= max_menu[cur_menu] ){
-      //there is one screen down,
-      lcd.setCursor(0,1);
-      lcd.write(CHAR_DOWN);
-    }
-    lcd.setCursor(2,0);
-    lcd.print(lcd_buf);
-    
+    if (cur_first_item!=first_item||draw_all){
+      //draw new screen
+      cur_first_item=first_item;  
+      lcd.clear();    
+      // clear out lcd buffer and copy menu entry to be displayed
+      memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
+      strcpy_P(lcd_buf, (char*) pgm_read_word(&(these[cur_first_item])));
+      
+      //draw arrows
+      if (cur_first_item>0){
+        //there is one screen up
+        lcd.setCursor(0,0);
+        lcd.write(CHAR_UP);
+      }
+      if(  cur_first_item+ 2 <= max_menu[cur_menu] ){
+        //there is one screen down,
+        lcd.setCursor(0,1);
+        lcd.write(CHAR_DOWN);
+      }
+      lcd.setCursor(2,0);
+      lcd.print(lcd_buf);
+      
       if( cur_first_item + 1 <= max_menu[cur_menu] ) {
+        //there is a second item to be drawn
         memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
         strcpy_P(lcd_buf, (char*)pgm_read_word(&(these[cur_first_item + 1])));
         lcd.setCursor(2,1);
         lcd.print(lcd_buf);
       }
-
     }
    
-   
-  //draw/delete cursor
-  lcd.setCursor(1,0);
-  lcd.print(cursor[updown]);
-  lcd.setCursor(1,1);
-  lcd.print(cursor[!updown]);
+    //draw/delete cursor
+    lcd.setCursor(1,0);
+    lcd.print(cursor[updown]);
+    lcd.setCursor(1,1);
+    lcd.print(cursor[!updown]);
   }
-    else {
-      //value entry
-      lcd.clear();
-      memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
-      strcpy_P(lcd_buf, (char*)pgm_read_word(&(these[cur_pos])));      
-      lcd.setCursor(1,0);
-      lcd.print(lcd_buf);
-      lcd.print('?');
-      lcd.setCursor(0,1);
-      lcd.write(CHAR_UPDOWN);
-      lcd.print(' ');
-      ui_ctrl_flags |= UI_VALUE_ENTRY;
-      if(! ( ui_ctrl_flags & UI_DRAWN_INITAL_VALUE ) ) {
-        // have just drawn this value
-        
-        // place value from variable into
-        // temporary buffer
-        get_value(cur_menu, cur_pos, false);
-        ui_ctrl_flags |= UI_DRAWN_INITAL_VALUE;
-      }
-
-      // display the correct current
-      // temporary input value
-      switch(ui_type) {
-      case INPUT_IO:
-        strcpy_P(lcd_buf, (char*) pgm_read_word(&(io_strings[cur_inp_int])));
-        lcd.print(lcd_buf);
-        break;
-      case INPUT_FLOAT:
-        lcd.print(cur_inp_float, (byte) 2);
-        break;
-      case INPUT_ONOFF:
-        if (cur_inp_bool == true) {
-          lcd.print("On");
-        } 
-        else {
-          lcd.print("Off");
-        }
-        break;
-       case INPUT_OKCANCEL:
-        if (cur_inp_bool == true) {
-          lcd.print(F("OK"));
-        } 
-        else {
-          lcd.print(F("Cancel"));
-        }
-        break;  
-      case INPUT_LTRT:
-        if (cur_inp_bool == true) {
-          lcd.print(F("Rt"));
-        } 
-        else {
-          lcd.print(F("Lt"));
-        }
-        break;
-      case INPUT_CMPCT:
-        if (cur_inp_bool == true) {
-          lcd.print(F("CPM"));
-        } 
-        else {
-          lcd.print(F("PCT"));
-        }
-        break;
-      case INPUT_CONTSMS:
-        if (cur_inp_bool == MODE_CONT) {
-          lcd.print(F("Cont."));
-        } 
-        else {
-          lcd.print("SMS");
-        }
-        break;
-      case INPUT_SLOT:
-        lcd.print("Slot ");
-        if( cur_inp_int == 0 )      lcd.print("A");
-        else if( cur_inp_int == 1 ) lcd.print("B");
-        else                        lcd.print("C");
-        
-        break;
-      case INPUT_SHUTTER:
-        strcpy_P(lcd_buf, (char*) pgm_read_word(&(shutter_strings[cur_inp_int])));
-        lcd.print(lcd_buf);
-        break;  
-      default:
-        lcd.print(cur_inp_int);
-        return;
-      }
+  else {
+    //value entry
+    //write strings to screen
+    lcd.clear();
+    memset(lcd_buf, ' ', sizeof(char) * MAX_LCD_STR);
+    strcpy_P(lcd_buf, (char*)pgm_read_word(&(these[cur_pos])));      
+    lcd.setCursor(1,0);
+    lcd.print(lcd_buf);
+    lcd.print('?');
+    lcd.setCursor(0,1);
+    lcd.write(CHAR_UPDOWN);
+    lcd.print(' ');
+    //set entry flag
+    ui_ctrl_flags |= UI_VALUE_ENTRY;
+    if(! ( ui_ctrl_flags & UI_DRAWN_INITAL_VALUE ) ) {
+      // have just drawn this value
+      // place value from variable into
+      // temporary buffer
+      get_value(cur_menu, cur_pos, false);
+      ui_ctrl_flags |= UI_DRAWN_INITAL_VALUE;
     }
-  } 
+
+    // display the correct current
+    // temporary input value
+    switch(ui_type) {
+    case INPUT_IO:
+      strcpy_P(lcd_buf, (char*) pgm_read_word(&(io_strings[cur_inp_int])));
+      lcd.print(lcd_buf);
+      break;
+    case INPUT_FLOAT:
+      lcd.print(cur_inp_float, (byte) 2);
+      break;
+    case INPUT_ONOFF:
+      if (cur_inp_bool == true) {
+        lcd.print("On");
+      } 
+      else {
+        lcd.print("Off");
+      }
+      break;
+     case INPUT_OKCANCEL:
+      if (cur_inp_bool == true) {
+        lcd.print(F("OK"));
+      } 
+      else {
+        lcd.print(F("Cancel"));
+      }
+      break;  
+    case INPUT_LTRT:
+      if (cur_inp_bool == true) {
+        lcd.print(F("Rt"));
+      } 
+      else {
+        lcd.print(F("Lt"));
+      }
+      break;
+    case INPUT_CMPCT:
+      if (cur_inp_bool == true) {
+        lcd.print(F("CPM"));
+      } 
+      else {
+        lcd.print(F("PCT"));
+      }
+      break;
+    case INPUT_CONTSMS:
+      if (cur_inp_bool == MODE_CONT) {
+        lcd.print(F("Cont."));
+      } 
+      else {
+        lcd.print("SMS");
+      }
+      break;
+    case INPUT_SLOT:
+      lcd.print("Slot ");
+      if( cur_inp_int == 0 )      lcd.print("A");
+      else if( cur_inp_int == 1 ) lcd.print("B");
+      else                        lcd.print("C");
+      
+      break;
+    case INPUT_SHUTTER:
+      strcpy_P(lcd_buf, (char*) pgm_read_word(&(shutter_strings[cur_inp_int])));
+      lcd.print(lcd_buf);
+      break;  
+    default:
+      lcd.print(cur_inp_int);
+      return;
+    }
+  }
+} 
  
 
 

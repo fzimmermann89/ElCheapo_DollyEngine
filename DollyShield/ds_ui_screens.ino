@@ -168,8 +168,10 @@ void show_manual() {
     display_spd_pct(m_speed);
   }
   lcd.setCursor(15,1);
-  if (m_dir==ui_invdir) lcd.print('>');
-  else lcd.print('<');  //TODO: richtige richtung
+  DEBUG("mdir:",m_dir);
+  DEBUG("inv:",ui_invdir);
+  if (m_dir) lcd.print('<');
+  else lcd.print('>');
 
 
 }
