@@ -279,7 +279,6 @@ ISR(TIMER2_OVF_vect){
   }
   else timer3_ms--;
  }
-  digitalToggleFast(13); 
   if (OCR2A>0) digitalWriteFast(MOTOR0_P, HIGH); //motor on
   if (OCR2B>0) digitalWriteFast(LCD_BKL, HIGH);  //display on
 
