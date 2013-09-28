@@ -343,5 +343,44 @@ void update_cal_screen() {
   lcd.print(cur_inp_float, 2);
 }
 
+void show_banner(){
+lcd.setCursor(15,0); 
+  lcd.write(CHAR_FZ);
+  lcd.setCursor(3,0); 
+  lcd.print(F("EasyDolly"));
+  lcd.setCursor(1,1);
+  lcd.print(F("Version 0.01A"));
+  delay(3000);
 
+  lcd.clear(); 
+  lcd.setCursor(0,0); 
+  lcd.print(F("Licensed under "));
+  lcd.write(CHAR_FZ);
+  lcd.setCursor(5,1);
+  lcd.print(F("GPLv3"));
+}
 
+void  show_about(){
+  lcd.clear();
+  show_banner();
+  delay(1000);
+  lcd.clear();
+  lcd.setCursor(7,0); 
+  lcd.print(F("by"));
+  lcd.setCursor(0,1);
+  lcd.print(F("Felix Zimmermann"));
+  delay(1000);
+  lcd.clear();
+  lcd.setCursor(4,0); 
+  lcd.print(F("based on"));
+  lcd.setCursor(1,1);
+  lcd.print(F("DP DollyShield"));
+  delay(1000);
+  lcd.clear();
+  lcd.setCursor(3,0);
+  lcd.print(F("more info:"));
+  lcd.setCursor(1,1);
+  lcd.print(F("thundercorp.de"));
+  delay(3000);
+  ui_button_lt(false);
+}

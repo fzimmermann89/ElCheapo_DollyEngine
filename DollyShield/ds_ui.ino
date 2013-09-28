@@ -46,21 +46,8 @@ void init_user_interface() {
   //lcd.autoscroll();
 
   // banner
-  lcd.setCursor(15,0); 
-  lcd.write(CHAR_FZ);
-  lcd.setCursor(3,0); 
-  lcd.print(F("EasyDolly"));
-  lcd.setCursor(1,1);
-  lcd.print(F("Version 0.01A"));
-  delay(3000);
-
-  lcd.clear(); 
-  lcd.setCursor(0,0); 
-  lcd.print(F("Licensed under "));
-  lcd.write(CHAR_FZ);
-  lcd.setCursor(5,1);
-  lcd.print(F("GPLv3"));
-
+  show_banner();
+  
   // set the update screen flag (draw main
   // screen)
   ui_ctrl_flags |= UI_UPDATE_DISP;
@@ -81,7 +68,7 @@ void check_user_interface() {
     if( blank_lcd ) 
       lcd.noDisplay();
     //disable backlight  
-		alt_io_display_set(0);
+    alt_io_display_set(0);
     
   }
   else if( (! (ui_ctrl_flags & UI_LCD_BKL_ON)) && (input_last_tm > millis() - (lcd_dim_tm * 1000)) ) {
@@ -250,13 +237,13 @@ byte get_menu( byte mnu, byte pos ) {
 
   // where is our target menu when 
   // mnu.pos is pressed?  
-  //MainMenu is menu 0, its submenus are menus 1-4. AdvancedMotorMenu is menu 5. 
-  //Special return codes for calibration, manual move and input.
+  // MainMenu is menu 0, its submenus are menus 1-5. 
+  // Special return codes for advanced, calibration, manual move and input.
 
-  if (mnu == 0) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
-  else if (mnu == 2 && pos == 7) return 5; //Advanced Motor Menu
-  else if (mnu == 5 && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
-  else if (mnu == 1) return MENU_MANUAL; 
+  if (mnu == MENU_MAIN) return (pos+1);   //in Main Menu, 0 is mainmenu, so return pos +1
+  else if (mnu == MENU_MOTOR && pos == 7) return MENU_ADVANCED; //Advanced Motor Menu
+  else if (mnu == MENU_ADVANCED && pos == 0 ) return MENU_CALIBRATION; //Calibration in Adv. Menu selected
+  else if (mnu == MENU_MOVEMENT) return MENU_MANUAL; 
   else return(MENU_INPUT); //No Submenu, Input Menu.
 
 }
@@ -347,7 +334,7 @@ void ui_button_center( boolean held ) {
 
     // resume back to setup menu
     ui_ctrl_flags |= UI_SETUP_MENU;
-    cur_menu = 1; // show manual menu again //TODO: richtiges menu?
+    cur_menu = MENU_MOVEMENT; // show movement menu again
     draw_menu(0, false);
     return;
   }
@@ -355,7 +342,7 @@ void ui_button_center( boolean held ) {
  // not in any setup menu, enter setup menu
   if( ! (ui_ctrl_flags & UI_SETUP_MENU) ) {
     ui_ctrl_flags |= UI_SETUP_MENU;
-    cur_menu = 0;
+    cur_menu = MENU_MAIN;
     draw_menu(0,false);
   }
   else {
@@ -583,7 +570,7 @@ void ui_button_lt(boolean held) {
 
   else {
     // draw previous menu
-    if( cur_menu == 0 ) { 
+    if( cur_menu == MENU_MAIN ) { 
     // we're at the highest menu, back to main screen 
     
     // clear setup flag
@@ -635,32 +622,31 @@ void draw_menu(byte dir, boolean value_entry) {
   
   switch( cur_menu ) {
     //draw the menu
-  case 0:
-
+  case MENU_MAIN:
     draw_values(menu_str, draw_all, value_entry);
     break;
 
-  case 1:
-
-    draw_values(man_str, draw_all, value_entry);
+  case MENU_MOVEMENT:
+    draw_values(mov_str, draw_all, value_entry);
     break;
 
-  case 2:
-
+  case MENU_MOTOR:
     draw_values(motor_str, draw_all, value_entry);
     break;
 
-  case 3:
-
+  case MENU_CAM:
     draw_values(cam_str, draw_all, value_entry);
     break;
 
-  case 4:
-
+  case MENU_SETUP:
     draw_values(set_str, draw_all, value_entry);
     break;
-
-  case 5:
+    
+  case MENU_ABOUT:
+    show_about();
+    break;
+    
+  case MENU_ADVANCED:
     draw_values(motor_adv_str, draw_all, value_entry);
 
   default: 

@@ -56,14 +56,9 @@ byte hist_menu[5] = {
 char lcd_buf[MAX_LCD_STR];
 
 
-//Special Return Codes used / Magic Values
-uint8_t const MENU_MANUAL = 254;
-uint8_t const MENU_CALIBRATION = 253;
-uint8_t const MENU_INPUT = 255;
-
 // what is our currently selected menu?
 // what is our current position?
-byte cur_menu      = 0;
+byte cur_menu      = MENU_MAIN;
 byte cur_pos       = 0;
 byte cur_first_item   = 0;
 

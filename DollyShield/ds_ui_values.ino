@@ -646,7 +646,6 @@ void get_mainscr_set(byte pos, boolean read_save) {
     ui_type=INPUT_LTRT;
 
     if( read_save ){
-      m_dir=cur_inp_bool;
       motor_dir(cur_inp_bool);
       eeprom_save(E_m_dir,m_dir);
     }

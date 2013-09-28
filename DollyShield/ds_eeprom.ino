@@ -89,20 +89,14 @@ uint8_t EEMEM E_eeprom_ver;
 
 boolean eeprom_saved() {
   byte test=eeprom_read_byte(&E_eeprom_saved);
-  DEBUG_var("issaved:",test);
- return (test==EEPROM_IS_SAVED);
+  return (test==EEPROM_IS_SAVED);
 }
 
 void eeprom_saved( boolean saved ) {
   static byte _eeprom_saved=eeprom_read_byte(&E_eeprom_saved);
-  DEBUG_var("_saved:",_eeprom_saved);
-    DEBUG_var("saved:",saved);
-
   if (saved!=(_eeprom_saved==EEPROM_IS_SAVED)){
-   DEBUG_msg("status changed");
-  _eeprom_saved=(saved==true?EEPROM_IS_SAVED:false);
-    DEBUG_var("new_saved:",_eeprom_saved);
-  eeprom_write_byte(&E_eeprom_saved,_eeprom_saved);
+    _eeprom_saved=(saved==true?EEPROM_IS_SAVED:false);
+    eeprom_write_byte(&E_eeprom_saved,_eeprom_saved);
   }
 }
 
@@ -112,9 +106,6 @@ boolean eeprom_versioning_ok() {
   // when a new firmware is loaded 
   byte eeprom_ver = 0;
   eeprom_load(E_eeprom_ver, eeprom_ver);
-DEBUG_var("ever:",eeprom_ver);
-byte test=FIRMWARE_VERSION;
-DEBUG_var("sver:",test);
   return( eeprom_ver == FIRMWARE_VERSION );
 }
 

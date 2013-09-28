@@ -1,12 +1,13 @@
 
 // menu strings
 const char menu_0[] PROGMEM = "Movements";
-const char menu_1[] PROGMEM = "Motor  Setup";
-const char menu_2[] PROGMEM = "Camera Setup";
+const char menu_1[] PROGMEM = "Motor Setup";
+const char menu_2[] PROGMEM = "Camera  Setup";
 const char menu_3[] PROGMEM = "General Setup";
+const char menu_4[] PROGMEM = "About";
 
-const char manual_menu_0[] PROGMEM = "Manual Move";
-const char manual_menu_1[] PROGMEM = "Fast Simulat.";
+const char movement_menu_0[] PROGMEM = "Manual Move";
+const char movement_menu_1[] PROGMEM = "Fast Simulat.";
 
 const char motor_menu_0[] PROGMEM = "Movement Mode";
 const char motor_menu_1[] PROGMEM = "Display Mode";
@@ -51,10 +52,10 @@ const char set_menu_10[] PROGMEM = "Reset Memory";
 
 // menu organization
 const char * const menu_str[] PROGMEM = { 
-  menu_0,menu_1, menu_2, menu_3};
+  menu_0,menu_1, menu_2, menu_3, menu_4};
 
-const char * const man_str[] PROGMEM = { 
-  manual_menu_0,  manual_menu_1 };
+const char * const mov_str[] PROGMEM = { 
+  movement_menu_0,  movement_menu_1 };
 
 const char * const motor_str[] PROGMEM = { 
   motor_menu_0,motor_menu_1, motor_menu_2, motor_menu_3, motor_menu_4, motor_menu_5, motor_menu_6,motor_menu_7};
@@ -70,7 +71,13 @@ const char * const motor_adv_str[] PROGMEM = {
 
 // max number of inputs for each menu (in order listed above, starting w/ 0)
 byte max_menu[7]  = {
-  3,1,7,9,10,6};
+  4,1,7,9,10,6};
+
+//Menu IDs
+enum  __attribute__((packed)) MENU {
+     MENU_MAIN, MENU_MOVEMENT, MENU_MOTOR, MENU_CAM, MENU_SETUP,MENU_ABOUT, MENU_ADVANCED, MENU_MANUAL, MENU_CALIBRATION, MENU_INPUT 
+ };
+
 
 //IO Mode Strings:
 const char io_disabled[] PROGMEM = "Disabled";
