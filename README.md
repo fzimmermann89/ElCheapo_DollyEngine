@@ -11,4 +11,4 @@ For more information, see http://dynamicperception.com and http://www.thundercor
 
 Status / Changelog
 =========================
-CURRENTLY NOT RUNNING!! PROBABLY DOESNT EVEN COMPILE!! WORK IN PROGRESS!!
+NO LONGER ON GITHUB
